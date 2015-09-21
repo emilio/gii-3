@@ -4,9 +4,10 @@ TARGETS := ExampleAgent
 TARGET_CLASS := $(patsubst %, %.class, $(TARGETS))
 
 .PHONY: all
-all: $(TARGET_CLASS)
+all: notes.pdf $(TARGET_CLASS)
 	@echo > /dev/null
 
+include ../../session.mk
 include ../deps.mk
 
 .PHONY: gui

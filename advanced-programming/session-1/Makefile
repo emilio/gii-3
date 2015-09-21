@@ -1,18 +1,17 @@
-JAVA := java
-JAVAC := javac
+include ../common.mk
 
-JAVAC_FLAGS :=
-JAVA_FLAGS :=
-
-TARGET := ExampleAgent
+TARGETS := ExampleAgent
+TARGET_CLASS := $(patsubst %, %.class, $(TARGETS))
 
 .PHONY: all
-all: $(TARGET).class
+all: $(TARGET_CLASS)
 	@echo > /dev/null
 
-.PHONY: run
-run: $(TARGET).class
-	java jade.Boot $(JAVA_FLAGS) -agents hi:$(TARGET)
+include ../deps.mk
+
+.PHONY: gui
+run: $(TARGET_CLASS)
+	java jade.Boot $(JAVA_FLAGS) -agents hi:ExampleAgent
 
 .PHONY: gui
 gui: JAVA_FLAGS := $(JAVA_FLAGS) -gui
@@ -21,6 +20,6 @@ gui: run
 clean:
 	rm -f *.class APDescription.txt MTPs-Main-Container.txt
 
-
-%.class: %.java
+%.class: %.java | deps
+	@echo "[BUILD] $@ <- $<"
 	javac $(JAVAC_FLAGS) $<

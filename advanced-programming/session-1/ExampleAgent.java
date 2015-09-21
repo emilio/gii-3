@@ -2,6 +2,6 @@ import jade.core.Agent;
 
 public class ExampleAgent extends Agent {
     protected void setup() {
-        System.out.println("Hey!");
+        System.out.println("Hey from agent 1!");
     }
 }

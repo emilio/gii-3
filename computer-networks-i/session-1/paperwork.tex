@@ -1,0 +1,210 @@
+\documentclass{article}
+
+\usepackage{fontspec}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{minted}
+\usepackage[spanish]{babel}
+\usepackage[cm]{fullpage}
+
+\usemintedstyle{friendly}
+
+\setlength{\parindent}{2em}
+\setlength{\parskip}{.5em}
+
+\titleformat{\section}[hang]{\normalfont\bfseries\Large}{Bloque \thesection: }{0pt}{}
+\titleformat{\subsubsection}{\normalfont\it}{\thesubsubsection) }{10pt}{}
+\titleformat{\paragraph}[hang]{\normalfont\bfseries}{\thesubsubsection) }{0}{}
+\titlespacing{\paragraph}{1em}{0pt}{0pt}
+
+\renewcommand{\thesection}{\Alph{section}}
+\renewcommand{\thesubsubsection}{\alph{subsubsection}}
+\renewcommand{\thesubsection}{\arabic{subsection}}
+
+\setlist[description]{leftmargin=\dimexpr2.5\parindent,itemindent=\dimexpr-1\parindent}
+
+\title{Práctica 1: El puerto serie}
+\author{Emilio Cobos Álvarez (B1) \\ Anna Elena Chesnais (B1) \\
+        Cristina García González (B1)}
+
+\begin{document}
+\maketitle
+
+\newpage
+\section{El cable de módem nulo}
+\subsection{Construya un cable de módem nulo con el fin de comunicar dos
+            equipos por el puerto serie (recomendada versión completa).}
+\subsubsection{Use el programa \emph{PuTTY} para comprobar dicha comunicación.
+               ¿Qué parámetros se pueden modificar en el puerto serie?.
+               ¿Qué valores son posibles en cada uno de ellos?.
+               Pruebe distintas configuraciones (al menos dos) y describa lo
+               que ocurre al teclear caracteres en una y otra consola.
+               ¿Se puede seleccionar el conjunto de caracteres que el terminal
+               remoto está utilizando?. ¿Para qué sirve esto?.}
+  \paragraph{Parámetros modificables y valores aceptados}
+    \begin{description}
+        \item[Puerto:]
+          Cualquier nombre de archivo que represente un puerto de serie.
+        \item[Pulsos por segundo (baudios):]
+          Cualquiera de los valores estándares que enumeramos a continuación: \\
+            110,
+            300\footnote{Valor mínimo con el que pudimos transmitir datos},
+            600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400,
+            56000, 57600, 115200, 128000,
+            153600 \footnote{El valor máximo que nuestra conexión soportaba},
+            230400, 256000, 460800 y 921600.
+        \item[Bits de datos de un carácter:]
+          5, 6, 7 u 8 bits.
+        \item[Bits de stop:]
+          1, 1.5 ó 2.
+        \item[Paridad:]
+          Ninguna, par o impar.
+        \item[Control de flujo:]
+          Ninguno, \texttt{XON/XOFF} o \texttt{RTS/CTS}.
+      \end{description}
+  \paragraph{Configuraciones probadas}
+    \begin{description}
+      \item[Configuración por defecto:] \hfill \\
+        9600 baudios, sin paridad, control de flujo \texttt{XON/XOFF}, 8 bits
+        por carácter y un bit de stop, con la que funcionaba sin problemas.
+      \item[Diferentes pulsos por segundo:] \hfill \\
+        Un lado a 9600 baudios y otro a 14400. Funcionaba también sin
+        ningún problema (probablemente de casualidad).
+      \item[Diferente paridad:] \hfill \\
+        Un lado con paridad par y otro con paridad impar. Funcionaba bien,
+        probablemente porque \emph{PuTTY} no controlará los errores de paridad,
+        por extraño que parezca.
+      \item[Diferente tamaño de carácter:] \hfill \\
+        Un lado con 5 bits y otro con 8: Tuvo el efecto esperado, no pudiendo
+        enviar nada valioso entre ambos terminales.
+      \item[Diferente tamaño de carácter (2):] \hfill \\
+        Un lado con 7 bits y otro con 8: La terminal configurada con 8 bits podía
+        enviar caracteres \texttt{ASCII} a la otra, aunque el octavo bit se perdía.
+
+        En la otra dirección se enviaban caracteres no imprimibles, como se podía
+        esperar.
+    \end{description}
+  \paragraph{Dato curioso}
+    Para enviar caracteres especiales pudimos usar:
+    \mint{bash}|echo "Hola \x00" > /dev/ttyS0|
+
+\subsection{Modifique la configuración del puerto serie entre 8 y 7 bits de
+            datos}
+\subsubsection{Justifique lo que ocurre al transmitir en ambos casos la
+               letra \texttt{ñ}}
+  Con 8 bits la ñ se transmite sin problema, ya que la representación de dicho
+  carácter en la codificación que estábamos usando (\texttt{UTF-8}) ocupa 8
+  bits.
+
+  Sin embargo con 7 bits no ocurre lo mismo, el bit más significativo (que
+  resulta ser 1 en dicha codificación) se pierde, haciendo que llegue un
+  carácter diferente al destinatario.
+\subsection{Pruebe los programas de ejemplo síncrono y asíncrono para
+            Windows y Linux}
+\subsubsection{Comentar el functionamiento de los ejemplos facilitados}
+  \paragraph{Linux}
+    \begin{description}
+      \item[\texttt{./chat}] \hfill \\
+        Envía el texto de forma asíncrona al otro extremo del puerto serie,
+        haciendo que se vea reflejado en el acto en la pantalla.
+
+        No se manejan los caracteres de control como el backspace y el carácter
+        nulo, aunque debería ser trivial hacerlo.
+      \item[\texttt{./frase}] \hfill \\
+        Envía el texto de forma síncrona en bloques de 80 caracteres.
+    \end{description}
+  \paragraph{Windows}
+    El funcionamiento de los programas es idéntico al de Linux.
+\subsubsection{Especifique los parámetros de configuración del puerto serie
+               en cada uno de los ejemplos e indique también la/s línea/s de
+               código en la que se configuran}
+  \paragraph{Linux}
+    En ambos ejemplos se configura el puerto mediante la función
+    \texttt{serie\_abrir}, con el puerto directamente sacado de los argumentos,
+    y la velocidad de 9600 baudios.
+
+    Dentro de esa función (archivo \texttt{serielin/serielin.c:30}) se
+    configura:
+    \begin{itemize}
+      \item Tamaño de carácter 8 (línea 42).
+      \item Sin paridad (línea 43).
+      \item Tamaño de buffer 1 (línea 46).
+      \item Sin timeout de lectura (línea 47).
+      \item La velocidad la pasada como argumento (50 y 51).
+      \item Otro porrón de implicaciones que se basan en el valor de
+        determinadas contstantes (modo no canónico, etc.) (líneas 44 y 45).
+      \item Los parámetros se guardan en la línea 64.
+    \end{itemize}
+
+  \paragraph{Windows}
+    La configuración del puerto serie se realiza a través de la función
+    \texttt{serie\_abrir}, localizada en el archivo \texttt{seriewin.c}
+    (línea 27)
+    \begin{itemize}
+      \item Apertura del puerto (línea 32).
+      \item Obtención de la configuración anterior (línea 49).
+      \item Configuración de los baudios (línea 55).
+      \item Configuración del número de bits (línea 56).
+      \item Configuración de la paridad (líneas 59 – 65).
+      \item Configuración de los bits de stop (líneas 68 – 72).
+      \item Hacer que no sea sensible al pin DSR (línea 74).
+      \item Configurar para que se active el DTR cuando se abra el puerto
+        (línea 75).
+      \item Configurar para que no se observe el pin DSR para hacer control
+        de flujo (línea 76).
+      \item Guardado de la configuración (línea 85).
+      \item Configurar los timeouts a 0 (líneas 91 – 104).
+    \end{itemize}
+\subsubsection{Comentar brevemente el API de Windows y Linux para
+               configurar el puerto serie, y cómo se lee y escribe.}
+Las APIs tanto de Windows como de Linux son similares en cuanto a que tratan
+al puerto de serie como un fichero normal, pero a partir de ahí la cosa cambia
+radicalmente:
+
+La interfaz de Linux (\texttt{termios}) es la estándar de POSIX, aunque su
+diseño puede ser discutible y está ligado al inicio de las comunicaciones entre
+ordenadores (obtener una terminal en otro ordenador).
+
+La de windows es una API mucho más genérica, que encaja con el resto del diseño
+de windows NT.
+
+\subsubsection{¿En qué se diferencia el modelo síncrono del asíncrono?}
+En el modelo síncrono las lecturas son bloqueantes, mientras que en el modelo
+asíncrono la lectura se lleva a cabo cuando el estado del puerto de serie
+cambia (\texttt{SIGIO} en Linux, \texttt{CommEvent} en windows), y la ejecución
+es no lineal.
+
+\subsubsection{¿Qué ocurre si cruzamos el programa de ejemplo asíncrono para
+               Windows con el de Linux? Justifique la respuesta.}
+En principio debería de funcionar sin problemas (modulo cambios de codificación
+de caracteres), gracias a la estandarización de la lectura/escritura en los
+puertos de serie.
+
+\subsection{Cree un fichero de texto con nombre serie.ini como el que figura
+            a continuación:}
+\begin{minted}[frame=lines]{ini}
+[Configuracion]
+Puerto=COM1
+Velocidad=9600
+BitsDatos=7
+BitsParada=2
+Paridad=Paridad par
+\end{minted}
+\subsubsection{Modifique y adjunte el programa de ejemplo asíncrono para
+               Windows de forma que cargue los datos de configuración del
+               puerto serie de este fichero. Utilice las funciones de Windows
+               \texttt{GetPrivateProfileString} y \texttt{GetPrivateProfileInt}
+               para recuperar directamente los valores del archivo de
+               configuración.}
+\begin{minted}[frame=lines]{diff}
+% TODO
+\end{minted}
+
+\subsubsection{Verifique su correcto funcionamiento mostrando la configuración
+               seleccionada en pantalla. Aporte las capturas de pantalla
+               cambiando el contenido del fichero .ini y verificando el
+               correcto funcionamiento del programa.}
+% TODO
+
+\end{document}

@@ -1,8 +1,9 @@
 
 paperwork.pdf: paperwork.tex
-	xelatex -shell-escape $<
-	rm -f paperwork.aux
-	rm -f paperwork.log
+	$(info [DOC] $< -> $@)
+	@xelatex -shell-escape $< > /dev/null 2>&1
+	@rm -f paperwork.aux
+	@rm -f paperwork.log
 
 include ../../session.mk
 

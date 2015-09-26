@@ -14,7 +14,10 @@
 
 TEX_TARGETS := $(wildcard *.tex)
 MD_TARGETS := $(wildcard *.md)
-PANDOC_FLAGS := $(PANDOC_FLAGS)
+
+ifeq ($(PANDOC_FLAGS),)
+PANDOC_FLAGS := --toc
+endif
 
 TARGETS := $(TEX_TARGETS:.tex=.pdf) $(MD_TARGETS:.md=.pdf)
 

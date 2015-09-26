@@ -12,14 +12,20 @@
 #   |- theory.{pdf,ppt,...}        # The theory provided for the session
 #   |- paperwork/programs/etc      # Whatever we have to provide
 
+TEX_TARGETS := $(wildcard *.tex)
+MD_TARGETS := $(wildcard *.md)
+PANDOC_FLAGS := $(PANDOC_FLAGS)
+
+TARGETS := $(TEX_TARGETS:.tex=.pdf) $(MD_TARGETS:.md=.pdf)
+
 .PHONY: session-notes
-session-notes: notes.pdf
+session-notes: $(TARGETS)
 
 %.pdf: %.tex
 	$(info [DOC] $< -> $@)
-	@pandoc --from=latex --latex-engine=xelatex --to=latex $< -o $@
+	@pandoc $(PANDOC_FLAGS) --from=latex --latex-engine=xelatex --to=latex $< -o $@
 
 %.pdf: %.md
 	$(info [DOC] $< -> $@)
-	@pandoc --from=markdown_github --latex-engine=xelatex --to=latex $< -o $@
+	@pandoc $(PANDOC_FLAGS) --from=markdown_github --latex-engine=xelatex --to=latex $< -o $@
 

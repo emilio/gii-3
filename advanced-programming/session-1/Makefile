@@ -1,4 +1,3 @@
-include ../common.mk
 
 TARGETS := ExampleAgent
 TARGET_CLASS := $(patsubst %, %.class, $(TARGETS))
@@ -7,20 +6,17 @@ TARGET_CLASS := $(patsubst %, %.class, $(TARGETS))
 all: notes.pdf $(TARGET_CLASS)
 	@echo > /dev/null
 
+include ../common.mk
 include ../../session.mk
-include ../deps.mk
 
-.PHONY: gui
+.PHONY: run
 run: $(TARGET_CLASS)
-	java jade.Boot $(JAVA_FLAGS) -agents hi:ExampleAgent
+	$(JADE_BOOT_AGENTS) hi:ExampleAgent
 
 .PHONY: gui
 gui: JAVA_FLAGS := $(JAVA_FLAGS) -gui
 gui: run
 
-clean:
-	rm -f *.class APDescription.txt MTPs-Main-Container.txt
+clean: clean-class-files-and-jade
+	@echo > /dev/null
 
-%.class: %.java | deps
-	@echo "[BUILD] $@ <- $<"
-	javac $(JAVAC_FLAGS) $<

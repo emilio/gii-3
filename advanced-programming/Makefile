@@ -1,6 +1,6 @@
 include ../Makefile
 
-include deps.mk
+include common.mk
 
 clean:
 	rm -rf jade.zip lib

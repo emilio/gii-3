@@ -16,9 +16,11 @@ public class SendOneShotBehaviour extends OneShotBehaviour {
     public void action() {
         Scanner s = new Scanner(System.in);
         String content;
+        System.out.println("SendOneShotBehaviour");
 
         while ( true ) {
             content = s.nextLine();
+            System.out.println("Read message");
             Utils.enviarMensaje(myAgent, "chat", content);
         }
     }

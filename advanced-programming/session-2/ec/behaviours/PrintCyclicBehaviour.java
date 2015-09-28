@@ -19,9 +19,11 @@ public class PrintCyclicBehaviour extends CyclicBehaviour {
                                 MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
                                 MessageTemplate.MatchOntology("null-ontology")
                             ));
+
         try {
-            System. out.println("Recv: "+ (String)msg.getContentObject());
+            System. out.println("recv: "+ (String)msg.getContentObject());
+        } catch (UnreadableException e) {
+            e.printStackTrace();
         }
-        catch (UnreadableException e) {}
     }
 }

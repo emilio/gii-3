@@ -1,5 +1,6 @@
 /**
  * This file is provided by USAL, slightly modified
+ * (basically s/ontologia/null-ontology/g)
  */
 package es.usal.pa;
 
@@ -69,10 +70,10 @@ public class Utils
             {
             	ACLMessage aclMessage = new ACLMessage(ACLMessage.REQUEST);
 
-            	for(int i=0;i<dfd.length;i++)
-	        		aclMessage.addReceiver(dfd[i].getName());
+                for ( DFAgentDescription agentDesc : dfd )
+	        		aclMessage.addReceiver(agentDesc.getName());
 
-                aclMessage.setOntology("ontologia");
+                aclMessage.setOntology("null-ontology");
                 //el lenguaje que se define para el servicio
                 aclMessage.setLanguage(new SLCodec().getName());
                 //el mensaje se transmita en XML

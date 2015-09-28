@@ -197,9 +197,11 @@ Paridad=Paridad par
                \texttt{GetPrivateProfileString} y \texttt{GetPrivateProfileInt}
                para recuperar directamente los valores del archivo de
                configuración.}
-\begin{minted}[frame=lines]{diff}
-% TODO
-\end{minted}
+Módulo una corrección de errores más exhaustiva, y usar los valores explícitos
+de Windows como \texttt{PTSTR} (donde nos aprovechamos de que no está definida
+la macro \texttt{UNICODE}, y que por lo tanto un carácter ocupa 8 bits al igual
+que el estándar de C), sería algo así:
+\inputminted[frame=lines]{diff}{add-ini-config.diff}
 
 \subsubsection{Verifique su correcto funcionamiento mostrando la configuración
                seleccionada en pantalla. Aporte las capturas de pantalla

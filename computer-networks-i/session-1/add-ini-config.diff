@@ -1,0 +1,54 @@
+diff --git a/chat.c.orig b/chat.c
+index db31338..538a487 100644
+--- a/chat.c.orig
++++ b/chat.c
+@@ -50,9 +50,48 @@ int main (int argc, char *argv[])
+ {
+     HANDLE hCommPort;
+ 
++    const char* config_file = "serie.ini";
++
++    unsigned int baud_rate = GetPrivateProfileInt("Configuracion",
++                                                  "Velocidad",
++                                                  9600,
++                                                  config_file);
++
++    unsigned int data_bits = GetPrivateProfileInt("Configuracion",
++                                                  "BitsDatos",
++                                                  8,
++                                                  config_file);
++
++    unsigned int stop_bits = GetPrivateProfileInt("Configuracion",
++                                                  "BitsParada",
++                                                  2,
++                                                  config_file);
++
++    /// NOTE: We use `char` because `UNICODE` is not defined, we should
++    /// check there.
++    char port_name[30];
++    unsigned int _len = GetPrivateProfileString("Configuracion",
++                                                "Puerto",
++                                                "COM1",
++                                                port_name,
++                                                sizeof(port_name),
++                                                config_file);
++
++    char parity[20];
++    unsigned int _parity_len = GetPrivateProfileString("Configuracion",
++                                                       "Paridad",
++                                                       "Sin paridad",
++                                                       parity,
++                                                       sizeof(parity),
++                                                       config_file);
++
++    if ( GetLastError() != ERROR_SUCCESS ) {
++        perror("ERROR: Error leyendo datos del fichero de configuración");
++        exit(1);
++    }
+ 
+     //-- Abre el puerto serie
+-    hCommPort = serie_abrir(argv[1], 9600, 8, 1, "Sin paridad");
++    hCommPort = serie_abrir(port_name, baud_rate, data_bits, stop_bits, parity);
+     if( hCommPort == INVALID_HANDLE_VALUE )
+ 	{
+         perror("ERROR: No se puede acceder al puerto serie.");

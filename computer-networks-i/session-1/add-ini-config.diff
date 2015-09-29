@@ -1,12 +1,32 @@
-diff --git a/chat.c.orig b/chat.c
-index db31338..538a487 100644
---- a/chat.c.orig
-+++ b/chat.c
-@@ -50,9 +50,48 @@ int main (int argc, char *argv[])
+diff --git a/chat.c b/windows-source-fixed.c
+index b3cb550..69b84d7 100644
+--- a/chat.c
++++ b/windows-source-fixed.c
+@@ -26,6 +26,7 @@
+ #include <stdio.h>
+ #include <string.h>
+ #include <windows.h>
++#include <conio.h>
+ #include "seriewin.h"
+ 
+ //-----------------------------------------------------------------------------
+@@ -50,22 +51,44 @@ int main(int argc, char *argv[])
  {
      HANDLE hCommPort;
  
-+    const char* config_file = "serie.ini";
+-    //-- Comprueba argumentos del main
+-    if(argc < 2)
+-    {
+-        printf("La sintaxis de este programa es:\n\n");
+-        printf("%s PUERTO\n\n", argv[0]);
+-        printf("\tPUERTO\tNombre de puerto serie:\n");
+-        printf("\t      \t COM1 Primer puerto serie\n");
+-        printf("\t      \t COM2 Segundo puerto serie\n");
+-        printf("\tEjemplo:\n");
+-        printf("\t%s COM1\n",argv[0]);
+-        exit(1);
+-    }
++    const char* config_file = "C:\\Users\\emilio\\Desktop\\serie.ini";
 +
 +    unsigned int baud_rate = GetPrivateProfileInt("Configuracion",
 +                                                  "Velocidad",
@@ -23,8 +43,6 @@ index db31338..538a487 100644
 +                                                  2,
 +                                                  config_file);
 +
-+    /// NOTE: We use `char` because `UNICODE` is not defined, we should
-+    /// check there.
 +    char port_name[30];
 +    unsigned int _len = GetPrivateProfileString("Configuracion",
 +                                                "Puerto",
@@ -41,14 +59,31 @@ index db31338..538a487 100644
 +                                                       sizeof(parity),
 +                                                       config_file);
 +
-+    if ( GetLastError() != ERROR_SUCCESS ) {
-+        perror("ERROR: Error leyendo datos del fichero de configuración");
-+        exit(1);
-+    }
++    printf("Datos: %d %d %d %s %s\n", baud_rate, data_bits, stop_bits, port_name, parity);
  
      //-- Abre el puerto serie
 -    hCommPort = serie_abrir(argv[1], 9600, 8, 1, "Sin paridad");
+-    if( hCommPort == INVALID_HANDLE_VALUE )
 +    hCommPort = serie_abrir(port_name, baud_rate, data_bits, stop_bits, parity);
-     if( hCommPort == INVALID_HANDLE_VALUE )
- 	{
++    if (hCommPort == INVALID_HANDLE_VALUE)
+     {
          perror("ERROR: No se puede acceder al puerto serie.");
+         exit(2);
+@@ -74,7 +97,7 @@ int main(int argc, char *argv[])
+     //-- Crea el hilo encargado de la lectura de datos del puerto serie
+     HANDLE hHiloLectura;
+     DWORD idHiloLectura;
+-    hHiloLectura = CreateThread(NULL,0,(void *)HiloLectura,&hCommPort,0,&idHiloLectura);
++    hHiloLectura = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)HiloLectura, &hCommPort, 0, &idHiloLectura);
+     if (hHiloLectura == NULL)
+     {
+         perror("ERROR: No se puede crear el hilo de lectura");
+@@ -87,7 +110,7 @@ int main(int argc, char *argv[])
+     char c;
+     do
+     {
+-        c = getch();
++        c = _getch();
+         if (c != ESC) {
+             serie_escribir(hCommPort, &c, sizeof(c));
+         }

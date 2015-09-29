@@ -26,7 +26,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <windows.h>
-#include <Tchar.h>
 #include <conio.h>
 #include "seriewin.h"
 
@@ -52,43 +51,40 @@ int main(int argc, char *argv[])
 {
     HANDLE hCommPort;
 
-     const char* config_file = "C:\\Users\\emilio\\Desktop\\serie.ini";
+    const char* config_file = "C:\\Users\\emilio\\Desktop\\serie.ini";
 
-     unsigned int baud_rate = GetPrivateProfileInt("Configuracion",
-                                                   "Velocidad",
-                                                   9600,
-                                                   config_file);
-     
-     unsigned int data_bits = GetPrivateProfileInt("Configuracion",
-                                                   "BitsDatos",
-                                                   8,
-                                                   config_file);
-     
-     unsigned int stop_bits = GetPrivateProfileInt("Configuracion",
-                                                   "BitsParada",
-                                                   2,
-                                                   config_file);
-     
-	 /// NOTE: We use `char` because `UNICODE` is not defined, we should
-	 /// check there.
-     char port_name[30];
-     unsigned int _len = GetPrivateProfileString("Configuracion",
-                                                 "Puerto",
-                                                 "COM1",
-                                                 port_name,
-                                                 sizeof(port_name),
-                                                 config_file);
-     
-     char parity[20];
-     unsigned int _parity_len = GetPrivateProfileString("Configuracion",
-                                                        "Paridad",
-                                                        "Sin paridad",
-                                                        parity,
-                                                        sizeof(parity),
-                                                        config_file);
+    unsigned int baud_rate = GetPrivateProfileInt("Configuracion",
+                                                  "Velocidad",
+                                                  9600,
+                                                  config_file);
 
-	 printf("Datos: %d %d %d %s %s\n", baud_rate, data_bits, stop_bits, port_name, parity);
-	 getchar();
+    unsigned int data_bits = GetPrivateProfileInt("Configuracion",
+                                                  "BitsDatos",
+                                                  8,
+                                                  config_file);
+
+    unsigned int stop_bits = GetPrivateProfileInt("Configuracion",
+                                                  "BitsParada",
+                                                  2,
+                                                  config_file);
+
+    char port_name[30];
+    unsigned int _len = GetPrivateProfileString("Configuracion",
+                                                "Puerto",
+                                                "COM1",
+                                                port_name,
+                                                sizeof(port_name),
+                                                config_file);
+
+    char parity[20];
+    unsigned int _parity_len = GetPrivateProfileString("Configuracion",
+                                                       "Paridad",
+                                                       "Sin paridad",
+                                                       parity,
+                                                       sizeof(parity),
+                                                       config_file);
+
+    printf("Datos: %d %d %d %s %s\n", baud_rate, data_bits, stop_bits, port_name, parity);
 
     //-- Abre el puerto serie
     hCommPort = serie_abrir(port_name, baud_rate, data_bits, stop_bits, parity);
@@ -120,7 +116,7 @@ int main(int argc, char *argv[])
         }
     } while (c != ESC);
 
-    //-- Termina el hilo de lectura    
+    //-- Termina el hilo de lectura
     TerminateThread(hHiloLectura, 0);
     CloseHandle(hHiloLectura);
 
@@ -177,12 +173,10 @@ DWORD HiloLectura(LPDWORD lpParam)
             if (serie_leer(hCommPort, szDatos, sizeof(szDatos)) > 0)
                 printf("%s", szDatos);
 
-            //-- Reinicia el estado del evento            
+            //-- Reinicia el estado del evento
             ResetEvent(ov.hEvent);
         }
     }
 
     return 0;
 }
-
-

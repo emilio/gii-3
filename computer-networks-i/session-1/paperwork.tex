@@ -1,20 +1,25 @@
-\documentclass{article}
+\documentclass[a4paper]{article}
 
 \usepackage{fontspec}
 \usepackage{titlesec}
 \usepackage{enumitem}
 \usepackage{tabularx}
+\usepackage{hyperref}
 \usepackage{minted}
 \usepackage[spanish]{babel}
 \usepackage[cm]{fullpage}
 
 \usemintedstyle{friendly}
+\setminted{breaklines,frame=lines}
 
 \setlength{\parindent}{2em}
 \setlength{\parskip}{.5em}
 
+\titleclass{\section}{top}
+\newcommand\sectionbreak{\clearpage}
+
 \titleformat{\section}[hang]{\normalfont\bfseries\Large}{Bloque \thesection: }{0pt}{}
-\titleformat{\subsubsection}{\normalfont\it}{\thesubsubsection) }{10pt}{}
+\titleformat{\subsubsection}[hang]{\normalfont\it}{\thesubsubsection) }{10pt}{}
 \titleformat{\paragraph}[hang]{\normalfont\bfseries}{\thesubsubsection) }{0}{}
 \titlespacing{\paragraph}{1em}{0pt}{0pt}
 
@@ -31,17 +36,21 @@
 \begin{document}
 \maketitle
 
-\newpage
+\tableofcontents
+
 \section{El cable de módem nulo}
+
 \subsection{Construya un cable de módem nulo con el fin de comunicar dos
             equipos por el puerto serie (recomendada versión completa).}
-\subsubsection{Use el programa \emph{PuTTY} para comprobar dicha comunicación.
+
+\subsubsection{Use el programa \textit{PuTTY} para comprobar dicha comunicación.
                ¿Qué parámetros se pueden modificar en el puerto serie?.
                ¿Qué valores son posibles en cada uno de ellos?.
                Pruebe distintas configuraciones (al menos dos) y describa lo
                que ocurre al teclear caracteres en una y otra consola.
                ¿Se puede seleccionar el conjunto de caracteres que el terminal
                remoto está utilizando?. ¿Para qué sirve esto?.}
+
   \paragraph{Parámetros modificables y valores aceptados}
     \begin{description}
         \item[Puerto:]
@@ -73,26 +82,29 @@
         ningún problema (probablemente de casualidad).
       \item[Diferente paridad:] \hfill \\
         Un lado con paridad par y otro con paridad impar. Funcionaba bien,
-        probablemente porque \emph{PuTTY} no controlará los errores de paridad,
-        por extraño que parezca.
+        probablemente porque \textit{PuTTY} no controlará los errores de
+        paridad, por extraño que parezca.
       \item[Diferente tamaño de carácter:] \hfill \\
         Un lado con 5 bits y otro con 8: Tuvo el efecto esperado, no pudiendo
         enviar nada valioso entre ambos terminales.
       \item[Diferente tamaño de carácter (2):] \hfill \\
         Un lado con 7 bits y otro con 8: La terminal configurada con 8 bits podía
-        enviar caracteres \texttt{ASCII} a la otra, aunque el octavo bit se perdía.
+        enviar caracteres \texttt{ASCII} a la otra, aunque el octavo bit se
+        perdía.
 
         En la otra dirección se enviaban caracteres no imprimibles, como se podía
         esperar.
     \end{description}
   \paragraph{Dato curioso}
     Para enviar caracteres especiales pudimos usar:
-    \mint{bash}|echo "Hola \x00" > /dev/ttyS0|
+    \mintinline{bash}{echo "Hola \x00" > /dev/ttyS0}
 
 \subsection{Modifique la configuración del puerto serie entre 8 y 7 bits de
             datos}
+
 \subsubsection{Justifique lo que ocurre al transmitir en ambos casos la
                letra \texttt{ñ}}
+
   Con 8 bits la ñ se transmite sin problema, ya que la representación de dicho
   carácter en la codificación que estábamos usando (\texttt{UTF-8}) ocupa 8
   bits.
@@ -102,7 +114,9 @@
   carácter diferente al destinatario.
 \subsection{Pruebe los programas de ejemplo síncrono y asíncrono para
             Windows y Linux}
+
 \subsubsection{Comentar el functionamiento de los ejemplos facilitados}
+
   \paragraph{Linux}
     \begin{description}
       \item[\texttt{./chat}] \hfill \\
@@ -116,9 +130,11 @@
     \end{description}
   \paragraph{Windows}
     El funcionamiento de los programas es idéntico al de Linux.
+
 \subsubsection{Especifique los parámetros de configuración del puerto serie
                en cada uno de los ejemplos e indique también la/s línea/s de
                código en la que se configuran}
+
   \paragraph{Linux}
     En ambos ejemplos se configura el puerto mediante la función
     \texttt{serie\_abrir}, con el puerto directamente sacado de los argumentos,
@@ -156,8 +172,10 @@
       \item Guardado de la configuración (línea 85).
       \item Configurar los timeouts a 0 (líneas 91 – 104).
     \end{itemize}
+
 \subsubsection{Comentar brevemente el API de Windows y Linux para
                configurar el puerto serie, y cómo se lee y escribe.}
+
 Las APIs tanto de Windows como de Linux son similares en cuanto a que tratan
 al puerto de serie como un fichero normal, pero a partir de ahí la cosa cambia
 radicalmente:
@@ -166,24 +184,27 @@ La interfaz de Linux (\texttt{termios}) es la estándar de POSIX, aunque su
 diseño puede ser discutible y está ligado al inicio de las comunicaciones entre
 ordenadores (obtener una terminal en otro ordenador).
 
-La de windows es una API mucho más genérica, que encaja con el resto del diseño
-de windows NT.
+La de Windows es una API mucho más genérica, que encaja con el resto del diseño
+de \textit{Windows NT}.
 
 \subsubsection{¿En qué se diferencia el modelo síncrono del asíncrono?}
+
 En el modelo síncrono las lecturas son bloqueantes, mientras que en el modelo
 asíncrono la lectura se lleva a cabo cuando el estado del puerto de serie
-cambia (\texttt{SIGIO} en Linux, \texttt{CommEvent} en windows), y la ejecución
+cambia (\texttt{SIGIO} en Linux, \texttt{CommEvent} en Windows), y la ejecución
 es no lineal.
 
 \subsubsection{¿Qué ocurre si cruzamos el programa de ejemplo asíncrono para
                Windows con el de Linux? Justifique la respuesta.}
+
 En principio debería de funcionar sin problemas (modulo cambios de codificación
 de caracteres), gracias a la estandarización de la lectura/escritura en los
 puertos de serie.
 
 \subsection{Cree un fichero de texto con nombre serie.ini como el que figura
             a continuación:}
-\begin{minted}[frame=lines]{ini}
+
+\begin{minted}{ini}
 [Configuracion]
 Puerto=COM1
 Velocidad=9600
@@ -191,17 +212,27 @@ BitsDatos=7
 BitsParada=2
 Paridad=Paridad par
 \end{minted}
+
 \subsubsection{Modifique y adjunte el programa de ejemplo asíncrono para
                Windows de forma que cargue los datos de configuración del
                puerto serie de este fichero. Utilice las funciones de Windows
                \texttt{GetPrivateProfileString} y \texttt{GetPrivateProfileInt}
                para recuperar directamente los valores del archivo de
                configuración.}
-Módulo una corrección de errores más exhaustiva, y usar los valores explícitos
-de Windows como \texttt{PTSTR} (donde nos aprovechamos de que no está definida
-la macro \texttt{UNICODE}, y que por lo tanto un carácter ocupa 8 bits al igual
-que el estándar de C), sería algo así:
-\inputminted[frame=lines]{diff}{add-ini-config.diff}
+
+Se migró el código a \textit{Visual Studio} porque \textbf{el compilador de
+\textit{DEV-C++} en Windows 10 padecía de errores internos}.
+
+De todas formas la migración no fue excesivamente complicada, salvo por ciertos
+problemas con la configuración del proyecto (\textit{Visual Studio} define la
+constante \texttt{UNICODE} por defecto, lo que cambia el ancho del carácter que
+usa la API de \textit{Windows}, por ejemplo), o de restricciones del compilador
+(fuerza determinados castings, el uso de \texttt{\_getch} vs \texttt{getch},
+etc).
+
+Los cambios aplicados al archivo son los siguientes:
+
+\inputminted{diff}{add-ini-config.diff}
 
 \subsubsection{Verifique su correcto funcionamiento mostrando la configuración
                seleccionada en pantalla. Aporte las capturas de pantalla
@@ -209,4 +240,20 @@ que el estándar de C), sería algo así:
                correcto funcionamiento del programa.}
 % TODO
 
+\section{El control de flujo}
+
+\subsection{Durante la transferencia de información entre dispositivos, puede
+            ocurrir que la velocidad de procesado de uno de ellos sea inferior a
+            la del otro, con lo que se podría perder parte de dicha información
+            si no se utilizase algún mecanismo de arbitraje. Este mecanismo es
+            precisamente el control de flujo. En la interfaz RS-232, existen dos
+            modalidades: el control de flujo hardware y el control de flujo
+            software.}
+
+\subsubsection{Con el apoyo de la herramienta Hércules describe el proceso de
+               control de flujo por hardware al enviar datos de un equipo a
+               otro. En este caso el control de flujo se realiza mediante las
+               líneas \texttt{RTS} y \texttt{CTS} del RS-232. Si lo consideras
+               necesario solicita el Mini Tester al profesor para confirmar
+               visualmente la activación/desactivación de estas líneas.}
 \end{document}

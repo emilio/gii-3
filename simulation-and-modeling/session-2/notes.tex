@@ -1,0 +1,46 @@
+\section{Internal and external representation of a system}
+
+For convenience we'll call \(u(t)\) to the input and, \(y(t)\) to the output.
+
+Remember that \(\dot{\vec{x}}\) means the derivative of \(\vec{x}\).
+
+\subsection{External representation}
+  Just a transference function that associates the input with the output.
+
+\subsection{Internal representation}
+  Now we've got two equations: a \textit{state equation} and a \textit{output
+  equation}.
+
+  State equation:
+
+  \[ \dot{\vec{x}} = f(u, \vec{x}, t) \]
+
+  Output equation:
+
+  \[ y = g(u, \vec{x}, t) \]
+
+  \subsubsection{Simplification in some kind of systems}
+
+    \[ \dot{\vec{x}} = A * \vec{x} + B * u \]
+    \[ y = C * \vec{x} + D * u \]
+
+\section{Linear systems}
+  \subsection{Laplace transform}
+
+  \[ f(t) = \int^{\infty}_0 e^{-st} f(t) dt \]
+
+  We calculate the transform of the input \(u(t)\) giving \(U(s)\),
+  and the transform of the output \(y(t)\) giving \(Y(t)\).
+
+  We use the property that:
+
+  \[ \frac{f(t)}{\partial t} \implies s \dot F(s) - f(0) \]
+
+  To reach a polynomial relation in the domain of \(s\).
+
+  The laplace transform is linear, so we can apply to the relation in the time
+  domain the laplace transform in the \(s\) domain.
+
+    \subsubsection{Example with the dork with mass}
+
+

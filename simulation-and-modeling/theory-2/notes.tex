@@ -15,13 +15,23 @@ We know that:
 
 That gives:
 
-\[ \sum \vec{F} = F_a - F_d - F_f = m \cdot a \]
+\[ \sum \vec{F}(t) = F_a(t) - F_d(t) - F_f(t) = m \cdot a(t) \]
 
-Substituting \(a\) as \(\frac{\partial v}{\partial t}\), and later
-\(v\) as \(\frac{\partial x}{\partial t}\):
+Substituting \(a(t)\) as \(\frac{\partial v(t)}{\partial t}\), and later
+\(v\) as \(\frac{\partial x(t)}{\partial t}\):
 
-\[ F_a - k \cdot x - b \cdot \frac{\partial x}{\partial t} = m \cdot \frac{\frac{\partial x}{\partial t}}{\partial t} \]
+\[ F_a(t) - k \cdot x(t) - b \cdot \frac{\partial x(t)}{\partial t} = m \cdot
+\frac{\partial^2 x(t)}{\partial t^2} \]
 
-Simplifying:
+Moving:
 
-% \[ F_a - k \cdot x - b \cdot \frac{\partial x}{\partial t} = m \cdot \frac{\partial \frac{\partial x}{\partial t}}{\partial t} \]
+\[ F_a = m \cdot \frac{\partial^2 x(t)}{\partial t^2} + k \cdot x(t) - b \cdot
+\frac{\partial x(t)}{\partial t} \]
+
+Aplying the Laplace transform (assuming \(x(0) = 0\)):
+
+\[ F_a(s) = m \cdot s^2 X(s) + k \cdot X(s) - b \cdot s \cdot X(s) \]
+
+So we get:
+
+\[ G(s) = \frac{X(s)}{F_a(s)} = \frac{1}{m \cdot s^2 + k - b \cdot s} \]

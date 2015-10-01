@@ -8,12 +8,12 @@ index b3cb550..69b84d7 100644
  #include <windows.h>
 +#include <conio.h>
  #include "seriewin.h"
- 
+
  //-----------------------------------------------------------------------------
 @@ -50,22 +51,44 @@ int main(int argc, char *argv[])
  {
      HANDLE hCommPort;
- 
+
 -    //-- Comprueba argumentos del main
 -    if(argc < 2)
 -    {
@@ -26,7 +26,7 @@ index b3cb550..69b84d7 100644
 -        printf("\t%s COM1\n",argv[0]);
 -        exit(1);
 -    }
-+    const char* config_file = "C:\\Users\\emilio\\Desktop\\serie.ini";
++    const char* config_file = ".\\serie.ini";
 +
 +    unsigned int baud_rate = GetPrivateProfileInt("Configuracion",
 +                                                  "Velocidad",
@@ -60,7 +60,7 @@ index b3cb550..69b84d7 100644
 +                                                       config_file);
 +
 +    printf("Datos: %d %d %d %s %s\n", baud_rate, data_bits, stop_bits, port_name, parity);
- 
+
      //-- Abre el puerto serie
 -    hCommPort = serie_abrir(argv[1], 9600, 8, 1, "Sin paridad");
 -    if( hCommPort == INVALID_HANDLE_VALUE )

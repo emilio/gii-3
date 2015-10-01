@@ -256,4 +256,46 @@ Los cambios aplicados al archivo son los siguientes:
                líneas \texttt{RTS} y \texttt{CTS} del RS-232. Si lo consideras
                necesario solicita el Mini Tester al profesor para confirmar
                visualmente la activación/desactivación de estas líneas.}
+Cuando el puerto está cerrado, el RTS está en negativo.
+
+Cuando el puerto del otro ordenador se intenta conectar, el CTS pasa a positivo,
+ya que el otro ordenador a activado su RTS (que está cruzado), lo que indica que
+el otro terminal está listo.
+
+Si conectamos el puerto, nuestro RTS pasa también a positivo (y por lo tanto el
+CTS del otro terminal).
+
+Cuando ambos pines en ambos dispositivos están en positivo, podemos transmitir
+datos.
+
+Si uno de los dos terminales usa RTS/CTS y el otro no, el primer terminal no
+será capaz de enviar datos, pero sí de recibirlos (pone el pin RTS a positivo,
+pero no recibe la señal de CLS, por lo que no envía). Sin embargo el otro
+terminal sí envía, y los datos llegan al primero.
+
+\subsubsection{Con el apoyo de la herramienta Hércules describe el proceso de
+               control de flujo por software al enviar datos de un equipo a
+               otro. En este caso el control de flujo se hace mediante las
+               líneas de datos por medio del envío de caracteres predeterminados
+               (Xoff para detener y Xon para reanudar la transmisión).}
+Con Xon y Xoff, ambos pines están en negativo (ya que no se usan), y el control
+de flujo se realiza por software (se aceptan datos a partir de recibir el
+caracter Xon hasta recibir el Xoff).
+
+Tratamos de enviar el caracter Xoff manualmente desde Hércules para ver si la
+parte posterior del mensaje llegaba o no, aunque o bien el programa al enviarlo
+lo eliminaba, o se introduce algún tipo de bit en el contenido para
+diferenciarlo.
+
+\section{El control de errores de la interfaz serie}
+
+\subsection{Realice las modificaciones necesarias en el programa resultante
+            del punto 4 (la configuración del puerto serie se lee del fichero
+            serie.ini) de tal forma que en la recepción se puedan detectar los
+            posibles errores. Consulte "Serial Status" del manual "MSDN - Serial
+            Communications". Adjunte el proyecto con el código fuente
+            modificado.}
+
+\section{Terminal por el puerto serie}
+
 \end{document}

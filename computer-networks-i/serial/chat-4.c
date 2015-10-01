@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 {
     HANDLE hCommPort;
 
-    const char* config_file = "C:\\Users\\emilio\\Desktop\\serie.ini";
+    const char* config_file = ".\\serie.ini";
 
     unsigned int baud_rate = GetPrivateProfileInt("Configuracion",
                                                   "Velocidad",

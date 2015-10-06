@@ -18,7 +18,7 @@ paperwork.pdf: paperwork.tex
 .PHONY: clean-tex-secondary-files
 clean-tex-secondary-files:
 	rm -f paperwork.aux paperwork.log paperwork.nav paperwork.out paperwork.snm
-	rm -f paperwork.toc missfont.log
+	rm -f paperwork.lof paperwork.toc missfont.log
 	rm -rf _minted*
 
 

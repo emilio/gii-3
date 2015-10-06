@@ -2,13 +2,17 @@
 
 \usepackage{fontspec}
 \usepackage{titlesec}
+\usepackage{float}
 \usepackage{enumitem}
 \usepackage{tabularx}
 \usepackage{hyperref}
 \usepackage{wrapfig}
 \usepackage{minted}
+\usepackage{chngcntr}
 \usepackage[spanish]{babel}
 \usepackage[cm]{fullpage}
+
+\counterwithout{subsection}{section}
 
 \usemintedstyle{friendly}
 \setminted{breaklines,frame=lines}
@@ -38,6 +42,14 @@
 \maketitle
 
 \tableofcontents
+
+% Disable listoffigures clearpage
+\begingroup
+\let\clearpage\relax
+
+\listoffigures
+
+\endgroup
 
 \section{El cable de módem nulo}
 
@@ -231,7 +243,7 @@ usa la API de \textit{Windows}, por ejemplo), o de restricciones del compilador
 (fuerza determinados castings, el uso de \texttt{\_getch} vs \texttt{getch},
 etc).
 
-Los cambios aplicados al archivo son los siguientes:
+Los cambios aplicados al archivo son los siguientes (\texttt{etc/chat-4.c}):
 
 \inputminted{diff}{etc/add-ini-config.diff}
 
@@ -240,7 +252,7 @@ Los cambios aplicados al archivo son los siguientes:
                cambiando el contenido del fichero .ini y verificando el
                correcto funcionamiento del programa.}
 
-\begin{figure}[h]
+\begin{figure}[H]
   \begin{center}
     \includegraphics[width=0.6\textwidth]{screenshots/ini-1.png}
     \includegraphics[width=0.6\textwidth]{screenshots/ini-2.png}
@@ -305,6 +317,66 @@ hasta que se vuelva a recibir el carácter \texttt{XON}.
             Serial Communications". Adjunte el proyecto con el código fuente
             modificado.}
 
+Sólo se ha usado \texttt{printf} para detectar el error, ya que el manejo del
+mismo no se especificaba en el enunciado.
+
+Nótese también que se ha usado \texttt{GetCommMask} y \texttt{SetCommMask} para
+evitar modificar el archivo \texttt{seriewin.c}.
+
+Los cambios aplicados con respecto al otro ejercicio son los siguientes
+(\texttt{etc/chat-6.c}):
+
+\inputminted{diff}{etc/error-detection.diff}
+
+\subsection{Debido a que el entorno en el que se desarrollan las prácticas
+            posee una tasa de error muy baja es difícil detectar los posibles
+            errores. Por esta razón, y siempre sobre el código del ejercicio
+            anterior, se pide lo siguiente:}
+
+\subsubsection{Modifique las configuraciones del puerto serie en emisor y
+               receptor para que se puedan producir un errores de paridad
+               (\texttt{CE\_RXPARITY}). Especifique y justifique los valores
+               escogidos para la configuración.}
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=0.6\textwidth]{screenshots/parity-error.png}
+    \caption{Configuración utilizada para provocar errores de paridad:
+             Símplemente se escogió diferentes tipos de paridad en ambos
+             terminales (par en uno e impar ene el otro).}
+  \end{center}
+\end{figure}
+
+
+\subsubsection{Modifique las configuraciones del puerto serie en emisor y
+               receptor para que se puedan producir errores de formato
+               (\texttt{CE\_FRAME}).Especifique y justifique los valores
+               escogidos para la configuración.}
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=0.6\textwidth]{screenshots/frame-error.png}
+    \caption{Configuración utilizada para provocar errores de formato: Se
+             utilizaron diferentes tamaños en ambos terminales tanto de bits de
+             datos como de parada, con el fin de forzar el envío de cadenas de
+             bits de longitud no esperada por el receptor}
+  \end{center}
+\end{figure}
+
+\subsubsection{Modifique el código para que se pueda obtener en el receptor una
+               condición de línea a 0 ó sin tensión (\texttt{CE\_BREAK}). Pista:
+               Revise el API de Windows para el manejo del puerto serie.}
+
+Nuestro código originalmente ya podía detectar los \texttt{CE\_BREAK}, así que
+no ha habido necesidad de modificarlo de nuevo.
+
+\subsubsection{Modifique el código para que no comience el proceso de recepción
+               hasta que no se haya pulsado la tecla \texttt{ESC}. Especifique
+               los pasos para provocar un error de sobreescritura del buffer de
+               entrada (\texttt{CE\_RXOVER}) con el nuevo código.}
+
+% TODO
+
 \section{Terminal por el puerto serie}
 
 \subsection{Una de las aplicaciones prácticas del puerto serie es la de
@@ -332,14 +404,14 @@ por defecto.
 La consola se queda leyendo de la entrada estándar indefinidamente, hasta que el
 cliente remoto cierra la sesión.
 
-\begin{figure}[h]
+\begin{figure}[H]
   \begin{center}
     \includegraphics[width=0.6\textwidth]{screenshots/getty.png}
     \caption{Orden utilizada, tras que el cliente haya cerrado la sesión.}
   \end{center}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
   \begin{center}
     \includegraphics[width=0.6\textwidth]{screenshots/getty-putty.png}
     \caption{Cliente usando putty para conectarse.}

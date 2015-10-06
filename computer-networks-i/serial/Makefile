@@ -13,7 +13,7 @@ paperwork.pdf: paperwork.tex
 	$(info [DOC] $< -> $@)
 	@xelatex -shell-escape $(TEX_FLAGS) $< $(TEX_REDIRECT)
 	@xelatex -shell-escape $(TEX_FLAGS) $< $(TEX_REDIRECT)
-	$(MAKE) clean-tex-secondary-files
+	@$(MAKE) --quiet clean-tex-secondary-files
 
 .PHONY: clean-tex-secondary-files
 clean-tex-secondary-files:
@@ -24,7 +24,7 @@ clean-tex-secondary-files:
 
 .PHONY: clean
 clean: clean-tex-secondary-files
-	rm -f paperwork.pdf
+	@rm -f paperwork.pdf
 
 include ../../session.mk
 

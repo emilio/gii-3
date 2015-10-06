@@ -1,21 +1,21 @@
 /*****************************************************************************/
 /* chat.c                                                    Septiembre 2012 */
-/*   Sergio Bravo MartÌn                                                     */
-/*   ¡ngeles M™ Moreno Montero                                               */
+/*   Sergio Bravo Mart√≠n                                                     */
+/*   √Ångeles M¬™ Moreno Montero                                               */
 /*---------------------------------------------------------------------------*/
-/* Este ejemplo ilustra la modalidad asÌncrona de comunicaciÛn por el puerto */
-/* serie a travÈs del funcionamiento de una sencilla aplicaciÛn de Chat.     */
+/* Este ejemplo ilustra la modalidad as√≠ncrona de comunicaci√≥n por el puerto */
+/* serie a trav√©s del funcionamiento de una sencilla aplicaci√≥n de Chat.     */
 /* Todos los caracteres tecleados por el usuario son enviados por el puerto  */
-/* serie y los caracteres recibidos son mostrados en la salida est·ndar.     */
+/* serie y los caracteres recibidos son mostrados en la salida est√°ndar.     */
 /*                                                                           */
-/* La configuraciÛn del puerto serie es: 9600 baudios, 8 bit de datos, 1 bit */
+/* La configuraci√≥n del puerto serie es: 9600 baudios, 8 bit de datos, 1 bit */
 /* de parada y sin paridad.                                                   */
 /*---------------------------------------------------------------------------*/
 /* Ejemplo de uso:                                                           */
 /*                                                                           */
 /*   chat COM1                                                               */
 /*                                                                           */
-/* El puerto serie escogido debe pasarse como par·metro                      */
+/* El puerto serie escogido debe pasarse como par√°metro                      */
 /*---------------------------------------------------------------------------*/
 /* En windows, los nombres de los dispositivos serie son:                    */
 /*                                                                           */
@@ -33,10 +33,10 @@
 //-- CONSTANTES
 //-----------------------------------------------------------------------------
 
-//-- CÛdigo ASCII de la tecla ESCape
+//-- C√≥digo ASCII de la tecla ESCape
 #define ESC '\x1B'
 
-//-- N˙mero m·ximo de caracteres de la cadena
+//-- N√∫mero m√°ximo de caracteres de la cadena
 #define MAXCHARS 80
 
 //-----------------------------------------------------------------------------
@@ -128,8 +128,8 @@ int main(int argc, char *argv[])
 }
 
 /*****************************************************************************/
-/* FunciÛn asociada al hilo encargado de leer datos del puerto serie y       */
-/* mostrarlos por la salida est·ndar                                         */
+/* Funci√≥n asociada al hilo encargado de leer datos del puerto serie y       */
+/* mostrarlos por la salida est√°ndar                                         */
 /*---------------------------------------------------------------------------*/
 /* ENTRADA:                                                                  */
 /*   -lpParam: manejador del puerto serie (HANDLE hCommPort)                 */
@@ -153,7 +153,7 @@ DWORD HiloLectura(LPDWORD lpParam)
     {
         if (!WaitCommEvent(hCommPort, &dwEvtMask, &ov))
         {
-            //-- perror("ERROR: WaitCommEvent. Esperando evento sÌncrono");
+            //-- perror("ERROR: WaitCommEvent. Esperando evento s√≠ncrono");
         }
 
         //-- Espera a que haya algo que leer

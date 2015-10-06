@@ -5,6 +5,7 @@
 \usepackage{enumitem}
 \usepackage{tabularx}
 \usepackage{hyperref}
+\usepackage{wrapfig}
 \usepackage{minted}
 \usepackage[spanish]{babel}
 \usepackage[cm]{fullpage}
@@ -232,13 +233,22 @@ etc).
 
 Los cambios aplicados al archivo son los siguientes:
 
-\inputminted{diff}{add-ini-config.diff}
+\inputminted{diff}{etc/add-ini-config.diff}
 
 \subsubsection{Verifique su correcto funcionamiento mostrando la configuración
                seleccionada en pantalla. Aporte las capturas de pantalla
                cambiando el contenido del fichero .ini y verificando el
                correcto funcionamiento del programa.}
-% TODO
+
+\begin{figure}[h]
+  \begin{center}
+    \includegraphics[width=0.6\textwidth]{screenshots/ini-1.png}
+    \includegraphics[width=0.6\textwidth]{screenshots/ini-2.png}
+    \includegraphics[width=0.6\textwidth]{screenshots/ini-3.png}
+    \caption{Algunos ejemplos de ejecución del programa con el archivo
+             \texttt{.ini} al lado}
+  \end{center}
+\end{figure}
 
 \section{El control de flujo}
 
@@ -256,46 +266,83 @@ Los cambios aplicados al archivo son los siguientes:
                líneas \texttt{RTS} y \texttt{CTS} del RS-232. Si lo consideras
                necesario solicita el Mini Tester al profesor para confirmar
                visualmente la activación/desactivación de estas líneas.}
-Cuando el puerto está cerrado, el RTS está en negativo.
 
-Cuando el puerto del otro ordenador se intenta conectar, el CTS pasa a positivo,
-ya que el otro ordenador a activado su RTS (que está cruzado), lo que indica que
-el otro terminal está listo.
+Cuando el puerto está cerrado, el pin \texttt{RTS} está en negativo.
 
-Si conectamos el puerto, nuestro RTS pasa también a positivo (y por lo tanto el
-CTS del otro terminal).
+Cuando el puerto del otro ordenador se intenta conectar, el \texttt{CTS} pasa a
+positivo, ya que el otro ordenador a activado su \texttt{RTS} (que está
+cruzado), lo que indica que el otro terminal está listo.
+
+Si conectamos el puerto, nuestro \texttt{RTS} pasa también a positivo (y por lo
+tanto el \texttt{CTS} del otro terminal).
 
 Cuando ambos pines en ambos dispositivos están en positivo, podemos transmitir
 datos.
 
-Si uno de los dos terminales usa RTS/CTS y el otro no, el primer terminal no
-será capaz de enviar datos, pero sí de recibirlos (pone el pin RTS a positivo,
-pero no recibe la señal de CLS, por lo que no envía). Sin embargo el otro
-terminal sí envía, y los datos llegan al primero.
+Si uno de los dos terminales usa \texttt{RTS}/\texttt{CTS} y el otro no, el
+primer terminal no enviará datos, pero sí de trata de recibirlos (pone el pin
+\texttt{RTS} a positivo, pero no recibe la señal de \texttt{CLS}, por lo que no
+envía). Sin embargo el otro terminal sí envía, y los datos llegan al primero.
 
-\subsubsection{Con el apoyo de la herramienta Hércules describe el proceso de
-               control de flujo por software al enviar datos de un equipo a
-               otro. En este caso el control de flujo se hace mediante las
-               líneas de datos por medio del envío de caracteres predeterminados
-               (Xoff para detener y Xon para reanudar la transmisión).}
-Con Xon y Xoff, ambos pines están en negativo (ya que no se usan), y el control
-de flujo se realiza por software (se aceptan datos a partir de recibir el
-caracter Xon hasta recibir el Xoff).
+\subsubsection{Con el apoyo de la herramienta \textit{Hércules}describe el
+               proceso de control de flujo por software al enviar datos de un
+               equipo a otro. En este caso el control de flujo se hace mediante
+               las líneas de datos por medio del envío de caracteres
+               predeterminados (\texttt{XOFF} para detener y \texttt{XON} para
+               reanudar la transmisión).}
 
-Tratamos de enviar el caracter Xoff manualmente desde Hércules para ver si la
-parte posterior del mensaje llegaba o no, aunque o bien el programa al enviarlo
-lo eliminaba, o se introduce algún tipo de bit en el contenido para
-diferenciarlo.
+Con \texttt{XON} y \texttt{XOFF}, tanto el pin \texttt{RTS} como el \texttt{CTS}
+están en negativo (ya que no se usan). El control de flujo se realiza por
+software (cuando se recibe el carácter \texttt{XOFF} se deja de transmitir,
+hasta que se vuelva a recibir el carácter \texttt{XON}.
 
 \section{El control de errores de la interfaz serie}
 
 \subsection{Realice las modificaciones necesarias en el programa resultante
             del punto 4 (la configuración del puerto serie se lee del fichero
             serie.ini) de tal forma que en la recepción se puedan detectar los
-            posibles errores. Consulte "Serial Status" del manual "MSDN - Serial
-            Communications". Adjunte el proyecto con el código fuente
+            posibles errores. Consulte ``Serial Status" del manual ``MSDN -
+            Serial Communications". Adjunte el proyecto con el código fuente
             modificado.}
 
 \section{Terminal por el puerto serie}
 
+\subsection{Una de las aplicaciones prácticas del puerto serie es la de
+            permitir controlar un sistema Unix de forma remota conectado
+            directamente por dicho puerto. Precisamente ésta es la manera más
+            típica que existe para la gestión de muchos elementos de red (p. ej:
+            conmutadores, enrutadores, pasarelas, etc.).}
+\subsubsection{Localice e investigue la orden getty para conseguir sacar un
+               terminal por el puerto serie con una velocidad de 9600 baudios y
+               con una emulación para el terminal vt100.}
+
+Al usar \texttt{getty} se abre el puerto serie y se permite crear una terminal
+remota desde un cliente.
+
+La orden ejecutada, como se puede ver en las capturas de pantalla del directorio
+\texttt{screenshots}, fue:
+
+\begin{minted}{bash}
+getty ttyS0 9600 vt100
+\end{minted}
+
+Nótese que el argumento \texttt{vt100} es completamente innecesario, ya que es
+por defecto.
+
+La consola se queda leyendo de la entrada estándar indefinidamente, hasta que el
+cliente remoto cierra la sesión.
+
+\begin{figure}[h]
+  \begin{center}
+    \includegraphics[width=0.6\textwidth]{screenshots/getty.png}
+    \caption{Orden utilizada, tras que el cliente haya cerrado la sesión.}
+  \end{center}
+\end{figure}
+
+\begin{figure}[h]
+  \begin{center}
+    \includegraphics[width=0.6\textwidth]{screenshots/getty-putty.png}
+    \caption{Cliente usando putty para conectarse.}
+  \end{center}
+\end{figure}
 \end{document}

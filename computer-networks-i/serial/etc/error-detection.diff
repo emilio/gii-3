@@ -1,0 +1,95 @@
+diff --git a/chat-4.c b/chat-6.c
+index 16c061a..8e2b5cf 100644
+--- a/chat-4.c
++++ b/chat-6.c
+@@ -94,6 +94,17 @@ int main(int argc, char *argv[])
+         exit(2);
+     }
+ 
++    DWORD mask;
++    if (!GetCommMask(hCommPort, &mask)) {
++        perror("GetCommMask");
++        exit(3);
++    }
++
++    if (!SetCommMask(hCommPort, mask | EV_ERR)) {
++        perror("SetCommMask");
++        exit(4);
++    }
++
+     //-- Crea el hilo encargado de la lectura de datos del puerto serie
+     HANDLE hHiloLectura;
+     DWORD idHiloLectura;
+@@ -101,7 +112,7 @@ int main(int argc, char *argv[])
+     if (hHiloLectura == NULL)
+     {
+         perror("ERROR: No se puede crear el hilo de lectura");
+-        exit(3);
++        exit(5);
+     }
+ 
+     printf("Pulse la tecla ESC para salir\n");
+@@ -139,8 +150,7 @@ DWORD HiloLectura(LPDWORD lpParam)
+ {
+     DWORD dwEvtMask;
+ 
+-    OVERLAPPED ov;
+-    memset(&ov, 0, sizeof(ov));
++    OVERLAPPED ov = { 0 };
+     ov.hEvent = CreateEvent(0, TRUE, 0, 0);
+ 
+     //-- Recoge el manejador del puerto serie
+@@ -148,12 +158,32 @@ DWORD HiloLectura(LPDWORD lpParam)
+ 
+     char szDatos[MAXCHARS + 1];
+ 
++    DWORD dwErrors;
++
+     //-- Bucle infinito de lectura
+     while (TRUE)
+     {
+-        if (!WaitCommEvent(hCommPort, &dwEvtMask, &ov))
+-        {
+-            //-- perror("ERROR: WaitCommEvent. Esperando evento síncrono");
++        if (!WaitCommEvent(hCommPort, &dwEvtMask, &ov)) {}
++
++        if (!ClearCommError(hCommPort, &dwErrors, NULL)) {
++            perror("ClearCommError");
++            continue;
++        }
++
++        if (dwErrors & CE_FRAME) {
++            printf("Frame error\n");
++        }
++        if (dwErrors & CE_RXPARITY) {
++            printf("Parity error\n");
++        }
++        if (dwErrors & CE_OVERRUN) {
++            printf("Overrun\n");
++        }
++        if (dwErrors & CE_BREAK) {
++            printf("CE_BREAK\n");
++        }
++        if (dwErrors & CE_RXOVER) {
++            printf("CE_RXOVER\n");
+         }
+ 
+         //-- Espera a que haya algo que leer
+@@ -162,7 +192,7 @@ DWORD HiloLectura(LPDWORD lpParam)
+             DWORD dwMask;
+             if (GetCommMask(hCommPort, &dwMask))
+             {
+-                if (dwMask == EV_TXEMPTY)
++                if (dwMask & EV_TXEMPTY)
+                 {
+                     ResetEvent(ov.hEvent);
+                     continue;
+@@ -172,6 +202,8 @@ DWORD HiloLectura(LPDWORD lpParam)
+             //-- Lee los datos del puerto serie
+             if (serie_leer(hCommPort, szDatos, sizeof(szDatos)) > 0)
+                 printf("%s", szDatos);
++            else
++                printf("serie_leer returned 0");
+ 
+             //-- Reinicia el estado del evento
+             ResetEvent(ov.hEvent);

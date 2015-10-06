@@ -24,7 +24,7 @@
 \newcommand\sectionbreak{\clearpage}
 
 \titleformat{\section}[hang]{\normalfont\bfseries\Large}{Bloque \thesection: }{0pt}{}
-\titleformat{\subsubsection}[hang]{\normalfont\it}{\thesubsubsection) }{10pt}{}
+\titleformat{\subsubsection}[hang]{\normalfont\bfseries\itshape}{\thesubsubsection) }{10pt}{}
 \titleformat{\paragraph}[hang]{\normalfont\bfseries}{\thesubsubsection) }{0}{}
 \titlespacing{\paragraph}{1em}{0pt}{0pt}
 
@@ -317,8 +317,8 @@ hasta que se vuelva a recibir el carácter \texttt{XON}.
             Serial Communications". Adjunte el proyecto con el código fuente
             modificado.}
 
-Sólo se ha usado \texttt{printf} para detectar el error, ya que el manejo del
-mismo no se especificaba en el enunciado.
+Sólo se ha usado \texttt{printf} para mostrar el error detectado, ya que el
+manejo del mismo no se especificaba en el enunciado.
 
 Nótese también que se ha usado \texttt{GetCommMask} y \texttt{SetCommMask} para
 evitar modificar el archivo \texttt{seriewin.c}.
@@ -338,12 +338,13 @@ Los cambios aplicados con respecto al otro ejercicio son los siguientes
                (\texttt{CE\_RXPARITY}). Especifique y justifique los valores
                escogidos para la configuración.}
 
+Símplemente se escogió diferentes tipos de paridad en ambos terminales (par en
+uno e impar ene el otro), para forzar el error de la forma más obvia posible.
+
 \begin{figure}[H]
   \begin{center}
     \includegraphics[width=0.6\textwidth]{screenshots/parity-error.png}
-    \caption{Configuración utilizada para provocar errores de paridad:
-             Símplemente se escogió diferentes tipos de paridad en ambos
-             terminales (par en uno e impar ene el otro).}
+    \caption{Configuración utilizada para provocar errores de paridad}
   \end{center}
 \end{figure}
 
@@ -353,13 +354,14 @@ Los cambios aplicados con respecto al otro ejercicio son los siguientes
                (\texttt{CE\_FRAME}).Especifique y justifique los valores
                escogidos para la configuración.}
 
+Se utilizaron \textbf{diferentes tamaños} en ambos terminales \textbf{tanto de
+bits de datos como de parada}, con el fin de forzar el envío de cadenas de bits
+de longitud no esperada por el receptor.
+
 \begin{figure}[H]
   \begin{center}
     \includegraphics[width=0.6\textwidth]{screenshots/frame-error.png}
-    \caption{Configuración utilizada para provocar errores de formato: Se
-             utilizaron diferentes tamaños en ambos terminales tanto de bits de
-             datos como de parada, con el fin de forzar el envío de cadenas de
-             bits de longitud no esperada por el receptor}
+    \caption{Configuración utilizada para provocar errores de formato}
   \end{center}
 \end{figure}
 

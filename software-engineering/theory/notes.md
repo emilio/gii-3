@@ -116,3 +116,67 @@ They're used to use to provide inputs and output to an activity..
 
 When an activity is invoked the input values are stored as token in the input
 value nodes.
+
+---
+
+At least one week was lost here
+
+---
+
+## Complex state machines
+
+---
+
+# Deployment view
+
+Deployment diagrams + component diagrams form part of the physical architecture.
+
+## Phisical Architecture
+
+Is a detailed description of the system that show the asignation of software
+node to physical nodes.
+
+### Phisical software structure
+
+Runtime distribution and dependencies of the software artifacts defined in the
+logical architecture.
+
+#### Components
+
+Phisical packaging of a collection of modeling element.
+
+#### Artifacts
+
+Phisical manifestation of the components.
+
+#### Deployment specifiers
+
+Set of properties that determine in which environment has to be used.
+
+### Phisical hardware structure
+
+#### Devices
+
+Nodes, computational resources.
+
+#### Communication paths
+
+#### Runtime environments
+
+## Deployment artifact
+
+Phisical entity: Source file, executable file, database table...
+
+The relation with a package is always `<<manifest>>`, since the artifact
+represents the manifestation of a component.
+
+Can have properties and operations.
+
+Can be instantiated (deployed artifact).
+
+Estereotypes already defined: `<<source>> <<executable>> <<document>>
+<<library>>`
+
+## Deployed artifact
+
+Instance of an artifact deployed in a node.

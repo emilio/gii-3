@@ -377,7 +377,10 @@ no ha habido necesidad de modificarlo de nuevo.
                los pasos para provocar un error de sobreescritura del buffer de
                entrada (\texttt{CE\_RXOVER}) con el nuevo código.}
 
-% TODO
+Nuestro código propuesto es bien simple. Sabemos que tampoco comienza el proceso
+de escritura hasta que se ha pulsado \texttt{ESC}, pero no nos parece un gran
+problema ya que el objetivo del programa es sólo sobreescribir el buffer de
+lectura.
 
 \section{Terminal por el puerto serie}
 

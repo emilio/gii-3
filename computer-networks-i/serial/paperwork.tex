@@ -380,7 +380,23 @@ no ha habido necesidad de modificarlo de nuevo.
 Nuestro código propuesto es bien simple. Sabemos que tampoco comienza el proceso
 de escritura hasta que se ha pulsado \texttt{ESC}, pero no nos parece un gran
 problema ya que el objetivo del programa es sólo sobreescribir el buffer de
-lectura.
+lectura, lo único forzoso es que se haya abierto el puerto de serie antes de
+``bloquearnos" hasta que se pulse \texttt{ESC}.
+
+Los cambios aplicados son (\texttt{etc/chat-7.c}):
+
+\inputminted{diff}{etc/prevent-read.diff}
+
+Mientras que uno de los clientes no había pulsado \texttt{ESC}, el otro copió
+aproximadamente 450 párrafos de texto, que fueron enviados, sobreescribiendo el
+buffer del primero, el resultado se puede ver abajo.
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=0.6\textwidth]{screenshots/rxover.png}
+    \caption{Se obtuvo una cantidad de errores \texttt{CE\_RXOVER} desmesurada}
+  \end{center}
+\end{figure}
 
 \section{Terminal por el puerto serie}
 
@@ -422,4 +438,17 @@ cliente remoto cierra la sesión.
     \caption{Cliente usando putty para conectarse.}
   \end{center}
 \end{figure}
+
+\subsubsection{Explicar por qué al ejecutar \mintinline{bash}{ps -aux | grep
+               getty} aparecen procesos ejecutándose. (extra)}
+
+Los procesos que aparecen son los terminales del sistema que se ejecutan cuando
+pulsas \texttt{CTRL + ALT + F1-F6}. En nuestro caso sólo salió un proceso
+(aparte del propio \texttt{grep}, referente a la terminal 1, probablemente
+porque la terminal ``gráfica" que estábamos usando estaría emulando
+\texttt{tty1}.
+
+Si entrábamos en otro terminal, por ejemplo \texttt{tty2} pulsando \texttt{CTRL
++ ALT + F2}, y usábamos el mismo comando, veíamos el nuevo proceso en la lista.
+
 \end{document}

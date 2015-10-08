@@ -1,0 +1,14 @@
+diff --git a/chat-6.c b/chat-7.c
+index 8e2b5cf..6995f2a 100644
+--- a/chat-6.c
++++ b/chat-7.c
+@@ -105,6 +105,9 @@ int main(int argc, char *argv[])
+         exit(4);
+     }
+ 
++    printf("Pulse la tecla ESC para empezar a leer\n");
++    while ( _getch() != ESC ) { /* Do nothing */ }
++
+     //-- Crea el hilo encargado de la lectura de datos del puerto serie
+     HANDLE hHiloLectura;
+     DWORD idHiloLectura;

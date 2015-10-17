@@ -4,12 +4,14 @@ JAVAC := javac
 ROOT := $(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
 JADE_ZIP := $(ROOT)jade.zip
 
-JAVAC_FLAGS := $(JAVAC_FLAGS) -g -cp $(abspath $(ROOT)lib/jade.jar):.
+CLASSPATH ?= $(abspath $(ROOT)lib/jade.jar):.
+
+JAVAC_FLAGS := $(JAVAC_FLAGS) -g -cp $(CLASSPATH)
 JADE_FLAGS :=
 
 # We add the current dir to the classpath to allow booting JADE with
 # Agents there
-JAVA_FLAGS := $(JAVA_FLAGS) -cp $(abspath $(ROOT)lib/jade.jar):.
+JAVA_FLAGS := $(JAVA_FLAGS) -cp $(CLASSPATH)
 
 # Note we don't use := to allow expanding later
 JADE_BOOT_AGENTS = java $(JAVA_FLAGS) jade.Boot $(JADE_FLAGS) -agents

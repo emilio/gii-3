@@ -23,6 +23,8 @@ abstract class Alumn extends SimpleAgent {
             ex.printStackTrace(System.err);
         }
 
+        System.out.println("Alumn agent " + this.getAID() + " started");
+
         this.currentAssignedGroup = null;
 
         this.teacherService = this.getService("teacher");
@@ -34,6 +36,8 @@ abstract class Alumn extends SimpleAgent {
         }
 
         this.sendMessage(this.teacherService, "requestFirstAssignment");
+        System.out.println("Requested first assignment to " + this.teacherService);
+
         ACLMessage msg = this.blockingReceive(
                              MessageTemplate.and(
                                  MessageTemplate.and(

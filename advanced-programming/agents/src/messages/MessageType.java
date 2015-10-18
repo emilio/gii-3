@@ -1,5 +1,8 @@
 package messages;
 
+// TODO: Unify the names of the messages. Choose between
+// * TerminationRequest...
+// * RequestTermination...
 public enum MessageType {
     TERMINATION_REQUEST,
     TERMINATION_CONFIRMATION,

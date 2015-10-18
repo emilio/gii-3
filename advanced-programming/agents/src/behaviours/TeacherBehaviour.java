@@ -80,6 +80,7 @@ public class TeacherBehaviour extends CyclicBehaviour {
         } catch (UnreadableException e) {
             System.err.println("[" + myAgent.getAID() + "] Error receiving message from " + sender);
             e.printStackTrace(System.err);
+            return;
         }
 
         switch ( message.getType() ) {
@@ -87,6 +88,7 @@ public class TeacherBehaviour extends CyclicBehaviour {
                 teacher.sendMessage(sender, new FirstAssignationMessage(this.firstAssignation(sender)));
                 return;
             default:
+                System.err.println("ERROR: Unexpected message of type " + message.getType() + " received in TeacherBehaviour. Sender: " + sender + "; Receiver: " + teacher.getAID());
                 return;
         }
     }

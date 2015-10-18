@@ -54,7 +54,7 @@
     <java classpathref="classpath" classname="jade.Boot" fork="true">
       <arg value="-gui"/>
       <arg value="-agents"/>
-      <arg value="teacher:agents.Teacher;availableAlumn1:agents.AvailableAlumn;availableAlumn2:agents.AvailableAlumn"/>
+      <arg value="teacher:agents.Teacher;availableAlumn1:agents.AvailableAlumn;availableAlumn2:agents.AvailableAlumn;mondayAlumn1:agents.MondayAlumn"/>
     </java>
   </target>
 

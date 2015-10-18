@@ -9,12 +9,24 @@ import jade.lang.acl.UnreadableException;
 // import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.FIPAException;
 
+import behaviours.AlumnBehaviour;
 import messages.*;
 
-abstract class Alumn extends SimpleAgent {
+public abstract class Alumn extends SimpleAgent {
     public abstract EnumSet<Availability> getAvailability();
+
+    // TODO: s/Availability/Group/g
     private Availability currentAssignedGroup;
     private AID teacherService;
+    private AlumnBehaviour behaviour;
+
+    public Availability getCurrentAssignedGroup() {
+        return currentAssignedGroup;
+    }
+
+    public boolean isAvailableForCurrentAssignedGroup() {
+        return getAvailability().contains(currentAssignedGroup);
+    }
 
     protected void setup() {
         try {
@@ -23,6 +35,9 @@ abstract class Alumn extends SimpleAgent {
             System.err.println("Agent " + this.getAID() + " setup failed!");
             ex.printStackTrace(System.err);
         }
+
+        this.behaviour = new AlumnBehaviour(this);
+        this.addBehaviour(this.behaviour);
 
         System.out.println("Alumn agent " + this.getAID() + " started");
 

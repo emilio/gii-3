@@ -15,8 +15,6 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 
 public class SimpleAgent extends Agent {
-    public static final String DEFAULT_ONTOLOGY = "default-ontology";
-
     public void simpleSetup(String serviceType) throws FIPAException {
         DFAgentDescription agentDescription = new DFAgentDescription();
         agentDescription.setName(this.getAID());

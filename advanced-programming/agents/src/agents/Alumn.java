@@ -8,7 +8,8 @@ import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 // import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.FIPAException;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
+
+import messages.*;
 
 abstract class Alumn extends SimpleAgent {
     public abstract EnumSet<Availability> getAvailability();
@@ -35,18 +36,17 @@ abstract class Alumn extends SimpleAgent {
             return;
         }
 
-        this.sendMessage(this.teacherService, "requestFirstAssignment");
+        this.sendMessage(this.teacherService, new RequestFirstAssignationMessage());
         System.out.println("Requested first assignment to " + this.teacherService);
 
         ACLMessage msg = this.blockingReceive(
                              MessageTemplate.and(
-                                 MessageTemplate.and(
-                                     MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
-                                     MessageTemplate.MatchOntology(DEFAULT_ONTOLOGY)),
-                                 MessageTemplate.MatchSender(this.findAgent("teacher", "teacher").getName())));
+                                 MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
+                                 MessageTemplate.MatchSender(this.teacherService)));
 
         try {
-            this.currentAssignedGroup = (Availability) msg.getContentObject();
+            FirstAssignationMessage response = (FirstAssignationMessage) msg.getContentObject();
+            this.currentAssignedGroup = response.getGroup();
         } catch (UnreadableException ex) {
             System.err.println("W.T.F");
             ex.printStackTrace(System.err);

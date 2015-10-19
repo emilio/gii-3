@@ -3,6 +3,7 @@ package messages;
 public class AlumnToAlumnMessage extends Message {
     public AlumnToAlumnMessage(MessageType type) {
         super(type);
-        assert(type == MessageType.REQUEST_GROUP_CHANGE);
+        assert(type == MessageType.GROUP_CHANGE_REQUEST ||
+               type == MessageType.GROUP_CHANGE_REQUEST_CONFIRMATION);
     }
 }

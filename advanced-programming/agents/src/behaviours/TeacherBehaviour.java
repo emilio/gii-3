@@ -84,7 +84,8 @@ public class TeacherBehaviour extends CyclicBehaviour {
         }
 
         switch ( message.getType() ) {
-            case REQUEST_FIRST_ASSIGNATION:
+            case FIRST_ASSIGNATION_REQUEST:
+                // TODO: This should be an INFORM message, with reply
                 teacher.sendMessage(sender, new FirstAssignationMessage(this.firstAssignation(sender)));
                 return;
             default:

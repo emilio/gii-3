@@ -51,7 +51,7 @@ public abstract class Alumn extends SimpleAgent {
             return;
         }
 
-        this.sendMessage(this.teacherService, new RequestFirstAssignationMessage());
+        this.sendMessage(this.teacherService, new FirstAssignationRequestMessage());
         System.out.println("Requested first assignment to " + this.teacherService);
 
         ACLMessage msg = this.blockingReceive(

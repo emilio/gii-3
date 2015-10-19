@@ -33,7 +33,7 @@ public class AlumnBehaviour extends CyclicBehaviour {
     public void action() {
         // Send a message to the other alumns if we aren't happy with our curent group
         if ( ! alumn.isAvailableForCurrentAssignedGroup() && ! changeRequestSent ) {
-            alumn.sendMessageToType("alumn", new RequestGroupChangeMessage(alumn.getCurrentAssignedGroup(), alumn.getAvailability()));
+            alumn.sendMessageToType("alumn", new GroupChangeRequestMessage(alumn.getCurrentAssignedGroup(), alumn.getAvailability()));
             changeRequestSent = true;
         } else {
             this.handleIncomingMessages();
@@ -62,9 +62,22 @@ public class AlumnBehaviour extends CyclicBehaviour {
                 alumn.sendMessage(sender, new TerminationConfirmationMessage());
                 alumn.doDelete();
                 return;
-            case REQUEST_GROUP_CHANGE:
-                RequestGroupChangeMessage groupChangeMessage = (RequestGroupChangeMessage) message;
-                // TODO
+            case GROUP_CHANGE_REQUEST:
+                GroupChangeRequestMessage groupChangeMessage = (GroupChangeRequestMessage) message;
+
+                // If our group doesn't interest the other agent, just leave
+                if ( !groupChangeMessage.getDesiredGroups().contains(alumn.getCurrentAssignedGroup()) ) {
+                    System.err.println("INFO: Change not possible from " + alumn.getAID() + " to " + sender);
+                    return;
+                }
+
+                // If our situation doesn't get worse
+                if ( !alumn.isAvailableForCurrentAssignedGroup() || alumn.getAvailability().contains(groupChangeMessage.getGroup()) ) {
+                    System.err.println("INFO: Trying to confirm change from " + alumn.getAID() + " to " + sender);
+                    alumn.sendMessage(sender, new GroupChangeRequestConfirmationMessage(groupChangeMessage.getGroup(), alumn.getCurrentAssignedGroup()));
+                }
+
+            // TODO
             default:
                 System.out.println("ERROR: Unexpected message " + message.getType() + " received in AlumnBehavior. Sender: " + sender + "; Receiver: " + alumn.getAID());
                 return;

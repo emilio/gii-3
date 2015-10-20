@@ -10,6 +10,8 @@ import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 import messages.FirstAssignationMessage;
 import messages.FirstAssignationRequestMessage;
+import messages.Message;
+import messages.MessageType;
 
 public abstract class Alumn extends SimpleAgent {
     private static final long serialVersionUID = 7370466273846708748L;
@@ -64,9 +66,8 @@ public abstract class Alumn extends SimpleAgent {
         this.sendMessage(this.teacherService, new FirstAssignationRequestMessage());
         System.out.println("Requested first assignment to " + this.teacherService);
 
-        final ACLMessage msg = this.blockingReceive(MessageTemplate
-                .and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
-                     MessageTemplate.MatchSender(this.teacherService)));
+        final ACLMessage msg = this
+                .blockingReceive(MessageTemplate.MatchSender(this.teacherService));
 
         try {
             final FirstAssignationMessage response = (FirstAssignationMessage) msg
@@ -79,5 +80,14 @@ public abstract class Alumn extends SimpleAgent {
 
         System.out.println("Alumn " + this.getAID() + " created. Assigned: "
                 + this.currentAssignedGroup);
+
+        final ACLMessage initMsg = this
+                .blockingReceive(MessageTemplate.MatchSender(this.teacherService));
+
+        try {
+            final Message initMessage = (Message) initMsg.getContentObject();
+            assert initMessage.getType() == MessageType.INIT;
+        } catch (UnreadableException ex) {
+        }
     }
 }

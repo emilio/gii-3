@@ -148,14 +148,25 @@ public class AlumnBehaviour extends CyclicBehaviour {
                 return;
 
             case TEACHER_GROUP_CHANGE:
-                this.pendingReplyFromTeacher = false;
-                this.pendingRepliesFromAlumns = 0;
-
                 final TeacherGroupChangeMessage teacherGroupChangeMessage = (TeacherGroupChangeMessage) message;
 
-                assert this.alumn.getCurrentAssignedGroup()
-                        .equals(teacherGroupChangeMessage.fromGroup);
-                this.alumn.setCurrentAssignedGroup(teacherGroupChangeMessage.toGroup);
+                // If we're some of the two parts involved
+                if (this.alumn.getAID().equals(teacherGroupChangeMessage.fromAlumn)) {
+                    this.pendingReplyFromTeacher = false;
+                    assert this.alumn.getCurrentAssignedGroup()
+                            .equals(teacherGroupChangeMessage.fromGroup);
+                    this.alumn.setCurrentAssignedGroup(teacherGroupChangeMessage.toGroup);
+                } else if (this.alumn.getAID().equals(teacherGroupChangeMessage.toAlumn)) {
+                    this.pendingReplyFromTeacher = false;
+                    assert this.alumn.getCurrentAssignedGroup()
+                            .equals(teacherGroupChangeMessage.toGroup);
+                    this.alumn.setCurrentAssignedGroup(teacherGroupChangeMessage.fromGroup);
+                    // If we're not and we're pending
+                } else {
+                    // TODO: unblock if blocked, asking both of them if some of
+                    // the groups match
+                }
+
                 return;
 
             // TODO

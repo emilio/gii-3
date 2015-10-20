@@ -14,6 +14,7 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import messages.FirstAssignationMessage;
+import messages.InitMessage;
 import messages.Message;
 import messages.TeacherGroupChangeMessage;
 import messages.TeacherGroupChangeRequestDenegationMessage;
@@ -26,6 +27,7 @@ import messages.TeacherGroupChangeRequestMessage;
 public class TeacherBehaviour extends CyclicBehaviour {
     private static final long serialVersionUID = 4979147830188132019L;
     private static long MAX_ALUMNS_PER_GROUP = 5;
+    private static long EXPECTED_ALUMN_COUNT = 8;
     private static EnumSet<Availability> AVAILABLE_GROUPS = EnumSet
             .of(Availability.MONDAY, Availability.TUESDAY, Availability.THURDSDAY,
                 Availability.FRIDAY);
@@ -39,6 +41,8 @@ public class TeacherBehaviour extends CyclicBehaviour {
 
     private final Random random;
 
+    private int alumnCount;
+
     public HashMap<AID, Availability> getGroups() {
         return new HashMap<AID, Availability>(this.groups);
     }
@@ -48,6 +52,7 @@ public class TeacherBehaviour extends CyclicBehaviour {
         this.groups = new HashMap<>();
         this.teacher = agent;
         this.random = new Random();
+        this.alumnCount = 0;
     }
 
     private Availability firstAssignation(AID alumn) {
@@ -104,10 +109,18 @@ public class TeacherBehaviour extends CyclicBehaviour {
 
         switch (message.getType()) {
             case FIRST_ASSIGNATION_REQUEST:
-                // TODO: This should be an INFORM message, with reply
+                // TODO: This should maybe be an INFORM message, with reply
                 this.teacher
                         .sendMessage(sender,
                                      new FirstAssignationMessage(this.firstAssignation(sender)));
+
+                this.alumnCount += 1;
+
+                assert alumnCount <= EXPECTED_ALUMN_COUNT;
+
+                if (EXPECTED_ALUMN_COUNT == this.alumnCount)
+                    this.teacher.sendMessageToType("alumn", new InitMessage());
+
                 return;
             case TEACHER_GROUP_CHANGE_REQUEST:
                 final TeacherGroupChangeRequestMessage requestMessage = (TeacherGroupChangeRequestMessage) message;
@@ -119,11 +132,9 @@ public class TeacherBehaviour extends CyclicBehaviour {
                         && this.groups.get(requestMessage.toAlumn) == requestMessage.toGroup) {
                     this.groups.put(requestMessage.fromAlumn, requestMessage.toGroup);
                     this.groups.put(requestMessage.toAlumn, requestMessage.fromGroup);
-                    this.teacher.sendMessage(requestMessage.fromAlumn,
-                                             new TeacherGroupChangeMessage(requestMessage.fromGroup,
-                                                     requestMessage.toGroup));
-                    this.teacher.sendMessage(requestMessage.toAlumn, new TeacherGroupChangeMessage(
-                            requestMessage.toGroup, requestMessage.fromGroup));
+                    this.teacher.sendMessageToType("alumn", new TeacherGroupChangeMessage(
+                            requestMessage.fromAlumn, requestMessage.toAlumn,
+                            requestMessage.fromGroup, requestMessage.toGroup));
                 } else {
                     this.teacher.sendMessage(requestMessage.fromAlumn,
                                              new TeacherGroupChangeRequestDenegationMessage());

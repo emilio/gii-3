@@ -19,7 +19,6 @@ import messages.*;
 import agents.Availability;
 import agents.Teacher;
 
-
 /**
  * This is the main teacher behaviour.
  * The behaviour encapsulates the teacher logic, storing the availability
@@ -37,6 +36,10 @@ public class TeacherBehaviour extends CyclicBehaviour {
     private Teacher teacher;
 
     private Random random;
+
+    public HashMap<AID, Availability> getGroups() {
+        return new HashMap<AID, Availability>(this.groups);
+    }
 
     public TeacherBehaviour(Teacher agent) {
         super(agent);
@@ -71,7 +74,12 @@ public class TeacherBehaviour extends CyclicBehaviour {
 
     @Override
     public void action() {
-        ACLMessage msg = myAgent.blockingReceive(MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+        // We have to use a timeout to allow the WakerBehaviour to take place
+        ACLMessage msg = myAgent.blockingReceive(100);
+
+        if ( msg == null )
+            return;
+
         AID sender = msg.getSender();
         Message message = null;
 
@@ -83,10 +91,28 @@ public class TeacherBehaviour extends CyclicBehaviour {
             return;
         }
 
+        System.err.println("INFO: [" + myAgent.getAID() + "] ReceiveMessage (" + message.getType() + ")");
+
         switch ( message.getType() ) {
             case FIRST_ASSIGNATION_REQUEST:
                 // TODO: This should be an INFORM message, with reply
                 teacher.sendMessage(sender, new FirstAssignationMessage(this.firstAssignation(sender)));
+                return;
+            case TEACHER_GROUP_CHANGE_REQUEST:
+                TeacherGroupChangeRequestMessage requestMessage = (TeacherGroupChangeRequestMessage) message;
+
+                assert(requestMessage.fromAlumn.equals(sender));
+
+                // Ensure those alumns haven't been changed previously
+                if ( groups.get(requestMessage.fromAlumn) == requestMessage.fromGroup &&
+                     groups.get(requestMessage.toAlumn) == requestMessage.toGroup) {
+                    groups.put(requestMessage.fromAlumn, requestMessage.toGroup);
+                    groups.put(requestMessage.toAlumn, requestMessage.fromGroup);
+                    teacher.sendMessage(requestMessage.fromAlumn, new TeacherGroupChangeMessage(requestMessage.fromGroup, requestMessage.toGroup));
+                    teacher.sendMessage(requestMessage.toAlumn, new TeacherGroupChangeMessage(requestMessage.toGroup, requestMessage.fromGroup));
+                } else {
+                    teacher.sendMessage(requestMessage.fromAlumn, new TeacherGroupChangeRequestDenegationMessage());
+                }
                 return;
             default:
                 System.err.println("ERROR: Unexpected message of type " + message.getType() + " received in TeacherBehaviour. Sender: " + sender + "; Receiver: " + teacher.getAID());

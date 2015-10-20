@@ -24,6 +24,14 @@ public abstract class Alumn extends SimpleAgent {
         return currentAssignedGroup;
     }
 
+    public void setCurrentAssignedGroup(Availability group) {
+        this.currentAssignedGroup = group;
+    }
+
+    public AID getTeacherService() {
+        return this.teacherService;
+    }
+
     public boolean isAvailableForCurrentAssignedGroup() {
         return getAvailability().contains(currentAssignedGroup);
     }

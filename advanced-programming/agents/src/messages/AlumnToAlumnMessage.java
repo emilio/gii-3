@@ -7,6 +7,7 @@ public class AlumnToAlumnMessage extends Message {
         super(type);
         assert type == MessageType.GROUP_CHANGE_REQUEST
                 || type == MessageType.GROUP_CHANGE_REQUEST_CONFIRMATION
-                || type == MessageType.GROUP_CHANGE_REQUEST_DENEGATION;
+                || type == MessageType.GROUP_CHANGE_REQUEST_DENEGATION
+                || type == MessageType.GROUP_CHANGE_REQUEST_CONFIRMATION_DENEGATION;
     }
 }

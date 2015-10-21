@@ -1,4 +1,4 @@
-package behaviours;
+package behaviours.alt;
 
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -128,16 +128,17 @@ public class TeacherBehaviour extends CyclicBehaviour {
                 assert requestMessage.fromAlumn.equals(sender);
 
                 // Ensure those alumns haven't been changed previously
-                assert this.groups.get(requestMessage.fromAlumn) == requestMessage.fromGroup
-                        && this.groups.get(requestMessage.toAlumn) == requestMessage.toGroup;
-
-                this.groups.put(requestMessage.fromAlumn, requestMessage.toGroup);
-                this.groups.put(requestMessage.toAlumn, requestMessage.fromGroup);
-                this.teacher
-                        .sendMessageToType("alumn",
-                                           new TeacherGroupChangeMessage(requestMessage.fromAlumn,
-                                                   requestMessage.toAlumn, requestMessage.fromGroup,
-                                                   requestMessage.toGroup));
+                if (this.groups.get(requestMessage.fromAlumn) == requestMessage.fromGroup
+                        && this.groups.get(requestMessage.toAlumn) == requestMessage.toGroup) {
+                    this.groups.put(requestMessage.fromAlumn, requestMessage.toGroup);
+                    this.groups.put(requestMessage.toAlumn, requestMessage.fromGroup);
+                    this.teacher.sendMessageToType("alumn", new TeacherGroupChangeMessage(
+                            requestMessage.fromAlumn, requestMessage.toAlumn,
+                            requestMessage.fromGroup, requestMessage.toGroup));
+                } else {
+                    this.teacher.sendMessage(requestMessage.fromAlumn,
+                                             new TeacherGroupChangeRequestDenegationMessage());
+                }
                 return;
             default:
                 System.err.println("ERROR: Unexpected message of type " + message.getType()

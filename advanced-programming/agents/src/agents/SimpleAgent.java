@@ -1,11 +1,10 @@
 package agents;
 
-import java.io.Serializable;
 import java.io.IOException;
+import java.io.Serializable;
 
-import jade.content.lang.sl.SLCodec;
-import jade.core.Agent;
 import jade.core.AID;
+import jade.core.Agent;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -15,11 +14,13 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 
 public class SimpleAgent extends Agent {
+    private static final long serialVersionUID = -9025034065047494472L;
+
     public void simpleSetup(String serviceType) throws FIPAException {
-        DFAgentDescription agentDescription = new DFAgentDescription();
+        final DFAgentDescription agentDescription = new DFAgentDescription();
         agentDescription.setName(this.getAID());
 
-        ServiceDescription serviceDescription = new ServiceDescription();
+        final ServiceDescription serviceDescription = new ServiceDescription();
         serviceDescription.setName(this.getLocalName());
         serviceDescription.setType(serviceType);
 
@@ -28,101 +29,104 @@ public class SimpleAgent extends Agent {
         DFService.register(this, agentDescription);
     }
 
-    public DFAgentDescription[] findAgents(String type,
-                                           String name,
-                                           long maxResults) {
-        DFAgentDescription template = new DFAgentDescription();
+    public DFAgentDescription[] findAgents(String type, String name, long maxResults) {
+        final DFAgentDescription template = new DFAgentDescription();
 
-        if ( type != null || name != null ) {
-            ServiceDescription serviceDescription = new ServiceDescription();
+        if (type != null || name != null) {
+            final ServiceDescription serviceDescription = new ServiceDescription();
 
-            if ( type != null )
+            if (type != null) {
                 serviceDescription.setType(type);
+            }
 
-            if ( name != null )
+            if (name != null) {
                 serviceDescription.setName(name);
+            }
 
             template.addServices(serviceDescription);
         }
 
-        SearchConstraints constraints = new SearchConstraints();
+        final SearchConstraints constraints = new SearchConstraints();
         constraints.setMaxResults(maxResults);
 
         try {
             return DFService.search(this, template, constraints);
-        } catch(FIPAException e) {
+        } catch (final FIPAException e) {
             e.printStackTrace();
             return null;
         }
     }
 
     public DFAgentDescription[] findAgents(String type, String name) {
-        return findAgents(type, name, Long.MAX_VALUE);
+        return this.findAgents(type, name, Long.MAX_VALUE);
     }
 
     public DFAgentDescription[] findAgents() {
-        return findAgents(null, null, Long.MAX_VALUE);
+        return this.findAgents(null, null, Long.MAX_VALUE);
     }
 
-    public DFAgentDescription findAgent(String type,
-                                        String name) {
-        DFAgentDescription[] results = findAgents(type, name, 1l);
+    public DFAgentDescription findAgent(String type, String name) {
+        final DFAgentDescription[] results = this.findAgents(type, name, 1l);
 
-        if ( results == null || results.length == 0 )
+        if (results == null || results.length == 0) {
             return null;
+        }
 
         return results[0];
     }
 
     public AID getService(String serviceType) {
-        DFAgentDescription maybeAgent = findAgentByType(serviceType);
+        final DFAgentDescription maybeAgent = this.findAgentByType(serviceType);
 
-        if ( maybeAgent == null )
+        if (maybeAgent == null) {
             return null;
+        }
 
         return maybeAgent.getName();
     }
 
     public DFAgentDescription findAgentByName(String name) {
-        return findAgent(null, name);
+        return this.findAgent(null, name);
     }
 
     public DFAgentDescription findAgentByType(String type) {
-        return findAgent(type, null);
+        return this.findAgent(type, null);
     }
 
     public DFAgentDescription[] findAgentsByType(String type) {
-        return findAgents(type, null);
+        return this.findAgents(type, null);
     }
 
     public DFAgentDescription[] findAgentsByName(String name) {
-        return findAgents(null, name);
+        return this.findAgents(null, name);
     }
 
-    public boolean sendMessage(DFAgentDescription[] receivers,
-                               Serializable contents) {
-        AID[] agents = new AID[receivers.length];
+    public boolean sendMessage(DFAgentDescription[] receivers, Serializable contents) {
+        final AID[] agents = new AID[receivers.length];
 
-        for (int i = 0; i < receivers.length; ++i)
+        for (int i = 0; i < receivers.length; ++i) {
             agents[i] = receivers[i] == null ? null : receivers[i].getName();
+        }
 
-        return sendMessage(agents, contents);
+        return this.sendMessage(agents, contents);
     }
 
     public boolean sendMessage(AID receiver, Serializable contents) {
-        return sendMessage(new AID[] { receiver }, contents);
+        return this.sendMessage(new AID[] { receiver }, contents);
     }
 
-    public boolean sendMessage(AID[] receivers,
-                               Serializable contents) {
-        if ( receivers == null || contents == null )
+    public boolean sendMessage(AID[] receivers, Serializable contents) {
+        if (receivers == null || contents == null) {
             return false;
+        }
 
-        ACLMessage aclMessage = new ACLMessage(ACLMessage.REQUEST);
+        final ACLMessage aclMessage = new ACLMessage(ACLMessage.REQUEST);
 
-        for ( AID agent : receivers )
-            if ( agent != null )
+        for (final AID agent : receivers) {
+            if (agent != null) {
                 aclMessage.addReceiver(agent);
+            }
+        }
 
         // aclMessage.setOntology(ontology);
         // aclMessage.setLanguage(new SLCodec().getName());
@@ -132,7 +136,7 @@ public class SimpleAgent extends Agent {
 
         try {
             aclMessage.setContentObject(contents);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return false;
         }
 
@@ -141,6 +145,6 @@ public class SimpleAgent extends Agent {
     }
 
     public boolean sendMessageToType(String type, Serializable contents) {
-        return sendMessage(findAgentsByType(type), contents);
+        return this.sendMessage(this.findAgentsByType(type), contents);
     }
 }

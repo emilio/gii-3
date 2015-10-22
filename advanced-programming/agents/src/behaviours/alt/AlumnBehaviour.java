@@ -1,11 +1,10 @@
-package behaviours;
+package behaviours.alt;
 
 import agents.Alumn;
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
-import messages.GroupChangeRequestConfirmationDenegationMessage;
 import messages.GroupChangeRequestConfirmationMessage;
 import messages.GroupChangeRequestDenegationMessage;
 import messages.GroupChangeRequestMessage;
@@ -22,7 +21,6 @@ public class AlumnBehaviour extends CyclicBehaviour {
     /** To avoid sending multiple times the same request */
     private int pendingRepliesFromAlumns;
     private boolean pendingReplyFromTeacher;
-    private boolean pendingGroupConfirmationReply;
     private final int otherAlumns;
 
     public AlumnBehaviour(Alumn alumn) {
@@ -31,7 +29,6 @@ public class AlumnBehaviour extends CyclicBehaviour {
         this.pendingRepliesFromAlumns = 0;
         this.otherAlumns = alumn.findAgentsByType("alumn").length - 1;
         this.pendingReplyFromTeacher = false;
-        this.pendingGroupConfirmationReply = false;
     }
 
     @Override
@@ -41,7 +38,7 @@ public class AlumnBehaviour extends CyclicBehaviour {
         // group And we don't have pending replies, neither from the alumns nor
         // from the teacher
         if (!this.alumn.isAvailableForCurrentAssignedGroup() && this.pendingRepliesFromAlumns == 0
-                && !this.pendingReplyFromTeacher && !this.pendingGroupConfirmationReply) {
+                && !this.pendingReplyFromTeacher) {
             this.pendingRepliesFromAlumns = this.otherAlumns;
             System.err.println("INFO: [" + this.myAgent.getAID()
                     + "] Requesting group changes to all alumns");
@@ -85,13 +82,9 @@ public class AlumnBehaviour extends CyclicBehaviour {
             case GROUP_CHANGE_REQUEST:
                 final GroupChangeRequestMessage groupChangeMessage = (GroupChangeRequestMessage) message;
 
-                // If we are waiting for a change, or our group doesn't interest
-                // the other alumn
-                // just deny the change
-                if (this.pendingRepliesFromAlumns > 0 || this.pendingReplyFromTeacher
-                        || this.pendingGroupConfirmationReply
-                        || !groupChangeMessage.getDesiredGroups()
-                                .contains(this.alumn.getCurrentAssignedGroup())) {
+                // If our group doesn't interest the other agent, just leave
+                if (!groupChangeMessage.getDesiredGroups()
+                        .contains(this.alumn.getCurrentAssignedGroup())) {
                     System.err.println("INFO: Change not possible from " + this.alumn.getAID()
                             + " to " + sender);
                     this.alumn.sendMessage(sender, new GroupChangeRequestDenegationMessage(
@@ -99,24 +92,17 @@ public class AlumnBehaviour extends CyclicBehaviour {
                     return;
                 }
 
-                // If our situation doesn't get worse, accept it, else reject it
+                // If our situation doesn't get worse
                 if (!this.alumn.isAvailableForCurrentAssignedGroup()
                         || this.alumn.getAvailability().contains(groupChangeMessage.getGroup())) {
                     System.err.println("INFO: Trying to confirm change from " + this.alumn.getAID()
                             + " to " + sender);
                     this.alumn.sendMessage(sender, new GroupChangeRequestConfirmationMessage(
                             groupChangeMessage.getGroup(), this.alumn.getCurrentAssignedGroup()));
-                    this.pendingGroupConfirmationReply = true;
                 } else {
                     this.alumn.sendMessage(sender, new GroupChangeRequestDenegationMessage(
                             groupChangeMessage.getGroup()));
                 }
-                return;
-            // Our confirmation was rejected due to another confirmation
-            // arriving before,
-            // we just unflag ourselves
-            case GROUP_CHANGE_REQUEST_CONFIRMATION_DENEGATION:
-                this.pendingGroupConfirmationReply = false;
                 return;
             case GROUP_CHANGE_REQUEST_DENEGATION:
                 final GroupChangeRequestDenegationMessage denegationMessage = (GroupChangeRequestDenegationMessage) message;
@@ -137,8 +123,6 @@ public class AlumnBehaviour extends CyclicBehaviour {
 
                 if (confirmationMessage.getOldGroup() != this.alumn.getCurrentAssignedGroup()) {
                     System.err.println("INFO: Received outdated confirmation message, ignoring...");
-                    this.alumn.sendMessage(sender,
-                                           new GroupChangeRequestConfirmationDenegationMessage());
                     return;
                 }
 
@@ -146,17 +130,21 @@ public class AlumnBehaviour extends CyclicBehaviour {
                 if (this.pendingReplyFromTeacher) {
                     System.err
                             .println("INFO: Received confirmation message while waiting for teacher, ignoring...");
-                    this.alumn.sendMessage(sender,
-                                           new GroupChangeRequestConfirmationDenegationMessage());
                     return;
                 }
 
-                // Make the change with the teacher
+                // Try to make the change with the teacher, note that it can
+                // reject it if another request involving this or the previous
+                // alumn was found.
                 this.alumn.sendMessage(this.alumn.getTeacherService(),
                                        new TeacherGroupChangeRequestMessage(this.alumn.getAID(),
                                                sender, confirmationMessage.getOldGroup(),
                                                confirmationMessage.getNewGroup()));
                 this.pendingReplyFromTeacher = true;
+                return;
+            case TEACHER_GROUP_CHANGE_REQUEST_DENEGATION:
+                this.pendingReplyFromTeacher = false;
+                this.pendingRepliesFromAlumns = 0;
                 return;
 
             case TEACHER_GROUP_CHANGE:
@@ -176,7 +164,7 @@ public class AlumnBehaviour extends CyclicBehaviour {
                     // If we're not and we're pending
                 } else {
                     // TODO: unblock if blocked, asking both of them if some of
-                    // the groups match our interests
+                    // the groups match
                 }
 
                 return;

@@ -3,7 +3,8 @@ package messages;
 import agents.Availability;
 
 public class FirstAssignationMessage extends TeacherToAlumnMessage {
-    private Availability group;
+    private static final long serialVersionUID = 8775855277633710105L;
+    private final Availability group;
 
     public FirstAssignationMessage(Availability availability) {
         super(MessageType.FIRST_ASSIGNATION);

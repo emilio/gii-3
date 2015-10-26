@@ -56,7 +56,7 @@
 			<arg value="-gui" />
 			<arg value="-agents" />
 			<arg
-				value="teacher:agents.Teacher;availableAlumn1:agents.AvailableAlumn;availableAlumn2:agents.AvailableAlumn;availableAlumn3:agents.AvailableAlumn;availableAlumn4:agents.AvailableAlumn;availableAlumn5:agents.AvailableAlumn;semiFlexibleAlumn1:agents.SemiFlexibleAlumn;semiFlexibleAlumn2:agents.SemiFlexibleAlumn;mondayAlumn1:agents.MondayAlumn" />
+				value="teacher:agents.Teacher;availableAlumn1:agents.AvailableAlumn;availableAlumn2:agents.AvailableAlumn;availableAlumn3:agents.AvailableAlumn;availableAlumn4:agents.AvailableAlumn;availableAlumn5:agents.AvailableAlumn;semiFlexibleAlumn1:agents.SemiFlexibleAlumn;semiFlexibleAlumn2:agents.SemiFlexibleAlumn;mondayAlumn1:agents.MondayAlumn;mondayAlumn2:agents.MondayAlumn" />
 		</java>
 	</target>
 

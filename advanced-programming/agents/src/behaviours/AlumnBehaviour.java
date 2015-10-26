@@ -17,6 +17,9 @@ import messages.TerminationConfirmationMessage;
 public class AlumnBehaviour extends CyclicBehaviour {
     private static final long serialVersionUID = 6681845965215134904L;
 
+    // We will ask for changes at most two times
+    private static final int MAX_UNSUCCESFUL_REQUESTS = 2;
+
     private final Alumn alumn;
 
     /** To avoid sending multiple times the same request */
@@ -24,26 +27,37 @@ public class AlumnBehaviour extends CyclicBehaviour {
     private boolean pendingReplyFromTeacher;
     private boolean pendingGroupConfirmationReply;
     private final int otherAlumns;
+    private int batchRequestsAlreadyDone;
 
     public AlumnBehaviour(Alumn alumn) {
         super(alumn);
         this.alumn = alumn;
+        this.batchRequestsAlreadyDone = 0;
         this.pendingRepliesFromAlumns = 0;
         this.otherAlumns = alumn.findAgentsByType("alumn").length - 1;
         this.pendingReplyFromTeacher = false;
         this.pendingGroupConfirmationReply = false;
     }
 
+    public boolean pendingReplies() {
+        assert this.pendingRepliesFromAlumns >= 0 : this.alumn.getAID().toString();
+        return this.pendingRepliesFromAlumns > 0 || this.pendingReplyFromTeacher
+                || this.pendingGroupConfirmationReply;
+    }
+
     @Override
     public void action() {
         assert this.alumn.getCurrentAssignedGroup() != null;
-        // Send a message to the other alumns if we aren't happy with our curent
-        // group And we don't have pending replies, neither from the alumns nor
-        // from the teacher
-        if (!this.alumn.isAvailableForCurrentAssignedGroup() && this.pendingRepliesFromAlumns == 0
-                && !this.pendingReplyFromTeacher && !this.pendingGroupConfirmationReply) {
-            this.pendingRepliesFromAlumns = this.otherAlumns;
-            System.err.println("INFO: [" + this.myAgent.getAID()
+        // Send a message to the other alumns iff:
+        // - We aren't happy with our curent group
+        // - We don't have pending replies, neither from the alumns nor from the
+        // teacher
+        // - We haven't asked more than MAX_UNSUCCESSFUL_REQUEST times
+        if (!this.alumn.isAvailableForCurrentAssignedGroup() && !this.pendingReplies()
+                && this.batchRequestsAlreadyDone < MAX_UNSUCCESFUL_REQUESTS) {
+            this.pendingRepliesFromAlumns += this.otherAlumns;
+            this.batchRequestsAlreadyDone += 1;
+            System.err.println("INFO: [" + this.myAgent.getLocalName()
                     + "] Requesting group changes to all alumns");
             this.alumn.sendMessageToType("alumn", new GroupChangeRequestMessage(
                     this.alumn.getCurrentAssignedGroup(), this.alumn.getAvailability()));
@@ -71,11 +85,11 @@ public class AlumnBehaviour extends CyclicBehaviour {
             return;
         }
 
-        System.err.println("INFO: [" + this.myAgent.getAID() + "] ReceiveMessage ("
-                + message.getType() + "). PendingReplies: " + this.pendingRepliesFromAlumns
-                + "; FromTeacher: " + this.pendingReplyFromTeacher);
-
-        assert this.pendingRepliesFromAlumns >= 0;
+        System.err.println("INFO: [" + this.myAgent.getLocalName() + "] ReceiveMessage ("
+                + message.getType() + ", " + sender.getLocalName() + ")\n\tPendingReplies: "
+                + this.pendingRepliesFromAlumns + "; FromTeacher: " + this.pendingReplyFromTeacher
+                + "; RequestsAlreadyDone: " + this.batchRequestsAlreadyDone + "; CurrentGroup: "
+                + this.alumn.getCurrentAssignedGroup());
 
         switch (message.getType()) {
             case TERMINATION_REQUEST:
@@ -88,12 +102,8 @@ public class AlumnBehaviour extends CyclicBehaviour {
                 // If we are waiting for a change, or our group doesn't interest
                 // the other alumn
                 // just deny the change
-                if (this.pendingRepliesFromAlumns > 0 || this.pendingReplyFromTeacher
-                        || this.pendingGroupConfirmationReply
-                        || !groupChangeMessage.getDesiredGroups()
-                                .contains(this.alumn.getCurrentAssignedGroup())) {
-                    System.err.println("INFO: Change not possible from " + this.alumn.getAID()
-                            + " to " + sender);
+                if (this.pendingReplies() || !groupChangeMessage.getDesiredGroups()
+                        .contains(this.alumn.getCurrentAssignedGroup())) {
                     this.alumn.sendMessage(sender, new GroupChangeRequestDenegationMessage(
                             groupChangeMessage.getGroup()));
                     return;
@@ -102,8 +112,6 @@ public class AlumnBehaviour extends CyclicBehaviour {
                 // If our situation doesn't get worse, accept it, else reject it
                 if (!this.alumn.isAvailableForCurrentAssignedGroup()
                         || this.alumn.getAvailability().contains(groupChangeMessage.getGroup())) {
-                    System.err.println("INFO: Trying to confirm change from " + this.alumn.getAID()
-                            + " to " + sender);
                     this.alumn.sendMessage(sender, new GroupChangeRequestConfirmationMessage(
                             groupChangeMessage.getGroup(), this.alumn.getCurrentAssignedGroup()));
                     this.pendingGroupConfirmationReply = true;
@@ -120,32 +128,29 @@ public class AlumnBehaviour extends CyclicBehaviour {
                 return;
             case GROUP_CHANGE_REQUEST_DENEGATION:
                 final GroupChangeRequestDenegationMessage denegationMessage = (GroupChangeRequestDenegationMessage) message;
-                System.err.println("INFO[" + this.alumn.getAID()
-                        + "]: Received denegation message, ignoring...");
+
+                this.pendingRepliesFromAlumns -= 1;
 
                 if (denegationMessage.getDeniedGroup() != this.alumn.getCurrentAssignedGroup()) {
-                    System.err.println("INFO: Received outdated denegation message, ignoring...");
-                    return;
+                    System.err.println("INFO: [" + this.alumn.getLocalName()
+                            + "] Received outdated denegation message, ignoring...");
                 }
-                this.pendingRepliesFromAlumns -= 1;
 
                 return;
             case GROUP_CHANGE_REQUEST_CONFIRMATION:
                 final GroupChangeRequestConfirmationMessage confirmationMessage = (GroupChangeRequestConfirmationMessage) message;
-                System.err.println("INFO[" + this.alumn.getAID()
-                        + "] Received group change request confirmation from " + sender);
+
+                this.pendingRepliesFromAlumns -= 1;
 
                 if (confirmationMessage.getOldGroup() != this.alumn.getCurrentAssignedGroup()) {
-                    System.err.println("INFO: Received outdated confirmation message, ignoring...");
+                    System.err.println("INFO: [" + this.alumn.getLocalName()
+                            + "] Received outdated confirmation message, ignoring...");
                     this.alumn.sendMessage(sender,
                                            new GroupChangeRequestConfirmationDenegationMessage());
                     return;
                 }
 
-                this.pendingRepliesFromAlumns -= 1;
                 if (this.pendingReplyFromTeacher) {
-                    System.err
-                            .println("INFO: Received confirmation message while waiting for teacher, ignoring...");
                     this.alumn.sendMessage(sender,
                                            new GroupChangeRequestConfirmationDenegationMessage());
                     return;
@@ -162,26 +167,72 @@ public class AlumnBehaviour extends CyclicBehaviour {
             case TEACHER_GROUP_CHANGE:
                 final TeacherGroupChangeMessage teacherGroupChangeMessage = (TeacherGroupChangeMessage) message;
 
+                // if the sender isn't the teacher and we're implicated in the
+                // change, it's the forwarded message from the other alumn we
+                // should ignore
+                if (!sender.equals(this.alumn.getTeacherService())
+                        && (this.alumn.getAID().equals(teacherGroupChangeMessage.fromAlumn)
+                                || this.alumn.getAID().equals(teacherGroupChangeMessage.toAlumn))) {
+                    return;
+                }
+
                 // If we're some of the two parts involved
                 if (this.alumn.getAID().equals(teacherGroupChangeMessage.fromAlumn)) {
+                    // Since our group has changed, we might want to ask
+                    // everyone again
+                    this.batchRequestsAlreadyDone = 0;
                     this.pendingReplyFromTeacher = false;
+
                     assert this.alumn.getCurrentAssignedGroup()
                             .equals(teacherGroupChangeMessage.fromGroup);
+
                     this.alumn.setCurrentAssignedGroup(teacherGroupChangeMessage.toGroup);
+
+                    // Forward the message for the other alumns, just in case
+                    // they're interested
+                    this.alumn.sendMessageToType("alumn", teacherGroupChangeMessage);
                 } else if (this.alumn.getAID().equals(teacherGroupChangeMessage.toAlumn)) {
+                    // Since our group has changed, we might want to ask
+                    // everyone again
+                    this.batchRequestsAlreadyDone = 0;
                     this.pendingReplyFromTeacher = false;
+
                     assert this.alumn.getCurrentAssignedGroup()
                             .equals(teacherGroupChangeMessage.toGroup);
+
                     this.alumn.setCurrentAssignedGroup(teacherGroupChangeMessage.fromGroup);
-                    // If we're not and we're pending
+
+                    // Forward the message for the other alumns, just in case
+                    // they're interested
+                    this.alumn.sendMessageToType("alumn", teacherGroupChangeMessage);
                 } else {
-                    // TODO: unblock if blocked, asking both of them if some of
-                    // the groups match our interests
+                    // If we aren't happy with our group and not waiting for
+                    // replies, check if the new groups interest us
+                    if (!this.alumn.isAvailableForCurrentAssignedGroup()
+                            && !this.pendingReplies()) {
+                        // If some of the new groups interest us, send a request
+                        // for the new holder of the group
+                        if (this.alumn.getAvailability()
+                                .contains(teacherGroupChangeMessage.fromGroup)) {
+                            this.alumn.sendMessage(teacherGroupChangeMessage.toAlumn,
+                                                   new GroupChangeRequestMessage(
+                                                           this.alumn.getCurrentAssignedGroup(),
+                                                           this.alumn.getAvailability()));
+                            this.pendingRepliesFromAlumns += 1;
+                        }
+
+                        if (this.alumn.getAvailability()
+                                .contains(teacherGroupChangeMessage.toGroup)) {
+                            this.alumn.sendMessage(teacherGroupChangeMessage.fromAlumn,
+                                                   new GroupChangeRequestMessage(
+                                                           this.alumn.getCurrentAssignedGroup(),
+                                                           this.alumn.getAvailability()));
+                            this.pendingRepliesFromAlumns += 1;
+                        }
+                    }
                 }
 
                 return;
-
-            // TODO
             default:
                 System.out.println("ERROR: Unexpected message " + message.getType()
                         + " received in AlumnBehavior. Sender: " + sender + "; Receiver: "

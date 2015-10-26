@@ -17,7 +17,6 @@ import messages.FirstAssignationMessage;
 import messages.InitMessage;
 import messages.Message;
 import messages.TeacherGroupChangeMessage;
-import messages.TeacherGroupChangeRequestDenegationMessage;
 import messages.TeacherGroupChangeRequestMessage;
 
 /**
@@ -27,7 +26,7 @@ import messages.TeacherGroupChangeRequestMessage;
 public class TeacherBehaviour extends CyclicBehaviour {
     private static final long serialVersionUID = 4979147830188132019L;
     private static long MAX_ALUMNS_PER_GROUP = 5;
-    private static long EXPECTED_ALUMN_COUNT = 8;
+    private static long EXPECTED_ALUMN_COUNT = 9;
     private static EnumSet<Availability> AVAILABLE_GROUPS = EnumSet
             .of(Availability.MONDAY, Availability.TUESDAY, Availability.THURDSDAY,
                 Availability.FRIDAY);
@@ -133,11 +132,15 @@ public class TeacherBehaviour extends CyclicBehaviour {
 
                 this.groups.put(requestMessage.fromAlumn, requestMessage.toGroup);
                 this.groups.put(requestMessage.toAlumn, requestMessage.fromGroup);
+
+                // We don't send the message to every alumn, we send it to both
+                // implicated alumns,
+                // and they'll take care to forward it to everyone else
                 this.teacher
-                        .sendMessageToType("alumn",
-                                           new TeacherGroupChangeMessage(requestMessage.fromAlumn,
-                                                   requestMessage.toAlumn, requestMessage.fromGroup,
-                                                   requestMessage.toGroup));
+                        .sendMessage(new AID[] { requestMessage.fromAlumn, requestMessage.toAlumn },
+                                     new TeacherGroupChangeMessage(requestMessage.fromAlumn,
+                                             requestMessage.toAlumn, requestMessage.fromGroup,
+                                             requestMessage.toGroup));
                 return;
             default:
                 System.err.println("ERROR: Unexpected message of type " + message.getType()

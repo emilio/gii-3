@@ -39,11 +39,16 @@ namespace Circles
 
                 obj.Position += timestep * (obj.Speed + timestep * acceleration / 2);
 
-                CalculateSpeedAndPositionFromCollisions(obj);
+                obj.PrecalculatedDeltaF = acceleration;
 
+                CalculateSpeedAndPositionFromCollisions(obj);
+            }
+
+            // We want updated position and speeds
+            foreach (MovingCircle obj in Objects) {
                 Vector newAcceleration = force(obj) / obj.Mass;
-                obj.Speed += timestep * (acceleration + newAcceleration) / 2;
-                // obj.Speed += timestep * acceleration;
+                // (oldAcceleration + newAcceleration) / 2
+                obj.Speed += timestep * (obj.PrecalculatedDeltaF + newAcceleration) / 2;
             }
         }
 

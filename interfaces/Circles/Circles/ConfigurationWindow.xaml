@@ -1,0 +1,26 @@
+﻿<Window x:Class="Circles.ConfigurationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Circles"
+        mc:Ignorable="d"
+        Title="ConfigurationWindow" Height="300" Width="300">
+    <StackPanel>
+        <Label>
+            <Bold>World Configuration</Bold>
+        </Label>
+        <Label>Gravity (px/s/s)</Label>
+        <Slider Name="Gravity" Value="{Binding Gravity, Mode=TwoWay}" Minimum="-1000" Maximum="1000"/>
+        <Separator></Separator>
+        <Label>
+            <Bold>Next Ball Configuration</Bold>
+        </Label>
+        <Label>Bounce factor</Label>
+        <Slider Name="BounceFactor" Value="{Binding BounceFactor, Mode=TwoWay}" Minimum="0" Maximum="1.5"/>
+        <Label>Radius</Label>
+        <Slider Name="Radius" Minimum="10" Value="{Binding Radius, Mode=TwoWay}" Maximum="75"/>
+        <Label>Mass</Label>
+        <Slider Name="Mass" Minimum="2" Value="{Binding Mass, Mode=TwoWay}" Maximum="75"/>
+    </StackPanel>
+</Window>

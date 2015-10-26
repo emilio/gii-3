@@ -5,7 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Circles"
         mc:Ignorable="d"
-        Title="MainWindow" MouseDown="Window_MouseDown">
-    <Canvas Name="Canvas" Height="500" Width="500">
-    </Canvas>
+        Title="MainWindow" SizeToContent="WidthAndHeight">
+    <StackPanel>
+        <Button Name="OpenConfigurationDialogButton" Click="OpenConfigurationDialog">Configurar</Button>
+        <!-- Background is needed to handle events -->
+        <Canvas Name="Canvas" Height="500" Width="500" MouseDown="HandleMouseDown" Background="Transparent">
+        </Canvas>
+    </StackPanel>
 </Window>

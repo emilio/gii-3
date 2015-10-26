@@ -2,3 +2,5 @@
 APDescription.txt
 MTPs-Main-Container.txt
 lib/
+*.ali
+*.o

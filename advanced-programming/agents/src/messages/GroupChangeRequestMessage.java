@@ -12,7 +12,7 @@ public class GroupChangeRequestMessage extends AlumnToAlumnMessage {
     public GroupChangeRequestMessage(Availability currentGroup,
             EnumSet<Availability> desiredGroups) {
         super(MessageType.GROUP_CHANGE_REQUEST);
-        assert!desiredGroups.contains(currentGroup);
+        assert !desiredGroups.contains(currentGroup);
         this.group = currentGroup;
         this.desiredGroups = desiredGroups;
     }

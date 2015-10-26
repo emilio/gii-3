@@ -1,10 +1,15 @@
 package behaviours;
 
+import java.util.EnumSet;
+
+import agents.Availability;
 import agents.Alumn;
+
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
+
 import messages.GroupChangeRequestConfirmationDenegationMessage;
 import messages.GroupChangeRequestConfirmationMessage;
 import messages.GroupChangeRequestDenegationMessage;
@@ -59,8 +64,19 @@ public class AlumnBehaviour extends CyclicBehaviour {
             this.batchRequestsAlreadyDone += 1;
             System.err.println("INFO: [" + this.myAgent.getLocalName()
                     + "] Requesting group changes to all alumns");
-            this.alumn.sendMessageToType("alumn", new GroupChangeRequestMessage(
-                    this.alumn.getCurrentAssignedGroup(), this.alumn.getAvailability()));
+            // If we've previously requested changes and no-one
+            // replied, we try to change the group independently
+            if (this.batchRequestsAlreadyDone > 1) {
+                EnumSet<Availability> desiredAvailability = Availability.ALL.clone();
+                desiredAvailability.remove(this.alumn.getCurrentAssignedGroup());
+
+                this.alumn.sendMessageToType("alumn", new GroupChangeRequestMessage(
+                        this.alumn.getCurrentAssignedGroup(), desiredAvailability));
+            // If not we just try to stick with our groups
+            } else {
+                this.alumn.sendMessageToType("alumn", new GroupChangeRequestMessage(
+                        this.alumn.getCurrentAssignedGroup(), this.alumn.getAvailability()));
+            }
         } else {
             this.handleIncomingMessages();
         }
@@ -100,8 +116,7 @@ public class AlumnBehaviour extends CyclicBehaviour {
                 final GroupChangeRequestMessage groupChangeMessage = (GroupChangeRequestMessage) message;
 
                 // If we are waiting for a change, or our group doesn't interest
-                // the other alumn
-                // just deny the change
+                // the other alumn just deny the change
                 if (this.pendingReplies() || !groupChangeMessage.getDesiredGroups()
                         .contains(this.alumn.getCurrentAssignedGroup())) {
                     this.alumn.sendMessage(sender, new GroupChangeRequestDenegationMessage(

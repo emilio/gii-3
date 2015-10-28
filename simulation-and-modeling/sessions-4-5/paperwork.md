@@ -108,7 +108,7 @@ $$G(s) = \frac{V_c(s)}{V_{al}(s)} = \frac{1}{R \cdot C \cdot s + 1}$$
 
 ## Circuto LRC
 
-Tomaremos como entrada $i(t)$, y como salida $V_R(t)$.
+Tomaremos como entrada $V_{al}(t)$ y como salida $i(t)$.
 
 ### Ecuaciones
 
@@ -121,7 +121,7 @@ Podemos usar las siguientes ecuaciones:
  * Tensión en los extremos de la bobina [^notreally]:
   $$V_L(t) = L \cdot \frac{\partial i(t)}{\partial t}$$
  * Tensión en los extremos de la resistencia (ley de Ohm):
-  $$V_R(t) = R \cdot i_R(t)$$
+  $$V_R(t) = R \cdot i(t)$$
 
 [^notreally]: Lo cierto es que es $- L \cdot \frac{\partial i(t)}{\partial t}$,
 pero para el caso el criterio de signos que cojamos no importa
@@ -132,7 +132,16 @@ Sustituyendo en la primera ecuación:
 
 $$V_{al}(t) = L \cdot \frac{\partial i(t)}{\partial t} + R \cdot i(t) + \frac{1}{C} \int^t_0 i(t) \, \partial t$$
 
-`TODO`
+El procedimiento es similar al seguido en el circuito RC. Aplicamos la
+transformada de laplace a ambos lados, asumiendo condiciones iniciales nulas,
+quedando:
+
+$$V_{al}(s) = L \cdot s \cdot I(s) + R \cdot I(s) + \frac{I(s)}{C \cdot s}$$
+
+Podemos entonces obtener la función de transferencia en el dominio de Laplace:
+
+$$G(s) = \frac{I(s)}{V_{al}(s)} = \frac{C \cdot s}{L \cdot s^2 + R \cdot C \cdot
+s + 1}$$
 
 ## Depósito simple
 

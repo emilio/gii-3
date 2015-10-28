@@ -55,7 +55,11 @@ $$G(s) = \frac{X(s)}{F_a(s)} = \frac{1}{m \cdot s^2 + k - b \cdot s}$$
 Para hallar la función de transferencia correspondiente sin rozamiento basta con
 igualar $b$ a $0$.
 
-## Circuito RC
+## Circuito RC[^wasntneeded]
+
+[^wasntneeded]: Me he dado cuenta tarde de que este sistema no estaba en el
+enunciado. No está de más de todos modos, y he usado esta explicación para la
+del circuito RLC, así que...
 
 Tomaremos como entrada la variable $V_{al}(t)$ y como salida $i(t)$.
 
@@ -106,7 +110,7 @@ s} = V_c(s) \cdot R \cdot C \cdot s + 1$$
 
 $$G(s) = \frac{V_c(s)}{V_{al}(s)} = \frac{1}{R \cdot C \cdot s + 1}$$
 
-## Circuto LRC
+## Circuto RLC
 
 Tomaremos como entrada $V_{al}(t)$ y como salida $i(t)$.
 

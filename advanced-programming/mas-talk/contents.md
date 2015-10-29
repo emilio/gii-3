@@ -1,23 +1,35 @@
-# Influencia de los S.M.A. en sistemas concurrentes y nuevos lenguajes de programación
+---
+title: Influencia de los S.M.A. en sistemas concurrentes y nuevos lenguajes de programación
+author:
+  - Emilio Cobos Álvarez (70912324N) <emiliocobos@usal.es>
+  - Víctor Barrueco Gutiérrez (53518348Q) <vbarruec@usal.es>
+  - Arturo Balleros Albillo
+date: \today
+lang: spanish
+babel-lang: spanish
+polyglossia-lang:
+  options: []
+  name: spanish
+abstract: |
+  En este papel se analizan las similitudes y diferencias de los sistemas
+  multiagente con el desarrollo de nuevos lenguajes de programación, con un
+  objetivo claro de maximizar la concurrencia sin perder seguridad.
 
-## Resumen
+  Concretamente nos centraremos en:
 
-En este papel se analizan las similitudes y diferencias de los sistemas
-multiagente con el desarrollo de nuevos lenguajes de programación, con un
-objetivo claro de maximizar la concurrencia sin perder seguridad.
+   * [Rust](https://www.rust-lang.org)
+   * [Go](https://golang.org)
+   * [Erlang](https://www.erlang.org) (si da tiempo)
 
-Concretamente nos centraremos en:
+  Como ejemplo de programa escrito en estos lenguajes con una arquitectura muy
+  similar a los sistemas multi-agente usaremos
+  [Servo](https://github.com/servo/servo), un motor de renderizado web cuyo
+  desarrollo viene encabezado por Mozilla.
+---
 
- * [Rust](https://www.rust-lang.org)
- * [Go](https://golang.org)
- * [Erlang](https://www.erlang.org) (si da tiempo)
+# Go
 
-Como ejemplo de programa escrito en estos lenguajes con una arquitectura muy
-similar a los sistemas multi-agente usaremos
-[Servo](https://github.com/servo/servo), un motor de renderizado web cuyo
-desarrollo viene encabezado por Mozilla.
-
-## Similitudes con Go
+## Introducción
 
 Go es un lenguaje de programación diseñado por Google para ser un lenguaje
 adecuado a sus necesidades de escalado y velocidad, centrado en:
@@ -45,7 +57,7 @@ La arquitectura de un programa en go consiste en:
 * El recolector de basura (paralelo desde hace relativamente poco).
 * El programa principal y las go-rutinas del usuario.
 
-### Ejemplo: Productor y consumidor
+## Ejemplo: Productor y consumidor
 
 Las funciones `produce` y `consume` son similares al comportamiento de un
 agente.
@@ -80,7 +92,7 @@ func main () {
 }
 ```
 
-### Wrap-up
+## Wrap-up
 
 Go es un lenguaje muy potente y competente para modelar sistemas distribuídos.
 
@@ -91,14 +103,16 @@ El recolector de basura, aunque quita el problema de encargarse del manejo de
 memoria manual, lo hace un lenguaje menos válido para sistemas hard
 real-time, aunque genial para **soft real-time**.
 
-### Recursos
+## Recursos
 
  * [Página oficial](https://golang.org)
  * [Tutorial oficial](https://tour.golang.org)
  * [Pequeña introducción con
      vídeos](https://gist.github.com/honkskillet/bd1f72223dd8e06b5ce6)
 
-## Similitudes con Rust
+# Rust
+
+## Introducción
 
 Rust es un lenguaje que **nace para competir en el nicho de Java y C/C++**.
 
@@ -111,9 +125,9 @@ Rust tuvo, al igual que go, canales como parte del lenguaje en versiones
 preliminares. Para garantizar la seguridad se usaron traits, y ahora esos
 canales están en la biblioteca estándar.
 
-### Algunos elementos sintácticos
+## Algunos elementos sintácticos
 
-#### Inmutabilidad por defecto e inferencia
+### Inmutabilidad por defecto e inferencia
 
 En Rust todas las variables son inmutables por defecto, salvo que especifiques
 lo contrario.
@@ -160,7 +174,7 @@ fn main() {
 }
 ```
 
-#### Traits
+### Traits
 
 Son un concepto similar al de una interfaz, pero el modo del que están diseñado
 permite usar llamadas estáticas en vez de necesitar una vtable (tabla con
@@ -182,13 +196,13 @@ impl<T:Clone + Sub<T, Output=T>> Sub for Point2D<T> {
 }
 ```
 
-#### RAII
+### RAII
 
 Modelo de programación muy conocido en C++, que Rust usa extensivamente.
 
 Cuando un tipo quiere un destructor implementa el trait `Drop`.
 
-#### Enum y pattern matching
+### Enum y pattern matching
 
 No (sólo) entendido como el `enum` de C/C++. Es equivalente a una *tagged union
 de C*, pero segura.
@@ -196,7 +210,7 @@ de C*, pero segura.
 El *pattern matching* viene dado por la palabra `match` y puede verse como un
 `switch` de C ampliado de una manera enorme.
 
-##### C/C++
+#### C/C++
 
 ```c
 typedef enum message_type {
@@ -226,7 +240,7 @@ switch ( message.type ) {
 }
 ```
 
-##### Rust
+#### Rust
 
 ```rust
 use std::sync::mpsc::channel;
@@ -259,7 +273,7 @@ fn main() {
 Rust ya ha ejercido influencia en el diseño de C++17 (`std::optional<T>`,
 `std::variant<T>`, propuestas para pattern matching...).
 
-### Recursos
+## Recursos
 
  * [Guía oficial](https://doc.rust-lang.org/book/)
  * [Guía oficial (avanzada)](https://doc.rust-lang.org/nightly/nomicon/)
@@ -267,7 +281,9 @@ Rust ya ha ejercido influencia en el diseño de C++17 (`std::optional<T>`,
  * [Bugs fáciles para contribuir en
      Servo](https://github.com/servo/servo/labels/E-easy)
 
-## Erlang
+# Erlang
+
+## Introducción
 
 Erlang es un lenguaje de programación desarrollado inicialmente por Ericsson en
 1986. [^erlangnote]
@@ -289,7 +305,7 @@ Ejemplos de usuarios de Erlang:
 telefónicas eran de las pocas que tenían la necesidad de tener un sistema
 distribuido con esas necesidades en cuanto a tiempo de respuesta.
 
-### Recursos
+## Recursos
 
  * [Curso oficial](http://www.erlang.org/course/course.html)
  * [Ejemplo productor-consumidor
@@ -297,21 +313,21 @@ distribuido con esas necesidades en cuanto a tiempo de respuesta.
  * [Learn you some Erlang for Great Good!](http://learnyousomeerlang.com/)
      (gratis online)
 
-## Conclusiones
+# Conclusiones
 
 La idea de este artículo es **ubicar los sistemas multi-agente** como parte
 imprescindible dentro del **aumento de la relevancia de los mecanismos de paso
 de mensajes** para sincronización y el desarrollo de sistemas distribuídos
 complejos, e introducir a plataformas que a pesar de no estar específicamente
-diseñadas para ello, responden a diferentes necesidades, son apropiadas para su
+diseñadas para ello, responden a diferentes necesidades y son apropiadas para su
 desarrollo, teniendo diferentes pros y contras.
 
 También pretende ser una pequeña introducción a algunas de estas plataformas que
 están tomando mucha relevancia en los últimos años.
 
-### Comparativa de los sistemas presentados
+## Comparativa de los sistemas presentados
 
-#### Go
+### Go
 
 **Tipos de sistemas más adecuados**:
 
@@ -339,7 +355,7 @@ están tomando mucha relevancia en los últimos años.
 [^goroutines_leak]:
 [http://openmymind.net/Leaking-Goroutines/](http://openmymind.net/Leaking-Goroutines/)
 
-#### Rust
+### Rust
 
 **Tipos de sistemas más adecuados**:
 
@@ -364,7 +380,7 @@ están tomando mucha relevancia en los últimos años.
   * Desarrollo de sistemas distribuídos más complicado que los dos anteriores
       (por falta de librerías).
 
-#### Erlang
+### Erlang
 
 **Tipos de sistemas más adecuados**:
 

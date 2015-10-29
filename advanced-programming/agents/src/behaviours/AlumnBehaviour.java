@@ -72,7 +72,7 @@ public class AlumnBehaviour extends CyclicBehaviour {
 
                 this.alumn.sendMessageToType("alumn", new GroupChangeRequestMessage(
                         this.alumn.getCurrentAssignedGroup(), desiredAvailability));
-            // If not we just try to stick with our groups
+                // If not we just try to stick with our groups
             } else {
                 this.alumn.sendMessageToType("alumn", new GroupChangeRequestMessage(
                         this.alumn.getCurrentAssignedGroup(), this.alumn.getAvailability()));
@@ -109,6 +109,7 @@ public class AlumnBehaviour extends CyclicBehaviour {
 
         switch (message.getType()) {
             case TERMINATION_REQUEST:
+                assert sender.equals(this.alumn.getTeacherService());
                 this.alumn.sendMessage(sender, new TerminationConfirmationMessage());
                 this.alumn.doDelete();
                 return;

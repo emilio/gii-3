@@ -16,6 +16,10 @@ import jade.domain.JADEAgentManagement.JADEManagementOntology;
 import jade.domain.JADEAgentManagement.ShutdownPlatform;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.lang.acl.UnreadableException;
+
+import messages.Message;
+import messages.MessageType;
 import messages.TerminationRequestMessage;
 
 public class TeacherWakerBehaviour extends WakerBehaviour {
@@ -29,13 +33,16 @@ public class TeacherWakerBehaviour extends WakerBehaviour {
 
     @Override
     protected void onWake() {
-        System.err.println("Done!!!1111!!!");
-
         int pendingReplies = this.teacher.findAgentsByType("alumn").length;
         this.teacher.sendMessageToType("alumn", new TerminationRequestMessage());
 
         while (pendingReplies-- > 0) {
-            this.teacher.blockingReceive(MessageTemplate.MatchAll());
+            ACLMessage aclMessage = this.teacher.blockingReceive();
+            try {
+                Message msg = (Message) aclMessage.getContentObject();
+                assert msg.getType() == MessageType.TERMINATION_CONFIRMATION;
+            } catch (UnreadableException ex) {
+            }
         }
 
         System.err.println("\n\n\n========================================");

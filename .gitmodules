@@ -1,0 +1,3 @@
+[submodule "advanced-programming/agents"]
+	path = advanced-programming/agents
+	url = git@github.com:ecoal95/agents.git

@@ -3,7 +3,7 @@ title: Influencia de los S.M.A. en sistemas concurrentes y nuevos lenguajes de p
 author:
   - Emilio Cobos Álvarez (70912324N) <emiliocobos@usal.es>
   - Víctor Barrueco Gutiérrez (53518348Q) <vbarruec@usal.es>
-  - Arturo Balleros Albillo
+  - Arturo Balleros Albillo (70912222W) <arturoballeros@usal.es>
 date: \today
 lang: spanish
 babel-lang: spanish

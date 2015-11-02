@@ -254,7 +254,6 @@ enum Message {
 fn main() {
     let (tx, rx) = channel();
 
-
     thread::spawn(move || {
         tx.send(Message::String("Hola!"));
     });

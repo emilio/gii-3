@@ -1,3 +1,6 @@
 [submodule "advanced-programming/agents"]
 	path = advanced-programming/agents
 	url = git@github.com:ecoal95/agents.git
+[submodule "advanced-programming/mas-talk/reveal.js"]
+	path = advanced-programming/mas-talk/reveal.js
+	url = https://github.com/hakimel/reveal.js/

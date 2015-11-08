@@ -4,3 +4,6 @@
 [submodule "advanced-programming/mas-talk/reveal.js"]
 	path = advanced-programming/mas-talk/reveal.js
 	url = https://github.com/hakimel/reveal.js/
+[submodule "interfaces/final"]
+	path = interfaces/final
+	url = git@github.com:ecoal95/gii-3-interfaces-final.git

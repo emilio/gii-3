@@ -1,4 +1,7 @@
 
+%.o: %.adb
+	gnatmake $<
+
 %: %.adb
 	gnatmake $<
 

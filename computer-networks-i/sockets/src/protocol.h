@@ -20,8 +20,8 @@
 #define MAX_EVENT_ID_LEN 20
 #define MAX_DESCRIPTION_LEN 140
 
-typedef char uid_t[MAX_UID_LEN + 1];
-typedef char event_id_t[MAX_EVENT_ID_LEN + 1];
+typedef char protocol_uid_t[MAX_UID_LEN + 1];
+typedef char protocol_event_id_t[MAX_EVENT_ID_LEN + 1];
 
 typedef uint8_t client_message_type_t;
 
@@ -39,14 +39,14 @@ typedef uint8_t client_message_type_t;
 typedef struct client_message {
     client_message_type_t type;
     union {
-        uid_t uid; // HELLO/BYE
-        struct {   // ASSISTANCE_LIST
-            uid_t uid;
-            event_id_t event_id;
+        protocol_uid_t uid; // HELLO/BYE
+        struct {            // ASSISTANCE_LIST
+            protocol_uid_t uid;
+            protocol_event_id_t event_id;
         } assistance_list_info;
         struct { // ASSISTANCE
-            uid_t uid;
-            event_id_t event_id;
+            protocol_uid_t uid;
+            protocol_event_id_t event_id;
             struct tm datetime;
         } assistance_info;
     } content;

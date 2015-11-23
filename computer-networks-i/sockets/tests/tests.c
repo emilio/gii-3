@@ -85,6 +85,20 @@ TEST(parse_failure_invalid_date, {
     ASSERT(ERROR_EXPECTED_VALID_DATE == parse_client_message(message, &result));
 })
 
+TEST(parse_failure_extra_newline, {
+    client_message_t result;
+    const char* message = "HOLA abc\n";
+
+    ASSERT(ERROR_UNEXPECTED_CONTENT == parse_client_message(message, &result));
+})
+
+TEST(parse_failure_extra_newline_in_content, {
+    client_message_t result;
+    const char* message = "HOLA\nabc\n";
+
+    ASSERT(ERROR_INVALID_MESSAGE_TYPE == parse_client_message(message, &result));
+})
+
 TEST_MAIN({
     RUN_TEST(parse_message_simple);
     RUN_TEST(parse_message_list_events);
@@ -95,4 +109,6 @@ TEST_MAIN({
     RUN_TEST(parse_failure_too_long_ident);
     RUN_TEST(parse_failure_missing_ident);
     RUN_TEST(parse_failure_invalid_date);
+    RUN_TEST(parse_failure_extra_newline);
+    RUN_TEST(parse_failure_extra_newline_in_content);
 })

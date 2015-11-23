@@ -1,5 +1,6 @@
 #include "protocol.h"
 #include <stdbool.h>
+#include <ctype.h>
 
 const char* PARSE_ERROR_MESSAGES[] = {
     "No error",                 // ERROR_NONE
@@ -60,8 +61,10 @@ static inline bool try_consume(const char** in_source,
         if (!**in_source) // the source string ended
             return false;
 
-        if (*text_to_match++ != *(*in_source)++)
+        if (*text_to_match++ != **in_source)
             return false;
+
+        (*in_source)++;
     }
 
     return true;
@@ -90,7 +93,7 @@ static bool try_consume_id(const char** current_cursor, char* id_buff,
                            size_t max_len) {
     size_t current_len = 0;
 
-    while (**current_cursor && **current_cursor != ' ') {
+    while (**current_cursor && !isspace(**current_cursor)) {
         // If we have read too much
         if (current_len++ == max_len)
             return false;

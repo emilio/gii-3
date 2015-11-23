@@ -50,6 +50,17 @@ void show_usage(int argc, char** argv) {
     }
 }
 
+/// Parses the message stored in buff, and sends the correct reply to `sock`,
+/// using `sendto()` and the given `target_addr`, and `target_addr_len`.
+///
+/// This function expects `buff` to be zero-terminated.
+///
+/// We exploit the fact that `sento()` can be used instead of `write()` in TCP,
+/// given that `target_addr` is null and `target_addr_size` is zero.
+void parse_message_and_reply(int sock, const char* buff,
+                             struct sockaddr* target_addr,
+                             socklen_t target_addr_len) {}
+
 void* start_tcp_server(void* info) {
     long port = *((long*)info);
     struct sockaddr_in serv_addr;
@@ -83,6 +94,35 @@ void* start_tcp_server(void* info) {
     if (ret == -1) {
         ERROR("Listen: %s", strerror(errno));
         goto cleanup_and_return;
+    }
+
+    while (true) {
+        char buff[MAX_MESSAGE_SIZE] = {0};
+        struct sockaddr_in client_addr;
+        socklen_t client_size = sizeof(client_addr);
+        int new_socket =
+            accept(sock, (struct sockaddr*)&client_addr, &client_size);
+
+        if (new_socket == -1) {
+            WARN("tcp: Ignoring accept() error: %s", strerror(errno));
+            continue;
+        }
+
+        // TODO: We don't handle chunked messages because we know the message
+        // size is fixed, and that messages longer than `MAX_MESSAGE_SIZE`
+        // can't be valid. We should have a growing buffer otherwise.
+        ssize_t len = read(new_socket, buff, sizeof(buff) - 1);
+        if (len == -1) {
+            WARN("tcp: Ignoring read() error: %s", strerror(errno));
+            close(new_socket);
+            continue;
+        }
+        buff[len] = 0;
+
+        LOG("tcp: Received %zu bytes: %s", len, buff);
+
+        parse_message_and_reply(new_socket, buff, NULL, 0);
+        close(new_socket);
     }
 
 cleanup_and_return:
@@ -121,23 +161,27 @@ void* start_udp_server(void* info) {
 
     LOG("UDP socket bound to port: %ld", port);
 
+    // TODO: handle chunked datagrams?
+    // It's arguably difficult (if not impossible) with UDP.
     while (true) {
         struct sockaddr_in src_addr;
         socklen_t src_addr_len = sizeof(src_addr);
         ssize_t len;
         char buff[MAX_MESSAGE_SIZE];
 
-        len = recvfrom(sock, buff, sizeof(buff), 0, (struct sockaddr*)&src_addr,
-                       &src_addr_len);
+        len = recvfrom(sock, buff, sizeof(buff) - 1, 0,
+                       (struct sockaddr*)&src_addr, &src_addr_len);
         if (len == -1) {
             WARN("Ignoring UDP datagram due to error: %s", strerror(errno));
             continue;
         }
 
+        buff[len] = 0;
+
         LOG("udp: Received %zu bytes: \"%s\"", len, buff);
 
-        len = sendto(sock, buff, len, 0, (struct sockaddr*)&src_addr,
-                     src_addr_len);
+        parse_message_and_reply(sock, buff, (struct sockaddr*)&src_addr,
+                                src_addr_len);
 
         if (len == -1) {
             WARN("UDP response lost: %s", strerror(errno));

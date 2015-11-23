@@ -23,7 +23,6 @@
 #define UDP_MAX_CONNECTIONS 1024
 #define MAX_MESSAGE_SIZE 512
 
-
 struct program_author {
     const char* name;
     const char* email;
@@ -52,7 +51,7 @@ void show_usage(int argc, char** argv) {
 }
 
 void* start_tcp_server(void* info) {
-    long port = *((long*) info);
+    long port = *((long*)info);
     struct sockaddr_in serv_addr;
     int sock;
     int ret;
@@ -72,7 +71,7 @@ void* start_tcp_server(void* info) {
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(port);
 
-    ret = bind(sock, (struct sockaddr*) &serv_addr, sizeof(serv_addr));
+    ret = bind(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     if (ret == -1) {
         ERROR("Couldn't bind TCP socket: %s", strerror(errno));
         goto cleanup_and_return;
@@ -93,7 +92,7 @@ cleanup_and_return:
 }
 
 void* start_udp_server(void* info) {
-    long port = *((long*) info);
+    long port = *((long*)info);
     struct sockaddr_in serv_addr;
     int sock;
     int ret;
@@ -113,7 +112,7 @@ void* start_udp_server(void* info) {
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(port);
 
-    ret = bind(sock, (struct sockaddr*) &serv_addr, sizeof(serv_addr));
+    ret = bind(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     if (ret == -1) {
         ERROR("Couldn't bind UDP socket: %s", strerror(errno));
         close(sock);
@@ -128,7 +127,8 @@ void* start_udp_server(void* info) {
         ssize_t len;
         char buff[MAX_MESSAGE_SIZE];
 
-        len = recvfrom(sock, buff, sizeof(buff), 0, (struct sockaddr*) &src_addr, &src_addr_len);
+        len = recvfrom(sock, buff, sizeof(buff), 0, (struct sockaddr*)&src_addr,
+                       &src_addr_len);
         if (len == -1) {
             WARN("Ignoring UDP datagram due to error: %s", strerror(errno));
             continue;
@@ -136,7 +136,8 @@ void* start_udp_server(void* info) {
 
         LOG("udp: Received %zu bytes: \"%s\"", len, buff);
 
-        len = sendto(sock, buff, len, 0, (struct sockaddr*) &src_addr, src_addr_len);
+        len = sendto(sock, buff, len, 0, (struct sockaddr*)&src_addr,
+                     src_addr_len);
 
         if (len == -1) {
             WARN("UDP response lost: %s", strerror(errno));
@@ -177,17 +178,22 @@ int main(int argc, char** argv) {
 
     LOG("Starting server on port %ld", port);
 
-    /// NOTE: Passing a pointer to a variable on the stack is unsafe if `main()` does not
+    /// NOTE: Passing a pointer to a variable on the stack is unsafe if `main()`
+    /// does not
     /// live long enough. It does though, so...
-    thread_creation_status = pthread_create(&tcp_thread, NULL, start_tcp_server, &port);
+    thread_creation_status =
+        pthread_create(&tcp_thread, NULL, start_tcp_server, &port);
     if (thread_creation_status != 0)
-        FATAL("Couldn't create TCP server thread: %s", strerror(thread_creation_status));
+        FATAL("Couldn't create TCP server thread: %s",
+              strerror(thread_creation_status));
 
     LOG("TCP server thread created: %ld", tcp_thread);
 
-    thread_creation_status = pthread_create(&udp_thread, NULL, start_udp_server, &port);
+    thread_creation_status =
+        pthread_create(&udp_thread, NULL, start_udp_server, &port);
     if (thread_creation_status != 0)
-        FATAL("Couldn't create UDP server thread: %s", strerror(thread_creation_status));
+        FATAL("Couldn't create UDP server thread: %s",
+              strerror(thread_creation_status));
 
     LOG("UDP server thread created: %ld", udp_thread);
 

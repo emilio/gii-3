@@ -32,10 +32,14 @@ int main() {
     socklen_t size = sizeof(serv_addr);
     char buff[SIZE];
     size_t recv_size;
+    size_t len;
     while (true) {
         printf("> ");
         fgets(buff, SIZE, stdin);
-        sendto(sock, buff, strlen(buff), 0, (struct sockaddr*)&serv_addr,
+        len = strlen(buff);
+        if (len)
+            buff[--len] = 0;
+        sendto(sock, buff, len, 0, (struct sockaddr*)&serv_addr,
                sizeof(serv_addr));
         recv_size =
             recvfrom(sock, buff, SIZE, 0, (struct sockaddr*)&serv_addr, &size);

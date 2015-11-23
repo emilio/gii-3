@@ -1,4 +1,5 @@
 CFLAGS := -std=c99 -Wall -pedantic
+CLINKFLAGS := -pthread
 PANDOC_FLAGS := --toc --filter pandoc-crossref
 
 TARGET_NAMES := server client
@@ -69,7 +70,7 @@ target/%.o: src/%.c
 
 target/%: target/%.o $(COMMON_OBJS)
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@ $(CLINKFLAGS)
 
 
 # Tests

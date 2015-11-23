@@ -17,6 +17,7 @@
 #include <unistd.h>
 
 #include "logger.h"
+#include "protocol.h"
 #include "utils.h"
 
 #define TCP_MAX_CONNECTIONS 1024
@@ -59,7 +60,30 @@ void show_usage(int argc, char** argv) {
 /// given that `target_addr` is null and `target_addr_size` is zero.
 void parse_message_and_reply(int sock, const char* buff,
                              struct sockaddr* target_addr,
-                             socklen_t target_addr_len) {}
+                             socklen_t target_addr_len) {
+    char response[512];
+    ssize_t ret;
+    client_message_t message;
+    parse_error_t error = parse_client_message(buff, &message);
+
+    if (error != ERROR_NONE) {
+        LOG("Parse error: %s", parse_error_string(error));
+        snprintf(response, sizeof(response), "ERROR Parse error: %s", parse_error_string(error));
+        ret = sendto(sock, response, strlen(response), 0, target_addr, target_addr_len);
+
+        if (ret == -1)
+            WARN("Ignoring sendto() error (socket: %d, response: %s)", sock, response);
+
+        return;
+    }
+
+    /// TODO
+    snprintf(response, sizeof(response), "OK");
+
+    ret = sendto(sock, response, strlen(response), 0, target_addr, target_addr_len);
+    if (ret == -1)
+        WARN("Ignoring sendto() error (socket: %d, response: %s)", sock, response);
+}
 
 void* start_tcp_server(void* info) {
     long port = *((long*)info);

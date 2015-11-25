@@ -1,6 +1,16 @@
+
 CFLAGS := -std=c99 -Wall -pedantic
 CLINKFLAGS := -pthread
 PANDOC_FLAGS := --toc --filter pandoc-crossref
+
+# Workaround for buggy C compiler in required target (encina/SunOS)
+ifeq ($(HOSTNAME), encina)
+	CC := gcc
+endif
+
+ifeq ($(shell uname), SunOS)
+	CLINKFLAGS := $(CLINKFLAGS) -lsocket
+endif
 
 TARGET_NAMES := server client
 TARGETS := $(patsubst %, target/%, $(TARGET_NAMES))

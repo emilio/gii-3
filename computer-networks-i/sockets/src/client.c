@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <pthread.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <netinet/udp.h>
 #include <netinet/tcp.h>
@@ -90,6 +91,13 @@ int main(int argc, char** argv) {
 
     if (sock == -1)
         FATAL("Error creating socket: %s", strerror(errno));
+
+    /// Set a recv timeout, to allow closing connections
+    struct timeval tv;
+    memset(&tv, 0, sizeof(struct timeval));
+    tv.tv_sec = 30;
+    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv,
+               sizeof(struct timeval));
 
     struct sockaddr_in serv_addr;
     memset(&serv_addr, 0, sizeof(serv_addr));

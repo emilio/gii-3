@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "protocol.h"
+#include "vector.h"
 #include "tests.h"
 
 TEST(parse_message_simple, {
@@ -99,6 +100,37 @@ TEST(parse_failure_extra_newline_in_content, {
     ASSERT(ERROR_INVALID_MESSAGE_TYPE == parse_client_message(message, &result));
 })
 
+TEST(vector_base, {
+    vector_t v;
+
+    vector_init(&v, sizeof(int), 10);
+
+    ASSERT(v.buffer != NULL);
+    ASSERT(vector_size(&v) == 0);
+    ASSERT(vector_capacity(&v) == 10);
+
+    for (int i = 0; i < 20; ++i) {
+        ASSERT(vector_push(&v, &i));
+    }
+
+    ASSERT(vector_size(&v) == 20);
+
+    int test = 0;
+    ASSERT(vector_get(&v, 19, &test));
+    ASSERT(test == 19);
+
+    ASSERT(vector_delete(&v, 18));
+    ASSERT(vector_get(&v, 18, &test));
+    ASSERT(test == 19);
+
+    ASSERT(vector_delete(&v, 0));
+    ASSERT(vector_get(&v, 0, &test));
+    ASSERT(test == 1);
+
+    vector_destroy(&v);
+    ASSERT(v.buffer == NULL);
+})
+
 TEST_MAIN({
     RUN_TEST(parse_message_simple);
     RUN_TEST(parse_message_list_events);
@@ -111,4 +143,6 @@ TEST_MAIN({
     RUN_TEST(parse_failure_invalid_date);
     RUN_TEST(parse_failure_extra_newline);
     RUN_TEST(parse_failure_extra_newline_in_content);
+
+    RUN_TEST(vector_base);
 })

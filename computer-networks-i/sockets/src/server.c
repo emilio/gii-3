@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <pthread.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <netinet/udp.h>
 #include <netinet/tcp.h>
@@ -19,6 +20,7 @@
 #include "logger.h"
 #include "protocol.h"
 #include "utils.h"
+#include "vector.h"
 
 #define TCP_MAX_CONNECTIONS 1024
 #define UDP_MAX_CONNECTIONS 1024
@@ -58,7 +60,10 @@ void show_usage(int argc, char** argv) {
 ///
 /// We exploit the fact that `sento()` can be used instead of `write()` in TCP,
 /// given that `target_addr` is null and `target_addr_size` is zero.
-void parse_message_and_reply(int sock, const char* buff,
+///
+/// The return value is a boolean indicating if the connection (in the tcp
+/// case) should continue
+bool parse_message_and_reply(int sock, const char* buff,
                              struct sockaddr* target_addr,
                              socklen_t target_addr_len) {
     char response[512];
@@ -71,18 +76,66 @@ void parse_message_and_reply(int sock, const char* buff,
         snprintf(response, sizeof(response), "ERROR Parse error: %s", parse_error_string(error));
         ret = sendto(sock, response, strlen(response), 0, target_addr, target_addr_len);
 
-        if (ret == -1)
+        if (ret == -1) {
             WARN("Ignoring sendto() error (socket: %d, response: %s)", sock, response);
+            return false;
+        }
 
-        return;
+        return true;
     }
 
     /// TODO
     snprintf(response, sizeof(response), "OK");
 
     ret = sendto(sock, response, strlen(response), 0, target_addr, target_addr_len);
-    if (ret == -1)
+    if (ret == -1) {
         WARN("Ignoring sendto() error (socket: %d, response: %s)", sock, response);
+        return false;
+    }
+
+    return true;
+}
+
+void* handle_tcp_connection(void* sent_socket) {
+    int socket = *((int*)sent_socket);
+    free(sent_socket);
+
+    /// Set a recv timeout, to allow closing connections
+    struct timeval tv;
+    memset(&tv, 0, sizeof(struct timeval));
+    tv.tv_sec = 30;
+    setsockopt(socket, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof(struct timeval));
+
+
+    LOG("tcp: Connection handling routine started (fd: %d)", socket);
+
+    char buff[MAX_MESSAGE_SIZE] = {0};
+    while (true) {
+        // TODO: We don't handle chunked messages because we know the message
+        // size is fixed, and that messages longer than `MAX_MESSAGE_SIZE`
+        // can't be valid. We should have a growing buffer otherwise.
+        ssize_t len = recv(socket, buff, sizeof(buff) - 1, 0);
+        if (len == -1) {
+            WARN("tcp: (fd: %d) read() error: %s", socket, strerror(errno));
+            break;
+        }
+
+        if (len == 0) {
+            LOG("tcp: (fd: %d) received empty message", socket);
+            break;
+        }
+
+        buff[len] = 0;
+
+        LOG("tcp: (fd: %d) received %zu bytes: %s", socket, len, buff);
+        if (!parse_message_and_reply(socket, buff, NULL, 0))
+            break;
+    }
+
+    LOG("tcp: Closing connection (fd: %d)", socket);
+    close(socket);
+
+    return NULL;
 }
 
 void* start_tcp_server(void* info) {
@@ -121,9 +174,9 @@ void* start_tcp_server(void* info) {
     }
 
     while (true) {
-        char buff[MAX_MESSAGE_SIZE] = {0};
         struct sockaddr_in client_addr;
         socklen_t client_size = sizeof(client_addr);
+
         int new_socket =
             accept(sock, (struct sockaddr*)&client_addr, &client_size);
 
@@ -132,21 +185,12 @@ void* start_tcp_server(void* info) {
             continue;
         }
 
-        // TODO: We don't handle chunked messages because we know the message
-        // size is fixed, and that messages longer than `MAX_MESSAGE_SIZE`
-        // can't be valid. We should have a growing buffer otherwise.
-        ssize_t len = read(new_socket, buff, sizeof(buff) - 1);
-        if (len == -1) {
-            WARN("tcp: Ignoring read() error: %s", strerror(errno));
-            close(new_socket);
-            continue;
-        }
-        buff[len] = 0;
+        LOG("tcp: New connection (fd: %d)", new_socket);
+        int* sent_socket = malloc(sizeof(int));
+        *sent_socket = new_socket;
 
-        LOG("tcp: Received %zu bytes: %s", len, buff);
-
-        parse_message_and_reply(new_socket, buff, NULL, 0);
-        close(new_socket);
+        pthread_t new_connection_thread;
+        pthread_create(&new_connection_thread, NULL, handle_tcp_connection, sent_socket);
     }
 
 cleanup_and_return:
@@ -241,14 +285,15 @@ int main(int argc, char** argv) {
                 FATAL("The %s option needs a value", argv[i - 1]);
             if (!read_long(argv[i], &port))
                 WARN("Using default port %ld", port);
+        } else {
+            WARN("Unrecognized option: %s", argv[i]);
         }
     }
 
     LOG("Starting server on port %ld", port);
 
-    /// NOTE: Passing a pointer to a variable on the stack is unsafe if `main()`
-    /// does not
-    /// live long enough. It does though, so...
+    // NOTE: Passing a pointer to a variable on the stack is unsafe if `main()`
+    // does not live long enough. It does though, so...
     thread_creation_status =
         pthread_create(&tcp_thread, NULL, start_tcp_server, &port);
     if (thread_creation_status != 0)

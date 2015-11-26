@@ -73,11 +73,14 @@ bool parse_message_and_reply(int sock, const char* buff,
 
     if (error != ERROR_NONE) {
         LOG("Parse error: %s", parse_error_string(error));
-        snprintf(response, sizeof(response), "ERROR Parse error: %s", parse_error_string(error));
-        ret = sendto(sock, response, strlen(response), 0, target_addr, target_addr_len);
+        snprintf(response, sizeof(response), "ERROR Parse error: %s",
+                 parse_error_string(error));
+        ret = sendto(sock, response, strlen(response), 0, target_addr,
+                     target_addr_len);
 
         if (ret == -1) {
-            WARN("Ignoring sendto() error (socket: %d, response: %s)", sock, response);
+            WARN("Ignoring sendto() error (socket: %d, response: %s)", sock,
+                 response);
             return false;
         }
 
@@ -87,9 +90,11 @@ bool parse_message_and_reply(int sock, const char* buff,
     /// TODO
     snprintf(response, sizeof(response), "OK");
 
-    ret = sendto(sock, response, strlen(response), 0, target_addr, target_addr_len);
+    ret = sendto(sock, response, strlen(response), 0, target_addr,
+                 target_addr_len);
     if (ret == -1) {
-        WARN("Ignoring sendto() error (socket: %d, response: %s)", sock, response);
+        WARN("Ignoring sendto() error (socket: %d, response: %s)", sock,
+             response);
         return false;
     }
 
@@ -104,8 +109,8 @@ void* handle_tcp_connection(void* sent_socket) {
     struct timeval tv;
     memset(&tv, 0, sizeof(struct timeval));
     tv.tv_sec = 30;
-    setsockopt(socket, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof(struct timeval));
-
+    setsockopt(socket, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv,
+               sizeof(struct timeval));
 
     LOG("tcp: Connection handling routine started (fd: %d)", socket);
 
@@ -190,7 +195,8 @@ void* start_tcp_server(void* info) {
         *sent_socket = new_socket;
 
         pthread_t new_connection_thread;
-        pthread_create(&new_connection_thread, NULL, handle_tcp_connection, sent_socket);
+        pthread_create(&new_connection_thread, NULL, handle_tcp_connection,
+                       sent_socket);
     }
 
 cleanup_and_return:
@@ -271,7 +277,7 @@ int main(int argc, char** argv) {
 
     LOGGER_CONFIG.log_file = stderr;
 
-    for (i = 0; i < argc; ++i) {
+    for (i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             show_usage(argc, argv);
             return 1;

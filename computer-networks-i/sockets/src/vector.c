@@ -33,7 +33,8 @@ bool vector_reserve(vector_t* v, size_t capacity) {
 
 bool vector_push(vector_t* v, const void* buff) {
     if (v->size == v->capacity)
-        if (!vector_reserve(v, v->capacity ? v->capacity * 2 : VECTOR_DEFAULT_CAPACITY))
+        if (!vector_reserve(v, v->capacity ? v->capacity * 2
+                                           : VECTOR_DEFAULT_CAPACITY))
             return false;
 
     return vector_set(v, v->size++, buff);
@@ -43,7 +44,8 @@ bool vector_set(vector_t* v, size_t index, const void* buff) {
     if (index >= v->size)
         return false;
 
-    memcpy(AS_CHAR_BUFF(v->buffer) + index * v->element_size, AS_CHAR_BUFF(buff), v->element_size);
+    memcpy(AS_CHAR_BUFF(v->buffer) + index * v->element_size,
+           AS_CHAR_BUFF(buff), v->element_size);
     return true;
 }
 
@@ -51,7 +53,8 @@ bool vector_get(vector_t* v, size_t index, void* out_buff) {
     if (index >= v->size || out_buff == NULL)
         return false;
 
-    memcpy(AS_CHAR_BUFF(out_buff), AS_CHAR_BUFF(v->buffer) + index * v->element_size, v->element_size);
+    memcpy(AS_CHAR_BUFF(out_buff),
+           AS_CHAR_BUFF(v->buffer) + index * v->element_size, v->element_size);
     return true;
 }
 
@@ -64,7 +67,9 @@ bool vector_delete(vector_t* v, size_t index) {
         return true;
     }
 
-    memmove(AS_CHAR_BUFF(v->buffer) + index * v->element_size, AS_CHAR_BUFF(v->buffer) + (index + 1) * v->element_size, (v->size - index - 1) * v->element_size);
+    memmove(AS_CHAR_BUFF(v->buffer) + index * v->element_size,
+            AS_CHAR_BUFF(v->buffer) + (index + 1) * v->element_size,
+            (v->size - index - 1) * v->element_size);
     return true;
 }
 

@@ -49,11 +49,9 @@ void show_usage(int argc, char** argv) {
     }
 }
 
-
 int main(int argc, char** argv) {
     bool use_udp = false;
     long int port = 8000;
-    int ret;
 
     /// TODO: add file argument
     FILE* src_file = stdin;
@@ -74,7 +72,8 @@ int main(int argc, char** argv) {
                 FATAL("The %s option needs a value", argv[i - 1]);
             if (!read_long(argv[i], &port))
                 WARN("Using default port %ld", port);
-        } else if (strcmp(argv[i], "-udp") == 0 || strcmp(argv[i], "--use-udp")) {
+        } else if (strcmp(argv[i], "-udp") == 0 ||
+                   strcmp(argv[i], "--use-udp")) {
             use_udp = true;
         } else {
             WARN("Unrecognized option: %s", argv[i]);
@@ -98,6 +97,7 @@ int main(int argc, char** argv) {
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(port);
 
+    int ret;
     ret = connect(sock, (const struct sockaddr*)&serv_addr, sizeof(serv_addr));
     if (ret == -1)
         FATAL("Error connecting to remote: %s", strerror(errno));
@@ -120,7 +120,12 @@ int main(int argc, char** argv) {
         printf("> ");
 
         if (buff != fgets(buff, SIZE, src_file)) {
-            LOG("Ignoring fgets() error: %s", strerror(errno));
+            if (feof(src_file)) {
+                LOG("EOF reached");
+                break;
+            }
+
+            LOG("Ignoring fgets() error, err: %s", strerror(ferror(src_file)));
             continue;
         }
 
@@ -128,11 +133,6 @@ int main(int argc, char** argv) {
 
         if (!interactive)
             printf("%s", buff);
-
-        if (feof(src_file)) {
-            LOG("EOF reached");
-            break;
-        }
 
         len = strlen(buff);
 
@@ -157,10 +157,9 @@ int main(int argc, char** argv) {
         socklen_t from_size = sizeof(from_addr);
 
         ssize_t recv_size;
-retry_udp_recv:
-        recv_size = recvfrom(sock, buff, SIZE, 0,
-                                     (struct sockaddr*)&from_addr,
-                                     &from_size);
+    retry_udp_recv:
+        recv_size = recvfrom(sock, buff, SIZE, 0, (struct sockaddr*)&from_addr,
+                             &from_size);
 
         if (recv_size < 0) {
             WARN("Recv error: %s", strerror(errno));
@@ -169,7 +168,8 @@ retry_udp_recv:
 
         buff[recv_size] = 0;
         if (use_udp) {
-            if (sockaddr_cmp((struct sockaddr*)&from_addr, (struct sockaddr*)&serv_addr) != 0) {
+            if (sockaddr_cmp((struct sockaddr*)&from_addr,
+                             (struct sockaddr*)&serv_addr) != 0) {
                 WARN("Received message not from server: %s", buff);
                 goto retry_udp_recv;
             }

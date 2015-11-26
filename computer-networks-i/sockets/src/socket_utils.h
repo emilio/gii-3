@@ -23,5 +23,5 @@ int sockaddr_in6_cmp(struct sockaddr_in6* x, struct sockaddr_in6* y);
 #define SOCKADDR_IN_PTR(sa) ((struct sockaddr_in*)sa)
 int sockaddr_in_cmp(struct sockaddr_in* x, struct sockaddr_in* y);
 
-int sockaddr_cmp(struct sockaddr *x, struct sockaddr *y);
+int sockaddr_cmp(struct sockaddr* x, struct sockaddr* y);
 #endif

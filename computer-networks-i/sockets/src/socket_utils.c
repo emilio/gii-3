@@ -17,7 +17,8 @@ int sockaddr_in6_cmp(struct sockaddr_in6* x, struct sockaddr_in6* y) {
     if (x->sin6_scope_id != y->sin6_scope_id)
         return x->sin6_scope_id - y->sin6_scope_id;
 
-    return memcmp(x->sin6_addr.s6_addr, y->sin6_addr.s6_addr, sizeof(x->sin6_addr.s6_addr));
+    return memcmp(x->sin6_addr.s6_addr, y->sin6_addr.s6_addr,
+                  sizeof(x->sin6_addr.s6_addr));
 }
 #endif
 
@@ -28,8 +29,7 @@ int sockaddr_in_cmp(struct sockaddr_in* x, struct sockaddr_in* y) {
     return x->sin_port - y->sin_port;
 }
 
-int sockaddr_cmp(struct sockaddr *x, struct sockaddr *y)
-{
+int sockaddr_cmp(struct sockaddr* x, struct sockaddr* y) {
     if (x->sa_family != y->sa_family)
         return x->sa_family - y->sa_family;
 

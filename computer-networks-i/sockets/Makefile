@@ -3,8 +3,11 @@ CFLAGS := -std=c99 -Wall -pedantic
 CLINKFLAGS := -pthread
 PANDOC_FLAGS := --toc --filter pandoc-crossref
 
-# Workaround for buggy C compiler in required target (encina/SunOS)
-ifeq ($(HOSTNAME), encina)
+# Workaround for buggy C compiler in required targets (encina and olivo/SunOS)
+ifeq ($(shell hostname), encina)
+	CC := gcc
+endif
+ifeq ($(shell hostname), olivo)
 	CC := gcc
 endif
 

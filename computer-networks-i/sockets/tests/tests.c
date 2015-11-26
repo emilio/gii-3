@@ -123,9 +123,13 @@ TEST(vector_base, {
     ASSERT(vector_get(&v, 18, &test));
     ASSERT(test == 19);
 
+    ASSERT(vector_size(&v) == 19);
+
     ASSERT(vector_delete(&v, 0));
     ASSERT(vector_get(&v, 0, &test));
     ASSERT(test == 1);
+
+    ASSERT(vector_size(&v) == 18);
 
     vector_destroy(&v);
     ASSERT(v.buffer == NULL);

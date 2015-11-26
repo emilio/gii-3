@@ -70,6 +70,7 @@ bool vector_delete(vector_t* v, size_t index) {
     memmove(AS_CHAR_BUFF(v->buffer) + index * v->element_size,
             AS_CHAR_BUFF(v->buffer) + (index + 1) * v->element_size,
             (v->size - index - 1) * v->element_size);
+    v->size--;
     return true;
 }
 

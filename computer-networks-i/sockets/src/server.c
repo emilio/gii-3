@@ -3,15 +3,18 @@
  *
  * @author Emilio Cobos Álvarez (70912324N)
  */
-
+#define _POSIX_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 #include <errno.h>
 #include <pthread.h>
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
+#include <sys/wait.h>
+#include <signal.h>
 #include <netinet/in.h>
 #include <netinet/udp.h>
 #include <netinet/tcp.h>
@@ -36,6 +39,17 @@ const struct program_author AUTHORS[] = {
     {NULL, NULL}, // End of list
 };
 
+/// Signal handler used to daemonize the program
+void daemonize_sig_handler(int signal) {
+    switch (signal) {
+        case SIGUSR1: // The daemon did run fine
+            LOG("Daemon seems to have started successfully");
+            exit(0);
+        case SIGCHLD: // The daemon died
+            FATAL("Daemon has died on startup");
+    }
+}
+
 /// Shows usage of the program
 void show_usage(int argc, char** argv) {
     printf("Usage: %s [options]\n", argv[0]);
@@ -43,6 +57,7 @@ void show_usage(int argc, char** argv) {
     printf("  -h, --help\t Display this message and exit\n");
     printf("  -p, --port [port]\t Listen to [port]\n");
     printf("  -v, --verbose\t Be verbose about what is going on\n");
+    printf("  -d, --daemonize\t Start server as a daemon\n");
     printf("\n");
     printf("Author(s):\n");
 
@@ -271,6 +286,7 @@ int main(int argc, char** argv) {
     int i;
     long port = 8000;
     int thread_creation_status;
+    bool daemonize = false;
 
     pthread_t tcp_thread;
     pthread_t udp_thread;
@@ -291,12 +307,45 @@ int main(int argc, char** argv) {
                 FATAL("The %s option needs a value", argv[i - 1]);
             if (!read_long(argv[i], &port))
                 WARN("Using default port %ld", port);
+        } else if (strcmp(argv[i], "-d") == 0 ||
+                   strcmp(argv[i], "--daemonize") == 0) {
+            daemonize = true;
         } else {
             WARN("Unrecognized option: %s", argv[i]);
         }
     }
 
-    LOG("Starting server on port %ld", port);
+    LOG("Starting server on port %ld, daemon: %d", port, daemonize ? 1 : 0);
+
+    // TODO: Some kind of lockfile?
+    if (daemonize) {
+        if (signal(SIGCHLD, daemonize_sig_handler) == SIG_ERR)
+            FATAL("Error registering SIGCHLD: %s", strerror(errno));
+
+        if (signal(SIGUSR1, daemonize_sig_handler) == SIG_ERR)
+            FATAL("Error registering SIGUSR1: %s", strerror(errno));
+
+        pid_t child_pid;
+        switch ((child_pid = fork())) {
+            case 0:
+                if (signal(SIGHUP, SIG_IGN) == SIG_ERR)
+                    FATAL("Error ignoring SIGHUP: %s", strerror(errno));
+
+                if (signal(SIGCHLD, SIG_IGN) == SIG_ERR)
+                    FATAL("Error ignoring SIGCHLD: %s", strerror(errno));
+
+                if (signal(SIGUSR1, SIG_IGN) == SIG_ERR)
+                    FATAL("Error ignoring SIGUSR1: %s", strerror(errno));
+
+                break;
+            case -1:
+                FATAL("Fork error: %s", strerror(errno));
+                break;
+            default:
+                waitpid(child_pid, NULL, 0); // Either SIGCHLD (if the daemon dies) or SIGUSR1 will arrive
+                return 0;
+        }
+    }
 
     // NOTE: Passing a pointer to a variable on the stack is unsafe if `main()`
     // does not live long enough. It does though, so...
@@ -316,8 +365,13 @@ int main(int argc, char** argv) {
 
     LOG("UDP server thread created: %ld", udp_thread);
 
+    /// Tell the parent we're fine
+    if (daemonize)
+        kill(getppid(), SIGUSR1);
+
     pthread_join(tcp_thread, NULL);
     pthread_join(udp_thread, NULL);
+
 
     return 0;
 }

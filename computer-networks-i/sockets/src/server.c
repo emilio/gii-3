@@ -342,7 +342,8 @@ int main(int argc, char** argv) {
                 FATAL("Fork error: %s", strerror(errno));
                 break;
             default:
-                waitpid(child_pid, NULL, 0); // Either SIGCHLD (if the daemon dies) or SIGUSR1 will arrive
+                waitpid(child_pid, NULL, 0); // Either SIGCHLD (if the daemon
+                                             // dies) or SIGUSR1 will arrive
                 return 0;
         }
     }
@@ -371,7 +372,6 @@ int main(int argc, char** argv) {
 
     pthread_join(tcp_thread, NULL);
     pthread_join(udp_thread, NULL);
-
 
     return 0;
 }

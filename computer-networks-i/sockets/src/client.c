@@ -3,6 +3,7 @@
  *
  * @author Emilio Cobos Álvarez (70912324N)
  */
+#define _POSIX_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -14,6 +15,7 @@
 #include <netinet/in.h>
 #include <netinet/udp.h>
 #include <netinet/tcp.h>
+#include <netdb.h>
 
 #include "logger.h"
 #include "protocol.h"
@@ -36,9 +38,10 @@ const struct program_author AUTHORS[] = {
 void show_usage(int argc, char** argv) {
     printf("Usage: %s [options]\n", argv[0]);
     printf("Options:\n");
-    printf("  -h, --help\t Display this message and exit\n");
+    printf("  --help\t Display this message and exit\n");
     printf("  -udp, --use-udp\t Use UDP instead of TCP\n");
-    printf("  -p, --port [port]\t Listen to [port]\n");
+    printf("  -p, --port [port]\t Connect to [port]\n");
+    printf("  -h, --host [host]\t Connect to [host]\n");
     printf("  -v, --verbose\t Be verbose about what is going on\n");
     printf("\n");
     printf("Author(s):\n");
@@ -52,7 +55,8 @@ void show_usage(int argc, char** argv) {
 
 int main(int argc, char** argv) {
     bool use_udp = false;
-    long int port = 8000;
+    const char* port = "8000";
+    const char* host = "localhost";
 
     /// TODO: add file argument
     FILE* src_file = stdin;
@@ -60,7 +64,7 @@ int main(int argc, char** argv) {
     LOGGER_CONFIG.log_file = stderr;
 
     for (int i = 1; i < argc; ++i) {
-        if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
+        if (strcmp(argv[i], "--help") == 0) {
             show_usage(argc, argv);
             return 1;
         } else if (strcmp(argv[i], "-v") == 0 ||
@@ -71,17 +75,22 @@ int main(int argc, char** argv) {
             ++i;
             if (i == argc)
                 FATAL("The %s option needs a value", argv[i - 1]);
-            if (!read_long(argv[i], &port))
-                WARN("Using default port %ld", port);
+            port = argv[i];
         } else if (strcmp(argv[i], "-udp") == 0 ||
-                   strcmp(argv[i], "--use-udp")) {
+                   strcmp(argv[i], "--use-udp") == 0) {
             use_udp = true;
+        } else if (strcmp(argv[i], "-h") == 0 ||
+                   strcmp(argv[i], "--host") == 0) {
+            ++i;
+            if (i == argc)
+                FATAL("The %s option needs a value", argv[i - 1]);
+            host = argv[i];
         } else {
             WARN("Unrecognized option: %s", argv[i]);
         }
     }
 
-    LOG("Using %s in port %ld", use_udp ? "UDP" : "TCP", port);
+    LOG("Using %s, port: %s, host: %s", use_udp ? "UDP" : "TCP", port, host);
 
     int sock;
     if (use_udp)
@@ -99,16 +108,26 @@ int main(int argc, char** argv) {
     setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv,
                sizeof(struct timeval));
 
-    struct sockaddr_in serv_addr;
-    memset(&serv_addr, 0, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = INADDR_ANY;
-    serv_addr.sin_port = htons(port);
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = use_udp ? SOCK_DGRAM : SOCK_STREAM;
 
     int ret;
-    ret = connect(sock, (const struct sockaddr*)&serv_addr, sizeof(serv_addr));
+    struct addrinfo* info;
+    ret = getaddrinfo(host, port, &hints, &info);
+    if (ret != 0)
+        FATAL("getaddrinfo: %s", gai_strerror(ret));
+
+    struct sockaddr_in serv_addr;
+    ret = connect(sock, info->ai_addr, info->ai_addrlen);
     if (ret == -1)
         FATAL("Error connecting to remote: %s", strerror(errno));
+
+    // Copy the address info to a safe place
+    memcpy(&serv_addr, info->ai_addr, info->ai_addrlen);
+
+    freeaddrinfo(info); // Now we don't need this anymore
 
     /// UDP requires to pass a pointer to the address to `sendto()`,
     /// while TCP requires NOT to pass it

@@ -92,22 +92,6 @@ int main(int argc, char** argv) {
 
     LOG("Using %s, port: %s, host: %s", use_udp ? "UDP" : "TCP", port, host);
 
-    int sock;
-    if (use_udp)
-        sock = socket(AF_INET, SOCK_DGRAM, 0);
-    else
-        sock = socket(AF_INET, SOCK_STREAM, 0);
-
-    if (sock == -1)
-        FATAL("Error creating socket: %s", strerror(errno));
-
-    /// Set a recv timeout, to allow closing connections
-    struct timeval tv;
-    memset(&tv, 0, sizeof(struct timeval));
-    tv.tv_sec = 30;
-    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv,
-               sizeof(struct timeval));
-
     struct addrinfo hints;
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_INET;
@@ -119,12 +103,25 @@ int main(int argc, char** argv) {
     if (ret != 0)
         FATAL("getaddrinfo: %s", gai_strerror(ret));
 
+    // We use just the first configuration returned by getaddrinfo
+    int sock;
+    sock = socket(info->ai_family, info->ai_socktype, 0);
+    if (sock == -1)
+        FATAL("Error creating socket: %s", strerror(errno));
+
+    /// Set a recv timeout, to allow closing connections if they fail
+    /// This is neccesary overall for udp
+    struct timeval tv;
+    memset(&tv, 0, sizeof(struct timeval));
+    tv.tv_sec = 30;
+    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv,
+               sizeof(struct timeval));
+
     struct sockaddr_in serv_addr;
     ret = connect(sock, info->ai_addr, info->ai_addrlen);
     if (ret == -1)
         FATAL("Error connecting to remote: %s", strerror(errno));
 
-    // Copy the address info to a safe place
     memcpy(&serv_addr, info->ai_addr, info->ai_addrlen);
 
     freeaddrinfo(info); // Now we don't need this anymore

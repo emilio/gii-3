@@ -5,6 +5,9 @@
 #define __USE_XOPEN // For strptime
 #include <time.h>
 #include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <ctype.h>
 
 /// It is mandatory that the protocol must be text based.
 ///
@@ -18,10 +21,11 @@
 /// There are some constraints like:
 #define MAX_UID_LEN 20
 #define MAX_EVENT_ID_LEN 20
-#define MAX_DESCRIPTION_LEN 140
+#define MAX_EVENT_DESCRIPTION_LEN 140
 
 typedef char protocol_uid_t[MAX_UID_LEN + 1];
 typedef char protocol_event_id_t[MAX_EVENT_ID_LEN + 1];
+typedef char protocol_description_t[MAX_EVENT_DESCRIPTION_LEN + 1];
 
 typedef uint8_t client_message_type_t;
 
@@ -52,11 +56,21 @@ typedef struct client_message {
     } content;
 } client_message_t;
 
+typedef struct protocol_event {
+    protocol_event_id_t id;
+    protocol_description_t description;
+    struct tm starts_at;
+    struct tm ends_at;
+} protocol_event_t;
+
 extern const char* PARSE_ERROR_MESSAGES[];
 
 typedef enum parse_error {
     ERROR_NONE = 0,
     ERROR_NO_MESSAGE,
+    ERROR_NO_EVENT,
+    ERROR_EXPECTED_SEPARATOR,
+    ERROR_EXPECTED_VALID_DESCRIPTION,
     ERROR_INVALID_MESSAGE_TYPE,
     // Note that not-found error is not related to the server.
     // It's a message which was expected to have an user id.
@@ -83,7 +97,13 @@ static inline const char* parse_error_string(parse_error_t error) {
     return PARSE_ERROR_MESSAGES[error];
 }
 
+static inline bool is_valid_id_char(char c) {
+    return isalnum(c) || c == '-' || c == '_';
+}
+
 parse_error_t parse_client_message(const char* in_source,
                                    client_message_t* message);
+
+parse_error_t parse_event(const char* in_source, protocol_event_t* event);
 
 #endif

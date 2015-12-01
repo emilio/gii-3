@@ -3,14 +3,16 @@
 #include <ctype.h>
 
 const char* PARSE_ERROR_MESSAGES[] = {
-    "No error",                 // ERROR_NONE
-    "No message received",      // ERROR_NO_MESSAGE
-    "Invalid message type",     // ERROR_INVALID_MESSAGE_TYPE
-    "Expected valid user id",   // ERROR_EXPECTED_VALID_UID
-    "Expected valid event id",  // ERROR_EXPECTED_VALID_EVENT_ID
-    "Expected valid date",      // ERROR_EXPECTED_VALID_DATE
-    "Unexpected extra content", // ERROR_UNEXPECTED_CONTENT
-    "Unknown error",            // ERROR_UNKNOWN
+    "No error",                   // ERROR_NONE
+    "No message received",        // ERROR_NO_MESSAGE
+    "Expected separator",         // ERROR_EXPECTED_SEPARATOR
+    "Expected valid description", // ERROR_EXPECTED_VALID_DESCRIPTION
+    "Invalid message type",       // ERROR_INVALID_MESSAGE_TYPE
+    "Expected valid user id",     // ERROR_EXPECTED_VALID_UID
+    "Expected valid event id",    // ERROR_EXPECTED_VALID_EVENT_ID
+    "Expected valid date",        // ERROR_EXPECTED_VALID_DATE
+    "Unexpected extra content",   // ERROR_UNEXPECTED_CONTENT
+    "Unknown error",              // ERROR_UNKNOWN
 };
 
 const char* MESSAGE_TYPE_STRINGS[] = {
@@ -88,12 +90,25 @@ static inline bool try_consume_message_type(const char** in_source,
     return false;
 }
 
+static bool try_consume_until(const char** current_cursor, char separator,
+                              char* buff, size_t max_len) {
+    size_t len = 0;
+    while (**current_cursor && **current_cursor != separator) {
+        if (len++ == max_len)
+            return false;
+
+        *buff++ = *(*current_cursor)++;
+    }
+
+    return len != 0;
+}
+
 /// We consider an id anything which is not a whitespace
 static bool try_consume_id(const char** current_cursor, char* id_buff,
                            size_t max_len) {
     size_t current_len = 0;
 
-    while (**current_cursor && !isspace(**current_cursor)) {
+    while (**current_cursor && is_valid_id_char(**current_cursor)) {
         // If we have read too much
         if (current_len++ == max_len)
             return false;
@@ -186,6 +201,40 @@ parse_error_t parse_client_message(const char* in_source,
         default:
             return ERROR_UNKNOWN;
     }
+
+    return ERROR_NONE;
+}
+
+parse_error_t parse_event(const char* in_source, protocol_event_t* event) {
+    const char* cursor = in_source;
+
+    if (event == NULL)
+        return ERROR_UNKNOWN;
+
+    if (in_source == NULL)
+        return ERROR_NO_EVENT;
+
+    if (!try_consume_id(&cursor, event->id, MAX_EVENT_ID_LEN))
+        return ERROR_EXPECTED_VALID_EVENT_ID;
+
+    if (!try_consume(&cursor, "#"))
+        return ERROR_EXPECTED_SEPARATOR;
+
+    if (!try_consume_until(&cursor, '#', event->description,
+                           MAX_EVENT_DESCRIPTION_LEN))
+        return ERROR_EXPECTED_VALID_DESCRIPTION;
+
+    if (!try_consume(&cursor, "#"))
+        return ERROR_EXPECTED_SEPARATOR;
+
+    if (!parse_date(&cursor, &event->starts_at))
+        return ERROR_EXPECTED_VALID_DATE;
+
+    if (!try_consume(&cursor, "#"))
+        return ERROR_EXPECTED_SEPARATOR;
+
+    if (!parse_date(&cursor, &event->ends_at))
+        return ERROR_EXPECTED_VALID_DATE;
 
     return ERROR_NONE;
 }

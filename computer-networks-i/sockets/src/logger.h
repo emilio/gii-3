@@ -12,37 +12,43 @@ static struct {
     pthread_mutex_t mutex;
 } LOGGER_CONFIG = {false, NULL, PTHREAD_MUTEX_INITIALIZER};
 
-#define LOG(fmt, ...)                                                          \
+#define LOG(...)                                                               \
     do {                                                                       \
         pthread_mutex_lock(&LOGGER_CONFIG.mutex);                              \
-        if (LOGGER_CONFIG.verbose && LOGGER_CONFIG.log_file)                   \
-            fprintf(LOGGER_CONFIG.log_file, "log: " fmt "\n", ##__VA_ARGS__);  \
+        if (LOGGER_CONFIG.verbose && LOGGER_CONFIG.log_file) {                 \
+            fprintf(LOGGER_CONFIG.log_file, "log: " __VA_ARGS__);              \
+            fprintf(LOGGER_CONFIG.log_file, "\n");                             \
+        }                                                                      \
         pthread_mutex_unlock(&LOGGER_CONFIG.mutex);                            \
     } while (0)
 
-#define WARN(fmt, ...)                                                         \
+#define WARN(...)                                                              \
     do {                                                                       \
         pthread_mutex_lock(&LOGGER_CONFIG.mutex);                              \
-        if (LOGGER_CONFIG.log_file)                                            \
-            fprintf(LOGGER_CONFIG.log_file, "warn: " fmt "\n", ##__VA_ARGS__); \
+        if (LOGGER_CONFIG.log_file) {                                          \
+            fprintf(LOGGER_CONFIG.log_file, "warn: " __VA_ARGS__);             \
+            fprintf(LOGGER_CONFIG.log_file, "\n");                             \
+        }                                                                      \
         pthread_mutex_unlock(&LOGGER_CONFIG.mutex);                            \
     } while (0)
 
-#define ERROR(fmt, ...)                                                        \
+#define ERROR(...)                                                             \
     do {                                                                       \
         pthread_mutex_lock(&LOGGER_CONFIG.mutex);                              \
-        if (LOGGER_CONFIG.log_file)                                            \
-            fprintf(LOGGER_CONFIG.log_file, "error: " fmt "\n",                \
-                    ##__VA_ARGS__);                                            \
+        if (LOGGER_CONFIG.log_file) {                                          \
+            fprintf(LOGGER_CONFIG.log_file, "error: " __VA_ARGS__);            \
+            fprintf(LOGGER_CONFIG.log_file, "\n");                             \
+        }                                                                      \
         pthread_mutex_unlock(&LOGGER_CONFIG.mutex);                            \
     } while (0)
 
-#define FATAL(fmt, ...)                                                        \
+#define FATAL(...)                                                             \
     do {                                                                       \
         pthread_mutex_lock(&LOGGER_CONFIG.mutex);                              \
-        if (LOGGER_CONFIG.log_file)                                            \
-            fprintf(LOGGER_CONFIG.log_file, "fatal: " fmt "\n",                \
-                    ##__VA_ARGS__);                                            \
+        if (LOGGER_CONFIG.log_file) {                                          \
+            fprintf(LOGGER_CONFIG.log_file, "error: " __VA_ARGS__);            \
+            fprintf(LOGGER_CONFIG.log_file, "\n");                             \
+        }                                                                      \
         pthread_mutex_unlock(&LOGGER_CONFIG.mutex);                            \
         exit(1);                                                               \
     } while (0)

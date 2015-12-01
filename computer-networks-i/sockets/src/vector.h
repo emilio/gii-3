@@ -14,6 +14,8 @@ typedef struct vector {
 } vector_t;
 
 #define VECTOR_DEFAULT_CAPACITY 8
+#define VECTOR_INITIALIZER(elem_size)                                          \
+    { 0, 0, elem_size, NULL }
 
 #define vector_size(v) (v)->size
 #define vector_capacity(v) (v)->capacity

@@ -30,15 +30,16 @@
 #define UDP_MAX_CONNECTIONS 1024
 #define MAX_MESSAGE_SIZE 512
 
-struct program_author {
-    const char* name;
-    const char* email;
-};
+struct server_data {
+    pthread_mutex_t mutex;
+    vector_t events;
+} GLOBAL_DATA = {PTHREAD_MUTEX_INITIALIZER,
+                 VECTOR_INITIALIZER(sizeof(protocol_event_t))};
 
-const struct program_author AUTHORS[] = {
-    {"Emilio Cobos Álvarez", "emiliocobos@usal.es"},
-    {NULL, NULL}, // End of list
-};
+
+void get_global_data_from(const char* filename) {
+    // TODO parse data source here (or at least after the fork)
+}
 
 /// Signal handler used to daemonize the program
 void daemonize_sig_handler(int signal) {
@@ -59,14 +60,10 @@ void show_usage(int argc, char** argv) {
     printf("  -p, --port [port]\t Listen to [port]\n");
     printf("  -v, --verbose\t Be verbose about what is going on\n");
     printf("  -d, --daemonize\t Start server as a daemon\n");
+    printf("  -f, --file [filename]\t Use [file] as data source\n");
     printf("\n");
     printf("Author(s):\n");
-
-    const struct program_author* current_author = AUTHORS;
-    while (current_author->name) {
-        printf("  %s (<%s>)\n", current_author->name, current_author->email);
-        current_author++;
-    }
+    printf("  Emilio Cobos Álvarez (<emiliocobos@usal.es>)\n");
 }
 
 /// Parses the message stored in buff, and sends the correct reply to `sock`,
@@ -339,6 +336,7 @@ int main(int argc, char** argv) {
     long port = 8000;
     int thread_creation_status;
     bool daemonize = false;
+    const char* data_src_filename = "etc/events.txt";
 
     pthread_t tcp_thread;
     pthread_t udp_thread;
@@ -362,10 +360,19 @@ int main(int argc, char** argv) {
         } else if (strcmp(argv[i], "-d") == 0 ||
                    strcmp(argv[i], "--daemonize") == 0) {
             daemonize = true;
+        } else if (strcmp(argv[i], "-f") == 0 ||
+                   strcmp(argv[i], "--file") == 0) {
+            ++i;
+            if (i == argc)
+                FATAL("The %s option needs a value", argv[i - 1]);
+            data_src_filename = argv[i];
         } else {
             WARN("Unrecognized option: %s", argv[i]);
         }
     }
+
+    LOG("Data source: %s", data_src_filename);
+    get_global_data_from(data_src_filename);
 
     LOG("Starting server on port %ld, daemon: %d", port, daemonize ? 1 : 0);
 

@@ -135,6 +135,15 @@ TEST(vector_base, {
     ASSERT(v.buffer == NULL);
 })
 
+TEST(parse_event_simple, {
+    protocol_event_t result;
+    const char* str = "sabbdf#fdafwafew#2015-01-01#2015-02-01";
+
+    ASSERT(ERROR_NONE == parse_event(str, &result));
+    ASSERT(strcmp("sabbdf", result.id) == 0);
+    ASSERT(strcmp(result.description, "fdafwafew") == 0);
+})
+
 TEST_MAIN({
     RUN_TEST(parse_message_simple);
     RUN_TEST(parse_message_list_events);
@@ -149,4 +158,6 @@ TEST_MAIN({
     RUN_TEST(parse_failure_extra_newline_in_content);
 
     RUN_TEST(vector_base);
+
+    RUN_TEST(parse_event_simple);
 })

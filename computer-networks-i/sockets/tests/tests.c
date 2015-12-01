@@ -144,6 +144,20 @@ TEST(parse_event_simple, {
     ASSERT(strcmp(result.description, "fdafwafew") == 0);
 })
 
+TEST(parse_failure_event_invalid_date, {
+    protocol_event_t result;
+    const char* str = "sabbdf#fdafwafew#fsfs#2015-02-01";
+
+    ASSERT(ERROR_EXPECTED_VALID_DATE == parse_event(str, &result));
+})
+
+TEST(parse_failure_event_missing_separator, {
+    protocol_event_t result;
+    const char* str = "sabbdf#fdafwafew#2015-02-01";
+
+    ASSERT(ERROR_EXPECTED_SEPARATOR == parse_event(str, &result));
+})
+
 TEST_MAIN({
     RUN_TEST(parse_message_simple);
     RUN_TEST(parse_message_list_events);
@@ -160,4 +174,6 @@ TEST_MAIN({
     RUN_TEST(vector_base);
 
     RUN_TEST(parse_event_simple);
+    RUN_TEST(parse_failure_event_invalid_date);
+    RUN_TEST(parse_failure_event_missing_separator);
 })

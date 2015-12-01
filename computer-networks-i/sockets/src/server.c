@@ -22,6 +22,7 @@
 
 #include "logger.h"
 #include "protocol.h"
+#include "connection-state.h"
 #include "utils.h"
 #include "vector.h"
 
@@ -78,18 +79,25 @@ void show_usage(int argc, char** argv) {
 ///
 /// The return value is a boolean indicating if the connection (in the tcp
 /// case) should continue
-bool parse_message_and_reply(int sock, const char* buff,
-                             struct sockaddr* target_addr,
+bool parse_message_and_reply(int sock, connection_state_t* state,
+                             const char* buff, struct sockaddr* target_addr,
                              socklen_t target_addr_len) {
+#define RESPOND(...) snprintf(response, sizeof(response), __VA_ARGS__)
+#define RESPOND_ERROR(...) RESPOND("ERROR " __VA_ARGS__)
+
+    // If the first character of the response is null at the end of it, we
+    // assume success and reply "OK"
     char response[512];
     ssize_t ret;
+
     client_message_t message;
     parse_error_t error = parse_client_message(buff, &message);
 
+    response[0] = '\0';
+
     if (error != ERROR_NONE) {
         LOG("Parse error: %s", parse_error_string(error));
-        snprintf(response, sizeof(response), "ERROR Parse error: %s",
-                 parse_error_string(error));
+        RESPOND_ERROR("Parse error: %s", parse_error_string(error));
         ret = sendto(sock, response, strlen(response), 0, target_addr,
                      target_addr_len);
 
@@ -102,8 +110,40 @@ bool parse_message_and_reply(int sock, const char* buff,
         return true;
     }
 
-    /// TODO
-    snprintf(response, sizeof(response), "OK");
+    switch (message.type) {
+        case MESSAGE_TYPE_HELLO:
+            if (state->logged_in) {
+                RESPOND_ERROR("Already logged in");
+                break;
+            }
+
+            strncpy(state->uid, message.content.uid, sizeof(protocol_uid_t));
+            state->logged_in = true;
+            break;
+
+        case MESSAGE_TYPE_BYE:
+            if (!state->logged_in) {
+                RESPOND_ERROR("Not logged in");
+                break;
+            }
+
+            if (strcmp(state->uid, message.content.uid) != 0) {
+                RESPOND_ERROR("Invalid user");
+                break;
+            }
+
+            state->logged_in = false;
+            break;
+
+        case MESSAGE_TYPE_EVENT_LIST:
+
+        default:
+            WARN("Unexpected message type %d", message.type);
+            RESPOND_ERROR("Unknown error");
+    }
+
+    if (!response[0])
+        RESPOND("OK");
 
     ret = sendto(sock, response, strlen(response), 0, target_addr,
                  target_addr_len);
@@ -114,11 +154,15 @@ bool parse_message_and_reply(int sock, const char* buff,
     }
 
     return true;
+#undef RESPOND
+#undef RESPOND_ERROR
 }
 
 void* handle_tcp_connection(void* sent_socket) {
     int socket = *((int*)sent_socket);
     free(sent_socket);
+    connection_state_t state;
+    connection_state_init(&state);
 
     /// Set a recv timeout, to allow closing connections
     struct timeval tv;
@@ -148,7 +192,7 @@ void* handle_tcp_connection(void* sent_socket) {
         buff[len] = 0;
 
         LOG("tcp: (fd: %d) received %zu bytes: %s", socket, len, buff);
-        if (!parse_message_and_reply(socket, buff, NULL, 0))
+        if (!parse_message_and_reply(socket, &state, buff, NULL, 0))
             break;
     }
 
@@ -220,11 +264,17 @@ cleanup_and_return:
     return NULL;
 }
 
+struct udp_cache_data {
+    struct sockaddr_in address;
+    time_t last_time_accessed;
+} udp_cache_data_t;
+
 void* start_udp_server(void* info) {
     long port = *((long*)info);
     struct sockaddr_in serv_addr;
     int sock;
     int ret;
+    connection_state_t fake_connection_state;
 
     LOG("start_udp_server(%p); port: %ld", info, port);
 
@@ -253,6 +303,8 @@ void* start_udp_server(void* info) {
     // TODO: handle chunked datagrams?
     // It's arguably difficult (if not impossible) with UDP.
     while (true) {
+        memset(&fake_connection_state, 0, sizeof(connection_state_t));
+
         struct sockaddr_in src_addr;
         socklen_t src_addr_len = sizeof(src_addr);
         ssize_t len;
@@ -269,8 +321,8 @@ void* start_udp_server(void* info) {
 
         LOG("udp: Received %zu bytes: \"%s\"", len, buff);
 
-        parse_message_and_reply(sock, buff, (struct sockaddr*)&src_addr,
-                                src_addr_len);
+        parse_message_and_reply(sock, &fake_connection_state, buff,
+                                (struct sockaddr*)&src_addr, src_addr_len);
 
         if (len == -1) {
             WARN("UDP response lost: %s", strerror(errno));

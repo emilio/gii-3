@@ -215,6 +215,10 @@ void* start_tcp_server(void* info) {
 
     LOG("Opened TCP socket (fd: %d)", sock);
 
+    int yes = 1;
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
+        WARN("tcp: Couldn't set SO_REUSEADDR. Reason: %s", strerror(errno));
+
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;

@@ -144,6 +144,25 @@ TEST(parse_event_simple, {
     ASSERT(strcmp(result.description, "fdafwafew") == 0);
 })
 
+TEST(parse_event_complex, {
+    protocol_event_t result;
+    const char* str = "id_evento_1#descripción del evento 1#01/11/2015 09:00:00#01/12/2015 14:00:00";
+
+    ASSERT(ERROR_NONE == parse_event(str, &result));
+    ASSERT(strcmp(result.id, "id_evento_1") == 0);
+    ASSERT(strcmp(result.description, "descripción del evento 1") == 0);
+    ASSERT(strcmp(result.description, "descripción del evento 1") == 0);
+
+    char buff[200];
+
+    strftime(buff, sizeof(buff), "%d/%m/%Y %H:%M:%S", &result.starts_at);
+    ASSERT(strcmp(buff, "01/11/2015 09:00:00") == 0);
+
+    strftime(buff, sizeof(buff), "%d/%m/%Y %H:%M:%S", &result.ends_at);
+    ASSERT(strcmp(buff, "01/12/2015 14:00:00") == 0);
+})
+
+
 TEST(parse_failure_event_invalid_date, {
     protocol_event_t result;
     const char* str = "sabbdf#fdafwafew#fsfs#2015-02-01";
@@ -156,6 +175,15 @@ TEST(parse_failure_event_missing_separator, {
     const char* str = "sabbdf#fdafwafew#2015-02-01";
 
     ASSERT(ERROR_EXPECTED_SEPARATOR == parse_event(str, &result));
+})
+
+TEST(parse_assistance_simple, {
+    protocol_assistance_t result;
+    const char* str = "sabbdf#fdafwafew#2015-02-01";
+
+    ASSERT(ERROR_NONE == parse_assistance(str, &result));
+    ASSERT(strcmp(result.uid, "sabbdf") == 0);
+    ASSERT(strcmp(result.event_id, "fdafwafew") == 0);
 })
 
 TEST_MAIN({
@@ -174,6 +202,9 @@ TEST_MAIN({
     RUN_TEST(vector_base);
 
     RUN_TEST(parse_event_simple);
+    RUN_TEST(parse_event_complex);
     RUN_TEST(parse_failure_event_invalid_date);
     RUN_TEST(parse_failure_event_missing_separator);
+
+    RUN_TEST(parse_assistance_simple);
 })

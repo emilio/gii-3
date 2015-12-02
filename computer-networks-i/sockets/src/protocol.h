@@ -63,6 +63,12 @@ typedef struct protocol_event {
     struct tm ends_at;
 } protocol_event_t;
 
+typedef struct protocol_assistance_t {
+    protocol_uid_t uid;
+    protocol_event_id_t event_id;
+    struct tm at;
+} protocol_assistance_t;
+
 extern const char* PARSE_ERROR_MESSAGES[];
 
 typedef enum parse_error {
@@ -106,4 +112,6 @@ parse_error_t parse_client_message(const char* in_source,
 
 parse_error_t parse_event(const char* in_source, protocol_event_t* event);
 
+parse_error_t parse_assistance(const char* in_source,
+                               protocol_assistance_t* assistance);
 #endif

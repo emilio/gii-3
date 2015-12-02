@@ -241,5 +241,39 @@ parse_error_t parse_event(const char* in_source, protocol_event_t* event) {
     if (!parse_date(&cursor, &event->ends_at))
         return ERROR_EXPECTED_VALID_DATE;
 
+    if (*cursor)
+        return ERROR_UNEXPECTED_CONTENT;
+
+    return ERROR_NONE;
+}
+
+parse_error_t parse_assistance(const char* in_source,
+                               protocol_assistance_t* assistance) {
+    const char* cursor = in_source;
+
+    if (assistance == NULL)
+        return ERROR_UNKNOWN;
+
+    if (in_source == NULL)
+        return ERROR_NO_EVENT;
+
+    if (!try_consume_id(&cursor, assistance->uid, MAX_UID_LEN))
+        return ERROR_EXPECTED_VALID_UID;
+
+    if (!try_consume(&cursor, "#"))
+        return ERROR_EXPECTED_SEPARATOR;
+
+    if (!try_consume_id(&cursor, assistance->event_id, MAX_EVENT_ID_LEN))
+        return ERROR_EXPECTED_VALID_EVENT_ID;
+
+    if (!try_consume(&cursor, "#"))
+        return ERROR_EXPECTED_SEPARATOR;
+
+    if (!parse_date(&cursor, &assistance->at))
+        return ERROR_EXPECTED_VALID_DATE;
+
+    if (*cursor)
+        return ERROR_UNEXPECTED_CONTENT;
+
     return ERROR_NONE;
 }

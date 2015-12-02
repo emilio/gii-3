@@ -68,6 +68,7 @@ bool get_events_from(const char* filename) {
     }
 
     LOG("event_parse: Found %zu events", vector_size(&GLOBAL_DATA.events));
+    fclose(f);
 
     return true;
 }
@@ -103,6 +104,7 @@ bool get_assistances_from(const char* filename) {
 
     LOG("assistance_parse: Found %zu assistances",
         vector_size(&GLOBAL_DATA.assistances));
+    fclose(f);
 
     return true;
 }
@@ -114,28 +116,31 @@ bool send_event_list(int sock, struct sockaddr* target_addr,
     char starts_at[20];
     char ends_at[20];
     time_t now = time(NULL);
-
+    size_t found = 0;
     int ret;
 
     // No need to lock here, events are inmutable
     for (size_t i = 0; i < vector_size(&GLOBAL_DATA.events); ++i) {
         vector_get(&GLOBAL_DATA.events, i, &event);
         if (mktime(&event.starts_at) < now && mktime(&event.ends_at) > now) {
+            ++found;
+
             strftime(starts_at, sizeof(starts_at), "%d/%m/%Y %H:%M:%S",
                      &event.starts_at);
             strftime(ends_at, sizeof(ends_at), "%d/%m/%Y %H:%M:%S",
                      &event.ends_at);
 
-            snprintf(response, sizeof(response), "%s#%s#%s#%s\n", event.id,
-                     event.description, starts_at, ends_at);
+            // If we're not the firsts we add the newline of the previous
+            if (found == 1) {
+                snprintf(response, sizeof(response), "%s#%s#%s#%s", event.id,
+                         event.description, starts_at, ends_at);
+            } else {
+                snprintf(response, sizeof(response), "\n%s#%s#%s#%s", event.id,
+                         event.description, starts_at, ends_at);
+            }
 
-            size_t len = strlen(response);
-
-            // If it's the last one change the \n with the trailing null
-            if (i == vector_size(&GLOBAL_DATA.events) - 1)
-                response[len - 1] = '\0';
-
-            ret = sendto(sock, response, len, 0, target_addr, target_addr_len);
+            ret = sendto(sock, response, strlen(response), 0, target_addr,
+                         target_addr_len);
             if (ret == -1) {
                 WARN("Ignoring sendto() error (socket: %d, response: %s)", sock,
                      response);
@@ -144,6 +149,68 @@ bool send_event_list(int sock, struct sockaddr* target_addr,
         }
     }
 
+    // Send the trailing byte
+    response[0] = '\0';
+    ret = sendto(sock, response, 1, 0, target_addr, target_addr_len);
+    if (ret == -1) {
+        WARN("Ignoring sendto() error (socket: %d, response: %s)", sock,
+             response);
+        return false;
+    }
+
+    return true;
+}
+
+bool send_assistance_list(int sock, struct sockaddr* target_addr,
+                          socklen_t target_addr_len,
+                          client_message_t* message) {
+    assert(message->type == MESSAGE_TYPE_ASSISTANCE_LIST);
+    protocol_assistance_t assistance;
+    char at[20];
+    char response[512];
+    int ret;
+    size_t found = 0;
+
+    pthread_mutex_lock(&GLOBAL_DATA.mutex);
+
+    for (size_t i = 0; i < vector_size(&GLOBAL_DATA.assistances); ++i) {
+        vector_get(&GLOBAL_DATA.assistances, i, &assistance);
+        if (strcmp(assistance.uid, message->content.assistance_list_info.uid) ==
+                0 &&
+            strcmp(assistance.event_id,
+                   message->content.assistance_list_info.event_id) == 0) {
+            ++found;
+
+            strftime(at, sizeof(at), "%d/%m/%Y %H:%M:%S", &assistance.at);
+            if (found == 1) {
+                snprintf(response, sizeof(response), "%s#%s#%s", assistance.uid,
+                         assistance.event_id, at);
+            } else {
+                snprintf(response, sizeof(response), "\n%s#%s#%s",
+                         assistance.uid, assistance.event_id, at);
+            }
+
+            ret = sendto(sock, response, strlen(response), 0, target_addr,
+                         target_addr_len);
+            if (ret == -1) {
+                WARN("Ignoring sendto() error (socket: %d, response: %s)", sock,
+                     response);
+                pthread_mutex_unlock(&GLOBAL_DATA.mutex);
+                return false;
+            }
+        }
+    }
+
+    response[0] = '\0';
+    ret = sendto(sock, response, 1, 0, target_addr, target_addr_len);
+    if (ret == -1) {
+        WARN("Ignoring sendto() error (socket: %d, response: %s)", sock,
+             response);
+        pthread_mutex_unlock(&GLOBAL_DATA.mutex);
+        return false;
+    }
+
+    pthread_mutex_unlock(&GLOBAL_DATA.mutex);
     return true;
 }
 
@@ -242,10 +309,10 @@ bool parse_message_and_reply(int sock, connection_state_t* state,
 
         case MESSAGE_TYPE_EVENT_LIST:
             return send_event_list(sock, target_addr, target_addr_len);
-            break;
 
         case MESSAGE_TYPE_ASSISTANCE_LIST:
-            // TODO
+            return send_assistance_list(sock, target_addr, target_addr_len,
+                                        &message);
 
         default:
             WARN("Unexpected message type %d", message.type);
@@ -375,6 +442,7 @@ void* start_tcp_server(void* info) {
         pthread_t new_connection_thread;
         pthread_create(&new_connection_thread, NULL, handle_tcp_connection,
                        sent_socket);
+        pthread_detach(new_connection_thread);
     }
 
 cleanup_and_return:
@@ -451,6 +519,11 @@ void* start_udp_server(void* info) {
 
     close(sock);
     return NULL;
+}
+
+void cleanup_global_data() {
+    vector_destroy(&GLOBAL_DATA.events);
+    vector_destroy(&GLOBAL_DATA.assistances);
 }
 
 int main(int argc, char** argv) {
@@ -562,6 +635,8 @@ int main(int argc, char** argv) {
     /// Tell the parent we're fine
     if (daemonize)
         kill(getppid(), SIGUSR1);
+
+    atexit(cleanup_global_data);
 
     pthread_join(tcp_thread, NULL);
     pthread_join(udp_thread, NULL);

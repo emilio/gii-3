@@ -63,7 +63,7 @@ typedef struct protocol_event {
     struct tm ends_at;
 } protocol_event_t;
 
-typedef struct protocol_assistance_t {
+typedef struct protocol_assistance {
     protocol_uid_t uid;
     protocol_event_id_t event_id;
     struct tm at;

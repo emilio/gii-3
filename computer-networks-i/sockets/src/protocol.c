@@ -5,6 +5,7 @@
 const char* PARSE_ERROR_MESSAGES[] = {
     "No error",                   // ERROR_NONE
     "No message received",        // ERROR_NO_MESSAGE
+    "No event received",          // ERROR_NO_EVENT
     "Expected separator",         // ERROR_EXPECTED_SEPARATOR
     "Expected valid description", // ERROR_EXPECTED_VALID_DESCRIPTION
     "Invalid message type",       // ERROR_INVALID_MESSAGE_TYPE

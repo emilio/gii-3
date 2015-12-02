@@ -33,12 +33,118 @@
 struct server_data {
     pthread_mutex_t mutex;
     vector_t events;
+    vector_t assistances;
 } GLOBAL_DATA = {PTHREAD_MUTEX_INITIALIZER,
-                 VECTOR_INITIALIZER(sizeof(protocol_event_t))};
+                 VECTOR_INITIALIZER(sizeof(protocol_event_t)),
+                 VECTOR_INITIALIZER(sizeof(protocol_assistance_t))};
 
+bool get_events_from(const char* filename) {
+    FILE* f;
+    char line[512];
+    protocol_event_t tmp_event;
 
-void get_global_data_from(const char* filename) {
-    // TODO parse data source here (or at least after the fork)
+    f = fopen(filename, "r");
+    if (!f) {
+        WARN("Couldn't open \"%s\": %s", filename, strerror(errno));
+        return false;
+    }
+
+    while (fgets(line, sizeof(line), f)) {
+        size_t len = strlen(line);
+
+        // Trim last newline
+        if (line[len - 1] == '\n')
+            line[len - 1] = '\0';
+
+        LOG("event_parse: %s", line);
+
+        parse_error_t error = parse_event(line, &tmp_event);
+        if (error != ERROR_NONE) {
+            WARN("Parse error: %s", parse_error_string(error));
+            continue;
+        }
+
+        vector_push(&GLOBAL_DATA.events, &tmp_event);
+    }
+
+    LOG("event_parse: Found %zu events", vector_size(&GLOBAL_DATA.events));
+
+    return true;
+}
+
+bool get_assistances_from(const char* filename) {
+    FILE* f;
+    char line[512];
+    protocol_assistance_t tmp_assistance;
+
+    f = fopen(filename, "r");
+    if (!f) {
+        WARN("Couldn't open \"%s\": %s", filename, strerror(errno));
+        return false;
+    }
+
+    while (fgets(line, sizeof(line), f)) {
+        size_t len = strlen(line);
+
+        // Trim last newline
+        if (line[len - 1] == '\n')
+            line[len - 1] = '\0';
+
+        LOG("assistance_parse: %s", line);
+
+        parse_error_t error = parse_assistance(line, &tmp_assistance);
+        if (error != ERROR_NONE) {
+            WARN("Parse error: %s", parse_error_string(error));
+            continue;
+        }
+
+        vector_push(&GLOBAL_DATA.assistances, &tmp_assistance);
+    }
+
+    LOG("assistance_parse: Found %zu assistances",
+        vector_size(&GLOBAL_DATA.assistances));
+
+    return true;
+}
+
+bool send_event_list(int sock, struct sockaddr* target_addr,
+                     socklen_t target_addr_len) {
+    protocol_event_t event;
+    char response[512];
+    char starts_at[20];
+    char ends_at[20];
+    time_t now = time(NULL);
+
+    int ret;
+
+    // No need to lock here, events are inmutable
+    for (size_t i = 0; i < vector_size(&GLOBAL_DATA.events); ++i) {
+        vector_get(&GLOBAL_DATA.events, i, &event);
+        if (mktime(&event.starts_at) < now && mktime(&event.ends_at) > now) {
+            strftime(starts_at, sizeof(starts_at), "%d/%m/%Y %H:%M:%S",
+                     &event.starts_at);
+            strftime(ends_at, sizeof(ends_at), "%d/%m/%Y %H:%M:%S",
+                     &event.ends_at);
+
+            snprintf(response, sizeof(response), "%s#%s#%s#%s\n", event.id,
+                     event.description, starts_at, ends_at);
+
+            size_t len = strlen(response);
+
+            // If it's the last one change the \n with the trailing null
+            if (i == vector_size(&GLOBAL_DATA.events) - 1)
+                response[len - 1] = '\0';
+
+            ret = sendto(sock, response, len, 0, target_addr, target_addr_len);
+            if (ret == -1) {
+                WARN("Ignoring sendto() error (socket: %d, response: %s)", sock,
+                     response);
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 /// Signal handler used to daemonize the program
@@ -60,7 +166,9 @@ void show_usage(int argc, char** argv) {
     printf("  -p, --port [port]\t Listen to [port]\n");
     printf("  -v, --verbose\t Be verbose about what is going on\n");
     printf("  -d, --daemonize\t Start server as a daemon\n");
-    printf("  -f, --file [filename]\t Use [file] as data source\n");
+    printf("  -e, --events [filename]\t Use [file] as event data source\n");
+    printf("  -a, --assistances [filename]\t Use [file] as assistance data "
+           "source\n");
     printf("\n");
     printf("Author(s):\n");
     printf("  Emilio Cobos Álvarez (<emiliocobos@usal.es>)\n");
@@ -133,6 +241,11 @@ bool parse_message_and_reply(int sock, connection_state_t* state,
             break;
 
         case MESSAGE_TYPE_EVENT_LIST:
+            return send_event_list(sock, target_addr, target_addr_len);
+            break;
+
+        case MESSAGE_TYPE_ASSISTANCE_LIST:
+            // TODO
 
         default:
             WARN("Unexpected message type %d", message.type);
@@ -345,7 +458,8 @@ int main(int argc, char** argv) {
     long port = 8000;
     int thread_creation_status;
     bool daemonize = false;
-    const char* data_src_filename = "etc/events.txt";
+    const char* events_src_filename = "etc/events.txt";
+    const char* assistances_src_filename = "etc/assistances.txt";
 
     pthread_t tcp_thread;
     pthread_t udp_thread;
@@ -369,19 +483,30 @@ int main(int argc, char** argv) {
         } else if (strcmp(argv[i], "-d") == 0 ||
                    strcmp(argv[i], "--daemonize") == 0) {
             daemonize = true;
-        } else if (strcmp(argv[i], "-f") == 0 ||
-                   strcmp(argv[i], "--file") == 0) {
+        } else if (strcmp(argv[i], "-e") == 0 ||
+                   strcmp(argv[i], "--events") == 0) {
             ++i;
             if (i == argc)
                 FATAL("The %s option needs a value", argv[i - 1]);
-            data_src_filename = argv[i];
+            events_src_filename = argv[i];
+        } else if (strcmp(argv[i], "-a") == 0 ||
+                   strcmp(argv[i], "--assistances") == 0) {
+            ++i;
+            if (i == argc)
+                FATAL("The %s option needs a value", argv[i - 1]);
+            assistances_src_filename = argv[i];
         } else {
             WARN("Unrecognized option: %s", argv[i]);
         }
     }
 
-    LOG("Data source: %s", data_src_filename);
-    get_global_data_from(data_src_filename);
+    LOG("Events source: %s", events_src_filename);
+    if (!get_events_from(events_src_filename))
+        FATAL("Couldn't get event data");
+
+    LOG("Assistances source:%s", assistances_src_filename);
+    if (!get_assistances_from(assistances_src_filename))
+        FATAL("Couldn't get assistance data");
 
     LOG("Starting server on port %ld, daemon: %d", port, daemonize ? 1 : 0);
 

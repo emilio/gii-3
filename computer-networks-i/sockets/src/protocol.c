@@ -27,15 +27,19 @@ const char* MESSAGE_TYPE_STRINGS[] = {
 
 static inline bool parse_date(const char** cursor, struct tm* tm) {
     static const char* formats_to_try[] = {
-        "%d-%m-%Y %H:%M", // day-month-year hours:minutes
-        "%d/%m/%Y %H:%M", // day/month/year hours:minutes
-        "%Y-%m-%d %H:%M", // Year-month-day hours:minutes
-        "%Y/%m/%d %H:%M", // Year/month/day hours:minutes
-        "%d-%m-%Y",       // day-month-year
-        "%d/%m/%Y",       // day/month/year
-        "%Y-%m-%d",       // ISO date format
-        "%Y/%m/%d",       // Year/month/day
-        "%c",             // Locale date
+        "%d-%m-%Y %H:%M:%S", // day-month-year hours:minutes:seconds
+        "%d/%m/%Y %H:%M:%S", // day/month/year hours:minutes:seconds
+        "%Y-%m-%d %H:%M:%S", // Year-month-day hours:minutes:seconds
+        "%Y/%m/%d %H:%M:%S", // Year/month/day hours:minutes:seconds
+        "%d-%m-%Y %H:%M",    // day-month-year hours:minutes
+        "%d/%m/%Y %H:%M",    // day/month/year hours:minutes
+        "%Y-%m-%d %H:%M",    // Year-month-day hours:minutes
+        "%Y/%m/%d %H:%M",    // Year/month/day hours:minutes
+        "%d-%m-%Y",          // day-month-year
+        "%d/%m/%Y",          // day/month/year
+        "%Y-%m-%d",          // ISO date format
+        "%Y/%m/%d",          // Year/month/day
+        "%c",                // Locale date
         NULL,
     };
 

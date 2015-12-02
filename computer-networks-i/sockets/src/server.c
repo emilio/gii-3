@@ -95,7 +95,7 @@ bool parse_message_and_reply(int sock, connection_state_t* state,
     if (error != ERROR_NONE) {
         LOG("Parse error: %s", parse_error_string(error));
         RESPOND_ERROR("Parse error: %s", parse_error_string(error));
-        ret = sendto(sock, response, strlen(response), 0, target_addr,
+        ret = sendto(sock, response, strlen(response) + 1, 0, target_addr,
                      target_addr_len);
 
         if (ret == -1) {
@@ -142,7 +142,12 @@ bool parse_message_and_reply(int sock, connection_state_t* state,
     if (!response[0])
         RESPOND("OK");
 
-    ret = sendto(sock, response, strlen(response), 0, target_addr,
+    // The strlen(response) + 1 is to always add a trailing null byte to the
+    // response
+    //
+    // This is useful over all because of randomly large responses like
+    // `send_event_list`.
+    ret = sendto(sock, response, strlen(response) + 1, 0, target_addr,
                  target_addr_len);
     if (ret == -1) {
         WARN("Ignoring sendto() error (socket: %d, response: %s)", sock,

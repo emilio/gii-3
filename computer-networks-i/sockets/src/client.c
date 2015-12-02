@@ -181,7 +181,10 @@ int main(int argc, char** argv) {
         socklen_t from_size = sizeof(from_addr);
 
         ssize_t recv_size;
-    retry_udp_recv:
+        size_t recv_count = 0;
+    retry_recv:
+        /// The server always replies with and ending null char, that should
+        /// not be present in the body response
         recv_size = recvfrom(sock, buff, SIZE, 0, (struct sockaddr*)&from_addr,
                              &from_size);
 
@@ -190,16 +193,33 @@ int main(int argc, char** argv) {
             break;
         }
 
-        buff[recv_size] = 0;
         if (use_udp) {
             if (sockaddr_cmp((struct sockaddr*)&from_addr,
                              (struct sockaddr*)&serv_addr) != 0) {
                 WARN("Received message not from server: %s", buff);
-                goto retry_udp_recv;
+                goto retry_recv;
             }
         }
 
-        printf("< %s\n", buff);
+        ++recv_count;
+
+        // The server always replies with a trailing zero on end,
+        // so maybe we have more data to receive.
+        bool is_first_message = recv_count == 1;
+        bool is_last_message = buff[recv_size - 1] == '\0';
+
+        if (is_first_message)
+            printf("< ");
+
+        buff[recv_size] = 0;
+        LOG("recv(%zu, last: %d): %s", recv_size, is_last_message, buff);
+
+        printf("%s", buff);
+
+        if (is_last_message)
+            printf("\n");
+        else
+            goto retry_recv;
     }
 
     LOG("Closing client");

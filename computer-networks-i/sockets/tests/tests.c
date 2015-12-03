@@ -136,6 +136,17 @@ TEST(parse_event_simple, {
     ASSERT(strcmp(result.description, "fdafwafew") == 0);
 })
 
+TEST(parse_event_simple_nonzero, {
+    protocol_event_t result;
+    const char* str = "sabbdf#fdafwafew#2015-01-01#2015-02-01";
+
+    memset(&result, 1, sizeof(result));
+
+    ASSERT(ERROR_NONE == parse_event(str, &result));
+    ASSERT(strcmp("sabbdf", result.id) == 0);
+    ASSERT(strcmp(result.description, "fdafwafew") == 0);
+})
+
 TEST(parse_event_complex, {
     protocol_event_t result;
     const char* str = "id_evento_1#descripción del evento 1#01/11/2015 09:00:00#01/12/2015 14:00:00";
@@ -213,6 +224,7 @@ TEST_MAIN({
     RUN_TEST(vector_base);
 
     RUN_TEST(parse_event_simple);
+    RUN_TEST(parse_event_simple_nonzero);
     RUN_TEST(parse_event_complex);
     RUN_TEST(parse_failure_event_invalid_date);
     RUN_TEST(parse_failure_event_missing_separator);

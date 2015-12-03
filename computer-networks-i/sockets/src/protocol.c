@@ -105,6 +105,8 @@ static bool try_consume_until(const char** current_cursor, char separator,
         *buff++ = *(*current_cursor)++;
     }
 
+    *buff = '\0';
+
     return len != 0;
 }
 

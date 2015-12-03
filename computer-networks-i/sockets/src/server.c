@@ -448,11 +448,11 @@ bool fill_assistance(int sock, struct sockaddr* target_addr,
 /// Signal handler used to daemonize the program
 void daemonize_sig_handler(int signal) {
     switch (signal) {
-        case SIGUSR1: // The daemon did run fine
-            LOG("Daemon seems to have started successfully");
-            exit(0);
         case SIGCHLD: // The daemon died
             FATAL("Daemon has died on startup");
+        case SIGALRM:
+            LOG("Daemon timed out waiting for children, they're probably fine");
+            exit(0);
     }
 }
 
@@ -763,6 +763,7 @@ void* start_udp_server(void* info) {
         }
     }
 
+    LOG("UDP server closing");
     close(sock);
     return NULL;
 }
@@ -858,8 +859,8 @@ int main(int argc, char** argv) {
         if (signal(SIGCHLD, daemonize_sig_handler) == SIG_ERR)
             FATAL("Error registering SIGCHLD: %s", strerror(errno));
 
-        if (signal(SIGUSR1, daemonize_sig_handler) == SIG_ERR)
-            FATAL("Error registering SIGUSR1: %s", strerror(errno));
+        if (signal(SIGALRM, daemonize_sig_handler) == SIG_ERR)
+            FATAL("Error registering SIGALRM: %s", strerror(errno));
 
         pid_t child_pid;
         switch ((child_pid = fork())) {
@@ -870,16 +871,18 @@ int main(int argc, char** argv) {
                 if (signal(SIGCHLD, SIG_IGN) == SIG_ERR)
                     FATAL("Error ignoring SIGCHLD: %s", strerror(errno));
 
-                if (signal(SIGUSR1, SIG_IGN) == SIG_ERR)
-                    FATAL("Error ignoring SIGUSR1: %s", strerror(errno));
-
                 break;
             case -1:
                 FATAL("Fork error: %s", strerror(errno));
                 break;
             default:
+                // NOTE: this is an educated guess, and does not guarantee
+                // that the server is fine. We assume that if after two seconds
+                // it's fine, it will be fine forever, but this does not have to
+                // be true.
+                alarm(2);
                 waitpid(child_pid, NULL, 0); // Either SIGCHLD (if the daemon
-                                             // dies) or SIGUSR1 will arrive
+                                             // dies) or SIGALRM will arrive
                 return 0;
         }
     }
@@ -902,14 +905,11 @@ int main(int argc, char** argv) {
 
     LOG("UDP server thread created: %ld", udp_thread);
 
-    /// Tell the parent we're fine
-    if (daemonize)
-        kill(getppid(), SIGUSR1);
-
     atexit(cleanup_global_data);
 
     pthread_join(tcp_thread, NULL);
     pthread_join(udp_thread, NULL);
 
+    LOG("Seems like all servers went down, exiting...");
     return 0;
 }

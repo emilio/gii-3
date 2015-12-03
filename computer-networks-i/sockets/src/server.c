@@ -31,15 +31,16 @@
 
 struct server_data {
     pthread_mutex_t mutex;
-    vector_t events;
-    vector_t users;
-    vector_t assistances;
-    vector_t invitations;
+    vector_t events;                  // Inmutable
+    vector_t users;                   // Inmutable
+    vector_t assistances;             // Not inmutable
+    vector_t invitations;             // Inmutable
+    const char* assistances_filename; // File we'll use as a (kind of) database.
 } GLOBAL_DATA = {PTHREAD_MUTEX_INITIALIZER,
                  VECTOR_INITIALIZER(sizeof(protocol_event_t)),
                  VECTOR_INITIALIZER(sizeof(protocol_user_t)),
                  VECTOR_INITIALIZER(sizeof(protocol_assistance_t)),
-                 VECTOR_INITIALIZER(sizeof(protocol_invitation_t))};
+                 VECTOR_INITIALIZER(sizeof(protocol_invitation_t)), NULL};
 
 bool event_exists(protocol_event_id_t id, protocol_event_t* event) {
     // NOTE: no locking here since it's supposed to be inmutable, fixme if it
@@ -296,6 +297,33 @@ bool get_assistances_from(const char* filename) {
     return true;
 }
 
+bool dump_assistances_to(const char* filename) {
+    FILE* f;
+    char date[20];
+    protocol_assistance_t assistance;
+
+    f = fopen(filename, "w");
+    if (!f) {
+        WARN("Couldn't open \"%s\": %s", filename, strerror(errno));
+        return false;
+    }
+
+    LOG("Dumping assistances to: %s", filename);
+
+    pthread_mutex_lock(&GLOBAL_DATA.mutex);
+
+    for (size_t i = 0; i < vector_size(&GLOBAL_DATA.assistances); ++i) {
+        vector_get(&GLOBAL_DATA.assistances, i, &assistance);
+        strftime(date, sizeof(date), "%d/%m/%Y %H:%M:%S", &assistance.at);
+        fprintf(f, "%s#%s#%s\n", assistance.uid, assistance.event_id, date);
+    }
+
+    pthread_mutex_unlock(&GLOBAL_DATA.mutex);
+
+    fclose(f);
+    return true;
+}
+
 bool send_event_list(int sock, struct sockaddr* target_addr,
                      socklen_t target_addr_len) {
     protocol_event_t event;
@@ -455,6 +483,12 @@ void daemonize_sig_handler(int signal) {
             exit(0);
     }
 }
+
+/// Do a clean exit when interrupted or TERM'd
+void clean_exit(int _signal) {
+    exit(0);
+}
+
 
 /// Shows usage of the program
 void show_usage(int argc, char** argv) {
@@ -771,6 +805,7 @@ void* start_udp_server(void* info) {
 }
 
 void cleanup_global_data() {
+    dump_assistances_to(GLOBAL_DATA.assistances_filename);
     vector_destroy(&GLOBAL_DATA.events);
     vector_destroy(&GLOBAL_DATA.users);
     vector_destroy(&GLOBAL_DATA.assistances);
@@ -854,7 +889,15 @@ int main(int argc, char** argv) {
     if (!get_assistances_from(assistances_src_filename))
         FATAL("Couldn't get assistance data");
 
+    GLOBAL_DATA.assistances_filename = assistances_src_filename;
+
     LOG("Starting server on port %ld, daemon: %d", port, daemonize ? 1 : 0);
+
+    if (signal(SIGTERM, clean_exit) == SIG_ERR)
+        FATAL("Error registering SIGTERM: %s", strerror(errno));
+
+    if (signal(SIGINT, clean_exit) == SIG_ERR)
+        FATAL("Error registering SIGINT: %s", strerror(errno));
 
     // TODO: Some kind of lockfile?
     if (daemonize) {

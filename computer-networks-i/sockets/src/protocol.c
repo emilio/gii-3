@@ -253,7 +253,7 @@ parse_error_t parse_assistance(const char* in_source,
         return ERROR_UNKNOWN;
 
     if (in_source == NULL)
-        return ERROR_NO_EVENT;
+        return ERROR_UNKNOWN;
 
     if (!try_consume_id(&cursor, assistance->uid, MAX_UID_LEN))
         return ERROR_EXPECTED_VALID_UID;
@@ -269,6 +269,49 @@ parse_error_t parse_assistance(const char* in_source,
 
     if (!parse_date(&cursor, &assistance->at))
         return ERROR_EXPECTED_VALID_DATE;
+
+    if (*cursor)
+        return ERROR_UNEXPECTED_CONTENT;
+
+    return ERROR_NONE;
+}
+
+parse_error_t parse_invitation(const char* in_source,
+                               protocol_invitation_t* invitation) {
+    const char* cursor = in_source;
+
+    if (invitation == NULL)
+        return ERROR_UNKNOWN;
+
+    if (in_source == NULL)
+        return ERROR_UNKNOWN;
+
+    if (!try_consume_id(&cursor, invitation->uid, MAX_UID_LEN))
+        return ERROR_EXPECTED_VALID_UID;
+
+    if (!try_consume(&cursor, "#"))
+        return ERROR_EXPECTED_SEPARATOR;
+
+    if (!try_consume_id(&cursor, invitation->event_id, MAX_EVENT_ID_LEN))
+        return ERROR_EXPECTED_VALID_EVENT_ID;
+
+    if (*cursor)
+        return ERROR_UNEXPECTED_CONTENT;
+
+    return ERROR_NONE;
+}
+
+parse_error_t parse_user(const char* in_source, protocol_user_t* user) {
+    const char* cursor = in_source;
+
+    if (user == NULL)
+        return ERROR_UNKNOWN;
+
+    if (in_source == NULL)
+        return ERROR_UNKNOWN;
+
+    if (!try_consume_id(&cursor, user->id, MAX_UID_LEN))
+        return ERROR_EXPECTED_VALID_UID;
 
     if (*cursor)
         return ERROR_UNEXPECTED_CONTENT;

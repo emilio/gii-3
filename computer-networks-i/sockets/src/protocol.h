@@ -68,6 +68,13 @@ typedef struct protocol_assistance {
     struct tm at;
 } protocol_assistance_t;
 
+typedef struct protocol_invitation {
+    protocol_uid_t uid;
+    protocol_event_id_t event_id;
+} protocol_invitation_t;
+
+typedef struct protocol_user { protocol_uid_t id; } protocol_user_t;
+
 extern const char* PARSE_ERROR_MESSAGES[];
 
 typedef enum parse_error {
@@ -113,4 +120,9 @@ parse_error_t parse_event(const char* in_source, protocol_event_t* event);
 
 parse_error_t parse_assistance(const char* in_source,
                                protocol_assistance_t* assistance);
+
+parse_error_t parse_invitation(const char* in_source,
+                               protocol_invitation_t* invitation);
+
+parse_error_t parse_user(const char* in_source, protocol_user_t* user);
 #endif

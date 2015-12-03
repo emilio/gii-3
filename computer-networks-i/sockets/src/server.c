@@ -32,10 +32,75 @@
 struct server_data {
     pthread_mutex_t mutex;
     vector_t events;
+    vector_t users;
     vector_t assistances;
+    vector_t invitations;
 } GLOBAL_DATA = {PTHREAD_MUTEX_INITIALIZER,
                  VECTOR_INITIALIZER(sizeof(protocol_event_t)),
-                 VECTOR_INITIALIZER(sizeof(protocol_assistance_t))};
+                 VECTOR_INITIALIZER(sizeof(protocol_user_t)),
+                 VECTOR_INITIALIZER(sizeof(protocol_assistance_t)),
+                 VECTOR_INITIALIZER(sizeof(protocol_invitation_t))};
+
+bool event_exists(protocol_event_id_t id, protocol_event_t* event) {
+    // NOTE: no locking here since it's supposed to be inmutable, fixme if it
+    // changes
+    //
+    // Wohoo linear search FTW.
+    for (size_t i = 0; i < vector_size(&GLOBAL_DATA.events); ++i) {
+        vector_get(&GLOBAL_DATA.events, i, event);
+        if (strcmp(event->id, id) == 0)
+            return true;
+    }
+
+    return false;
+}
+
+bool user_exists(protocol_uid_t id, protocol_user_t* user) {
+    // NOTE: no locking here since it's supposed to be inmutable, fixme if it
+    // changes
+    for (size_t i = 0; i < vector_size(&GLOBAL_DATA.users); ++i) {
+        vector_get(&GLOBAL_DATA.users, i, user);
+        if (strcmp(user->id, id) == 0)
+            return true;
+    }
+
+    return false;
+}
+
+bool invitation_exists(protocol_uid_t uid, protocol_event_id_t event_id) {
+    protocol_invitation_t invitation;
+    // NOTE: no locking here since it's supposed to be inmutable, fixme if it
+    // changes
+    for (size_t i = 0; i < vector_size(&GLOBAL_DATA.invitations); ++i) {
+        vector_get(&GLOBAL_DATA.invitations, i, &invitation);
+        if (strcmp(invitation.uid, uid) == 0 &&
+            strcmp(invitation.event_id, event_id) == 0)
+            return true;
+    }
+
+    return false;
+}
+
+// Adds an assistance to the global data
+// returns false if the assistance was previously registered
+bool add_assistance(protocol_assistance_t* assistance) {
+    pthread_mutex_lock(&GLOBAL_DATA.mutex);
+    protocol_assistance_t existing_assistance;
+
+    for (size_t i = 0; i < vector_size(&GLOBAL_DATA.assistances); ++i) {
+        vector_get(&GLOBAL_DATA.assistances, i, &existing_assistance);
+        if (strcmp(assistance->uid, existing_assistance.uid) == 0 &&
+            strcmp(assistance->event_id, existing_assistance.event_id) == 0) {
+            pthread_mutex_unlock(&GLOBAL_DATA.mutex);
+            return false;
+        }
+    }
+
+    vector_push(&GLOBAL_DATA.assistances, assistance);
+    pthread_mutex_unlock(&GLOBAL_DATA.mutex);
+
+    return true;
+}
 
 bool get_events_from(const char* filename) {
     FILE* f;
@@ -72,10 +137,99 @@ bool get_events_from(const char* filename) {
     return true;
 }
 
+bool get_users_from(const char* filename) {
+    FILE* f;
+    char line[512];
+    protocol_user_t tmp_user;
+
+    f = fopen(filename, "r");
+    if (!f) {
+        WARN("Couldn't open \"%s\": %s", filename, strerror(errno));
+        return false;
+    }
+
+    while (fgets(line, sizeof(line), f)) {
+        size_t len = strlen(line);
+
+        // Trim last newline
+        if (line[len - 1] == '\n')
+            line[len - 1] = '\0';
+
+        LOG("user_parse: %s", line);
+
+        parse_error_t error = parse_user(line, &tmp_user);
+        if (error != ERROR_NONE) {
+            WARN("Parse error: %s", parse_error_string(error));
+            continue;
+        }
+
+        vector_push(&GLOBAL_DATA.users, &tmp_user);
+    }
+
+    LOG("user_parse: Found %zu users", vector_size(&GLOBAL_DATA.users));
+    fclose(f);
+
+    return true;
+}
+
+bool get_invitations_from(const char* filename) {
+    FILE* f;
+    char line[512];
+    protocol_invitation_t tmp_invitation;
+    protocol_event_t event;
+    protocol_user_t user;
+
+    f = fopen(filename, "r");
+    if (!f) {
+        WARN("Couldn't open \"%s\": %s", filename, strerror(errno));
+        return false;
+    }
+
+    while (fgets(line, sizeof(line), f)) {
+        size_t len = strlen(line);
+
+        // Trim last newline
+        if (line[len - 1] == '\n')
+            line[len - 1] = '\0';
+
+        LOG("invitation_parse: %s", line);
+
+        parse_error_t error = parse_invitation(line, &tmp_invitation);
+        if (error != ERROR_NONE) {
+            WARN("Parse error: %s", parse_error_string(error));
+            continue;
+        }
+
+        if (!event_exists(tmp_invitation.event_id, &event)) {
+            WARN("Event \"%s\" does not exist, ignoring",
+                 tmp_invitation.event_id);
+            continue;
+        }
+
+        if (!user_exists(tmp_invitation.uid, &user)) {
+            WARN("User \"%s\" does not exist, ignoring", tmp_invitation.uid);
+            continue;
+        }
+
+        // if (!invitation_exists(..))
+        // There's no practical issue with a duplicated invitation
+
+        vector_push(&GLOBAL_DATA.invitations, &tmp_invitation);
+    }
+
+    LOG("invitation_parse: Found %zu invitations",
+        vector_size(&GLOBAL_DATA.invitations));
+    fclose(f);
+
+    return true;
+}
+
 bool get_assistances_from(const char* filename) {
     FILE* f;
     char line[512];
     protocol_assistance_t tmp_assistance;
+    protocol_event_t event;
+    protocol_user_t user;
 
     f = fopen(filename, "r");
     if (!f) {
@@ -98,7 +252,36 @@ bool get_assistances_from(const char* filename) {
             continue;
         }
 
-        vector_push(&GLOBAL_DATA.assistances, &tmp_assistance);
+        if (!event_exists(tmp_assistance.event_id, &event)) {
+            WARN("Event \"%s\" does not exist, ignoring",
+                 tmp_assistance.event_id);
+            continue;
+        }
+
+        time_t assistance_time = mktime(&tmp_assistance.at);
+
+        if (mktime(&event.starts_at) > assistance_time ||
+            mktime(&event.ends_at) < assistance_time) {
+            WARN("Invalid time for assistance to event \"%s\"", event.id);
+            continue;
+        }
+
+        if (!user_exists(tmp_assistance.uid, &user)) {
+            WARN("User \"%s\" does not exist, ignoring", tmp_assistance.uid);
+            continue;
+        }
+
+        if (!invitation_exists(tmp_assistance.uid, tmp_assistance.event_id)) {
+            WARN("Invalid assistance from \"%s\" to \"%s\", not invited",
+                 tmp_assistance.uid, tmp_assistance.event_id);
+            continue;
+        }
+
+        if (!add_assistance(&tmp_assistance)) {
+            WARN("Assistance already registered for \"%s\" -> \"%s\"",
+                 tmp_assistance.uid, tmp_assistance.event_id);
+            continue;
+        }
     }
 
     LOG("assistance_parse: Found %zu assistances",
@@ -172,6 +355,9 @@ bool send_assistance_list(int sock, struct sockaddr* target_addr,
 
     pthread_mutex_lock(&GLOBAL_DATA.mutex);
 
+    // TODO: We probably just want to send one, since we don't allow duplicates.
+    //
+    // We initially did so it can remain this way for now.
     for (size_t i = 0; i < vector_size(&GLOBAL_DATA.assistances); ++i) {
         vector_get(&GLOBAL_DATA.assistances, i, &assistance);
         if (strcmp(assistance.uid, message->content.assistance_list_info.uid) ==
@@ -217,48 +403,32 @@ bool fill_assistance(int sock, struct sockaddr* target_addr,
                      socklen_t target_addr_len, client_message_t* message) {
     protocol_assistance_t assistance;
     protocol_event_t event;
-    bool found = false;
     char response[512];
     int ret;
 
     assert(message->type == MESSAGE_TYPE_ASSISTANCE);
 
     time_t assistance_time = mktime(&message->content.assistance_info.datetime);
-
-    for (size_t i = 0; i < vector_size(&GLOBAL_DATA.events); ++i) {
-        vector_get(&GLOBAL_DATA.events, i, &event);
-        if (strcmp(event.id, message->content.assistance_info.event_id) == 0 &&
-            mktime(&event.starts_at) < assistance_time &&
-            mktime(&event.ends_at) > assistance_time) {
-            found = true;
-            break;
-        }
-    }
-
-    if (!found) {
-        snprintf(response, sizeof(response),
-                 "ERROR invalid event_id (maybe it's over)");
-        ret = sendto(sock, response, strlen(response) + 1, 0, target_addr,
-                     target_addr_len);
-        if (ret == -1) {
-            WARN("Ignoring sendto() error (socket: %d, response: %s)", sock,
-                 response);
-            return false;
-        }
-        return true;
-    }
-
     strcpy(assistance.uid, message->content.assistance_info.uid);
     strcpy(assistance.event_id, message->content.assistance_info.event_id);
     memcpy(&assistance.at, &message->content.assistance_info.datetime,
            sizeof(struct tm));
 
-    // TODO: Maybe check that assistance wasn't previously registered?
-    pthread_mutex_lock(&GLOBAL_DATA.mutex);
-    vector_push(&GLOBAL_DATA.assistances, &assistance);
-    pthread_mutex_unlock(&GLOBAL_DATA.mutex);
+    if (!event_exists(assistance.event_id, &event)) {
+        snprintf(response, sizeof(response), "ERROR invalid event_id");
+    } else if (mktime(&event.starts_at) > assistance_time ||
+               mktime(&event.ends_at) < assistance_time) {
+        snprintf(response, sizeof(response),
+                 "ERROR event expired or not yet started");
+    } else if (!invitation_exists(assistance.uid, assistance.event_id)) {
+        snprintf(response, sizeof(response), "ERROR not invited");
+    } else if (!add_assistance(&assistance)) {
+        snprintf(response, sizeof(response),
+                 "ERROR assistance already registered");
+    } else {
+        snprintf(response, sizeof(response), "OK");
+    }
 
-    snprintf(response, sizeof(response), "OK");
     ret = sendto(sock, response, strlen(response) + 1, 0, target_addr,
                  target_addr_len);
     if (ret == -1) {
@@ -266,6 +436,7 @@ bool fill_assistance(int sock, struct sockaddr* target_addr,
              response);
         return false;
     }
+
     return true;
 }
 
@@ -289,7 +460,10 @@ void show_usage(int argc, char** argv) {
     printf("  -v, --verbose\t Be verbose about what is going on\n");
     printf("  -d, --daemonize\t Start server as a daemon\n");
     printf("  -e, --events [filename]\t Use [file] as event data source\n");
+    printf("  -u, --users [filename]\t Use [file] as user data source\n");
     printf("  -a, --assistances [filename]\t Use [file] as assistance data "
+           "source\n");
+    printf("  -i, --invitations [filename]\t Use [file] as invitation data "
            "source\n");
     printf("\n");
     printf("Author(s):\n");
@@ -340,6 +514,7 @@ bool parse_message_and_reply(int sock, connection_state_t* state,
         return true;
     }
 
+    protocol_user_t user;
     switch (message.type) {
         case MESSAGE_TYPE_HELLO:
             if (state->logged_in) {
@@ -347,6 +522,10 @@ bool parse_message_and_reply(int sock, connection_state_t* state,
                 break;
             }
 
+            if (!user_exists(message.content.uid, &user)) {
+                RESPOND_ERROR("User not registered");
+                break;
+            }
             strncpy(state->uid, message.content.uid, sizeof(protocol_uid_t));
             state->logged_in = true;
             break;
@@ -585,7 +764,9 @@ void* start_udp_server(void* info) {
 
 void cleanup_global_data() {
     vector_destroy(&GLOBAL_DATA.events);
+    vector_destroy(&GLOBAL_DATA.users);
     vector_destroy(&GLOBAL_DATA.assistances);
+    vector_destroy(&GLOBAL_DATA.invitations);
 }
 
 int main(int argc, char** argv) {
@@ -595,6 +776,8 @@ int main(int argc, char** argv) {
     bool daemonize = false;
     const char* events_src_filename = "etc/events.txt";
     const char* assistances_src_filename = "etc/assistances.txt";
+    const char* invitations_src_filename = "etc/invitations.txt";
+    const char* users_src_filename = "etc/users.txt";
 
     pthread_t tcp_thread;
     pthread_t udp_thread;
@@ -630,6 +813,18 @@ int main(int argc, char** argv) {
             if (i == argc)
                 FATAL("The %s option needs a value", argv[i - 1]);
             assistances_src_filename = argv[i];
+        } else if (strcmp(argv[i], "-u") == 0 ||
+                   strcmp(argv[i], "--users") == 0) {
+            ++i;
+            if (i == argc)
+                FATAL("The %s option needs a value", argv[i - 1]);
+            users_src_filename = argv[i];
+        } else if (strcmp(argv[i], "-i") == 0 ||
+                   strcmp(argv[i], "--invitations") == 0) {
+            ++i;
+            if (i == argc)
+                FATAL("The %s option needs a value", argv[i - 1]);
+            invitations_src_filename = argv[i];
         } else {
             WARN("Unrecognized option: %s", argv[i]);
         }
@@ -639,7 +834,15 @@ int main(int argc, char** argv) {
     if (!get_events_from(events_src_filename))
         FATAL("Couldn't get event data");
 
-    LOG("Assistances source:%s", assistances_src_filename);
+    LOG("User source: %s", invitations_src_filename);
+    if (!get_users_from(users_src_filename))
+        FATAL("Couldn't get user data");
+
+    LOG("Invitation source: %s", invitations_src_filename);
+    if (!get_invitations_from(invitations_src_filename))
+        FATAL("Couldn't get invitation data");
+
+    LOG("Assistances source: %s", assistances_src_filename);
     if (!get_assistances_from(assistances_src_filename))
         FATAL("Couldn't get assistance data");
 

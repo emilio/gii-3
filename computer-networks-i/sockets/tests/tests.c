@@ -178,6 +178,26 @@ TEST(parse_assistance_simple, {
     ASSERT(strcmp(result.event_id, "fdafwafew") == 0);
 })
 
+TEST(parse_invitation_simple, {
+    protocol_invitation_t result;
+    const char* str = "sabbdf#fdafwafew";
+
+    ASSERT(ERROR_NONE == parse_invitation(str, &result));
+    ASSERT(strcmp(result.uid, "sabbdf") == 0);
+    ASSERT(strcmp(result.event_id, "fdafwafew") == 0);
+})
+
+TEST(parse_user_simple, {
+    protocol_user_t result;
+    const char* str = "sabbdf";
+
+    ASSERT(ERROR_NONE == parse_user(str, &result));
+    ASSERT(strcmp(result.id, "sabbdf") == 0);
+
+    const char* str_2 = "sabbdf#fdafew";
+    ASSERT(ERROR_UNEXPECTED_CONTENT == parse_user(str_2, &result));
+})
+
 TEST_MAIN({
     RUN_TEST(parse_message_simple);
     RUN_TEST(parse_message_list_events);
@@ -198,4 +218,8 @@ TEST_MAIN({
     RUN_TEST(parse_failure_event_missing_separator);
 
     RUN_TEST(parse_assistance_simple);
+
+    RUN_TEST(parse_invitation_simple);
+
+    RUN_TEST(parse_user_simple);
 })

@@ -1,7 +1,8 @@
 
-CFLAGS := -std=c99 -Wall -pedantic
+CFLAGS := -std=c99 -Wall -pedantic -D_REENTRANT -D__USE_XOPEN -D_XOPEN_SOURCE=600
 CLINKFLAGS := -pthread
 PANDOC_FLAGS := --toc --filter pandoc-crossref
+UNAME := $(shell uname)
 
 # Workaround for buggy C compiler in required targets (encina and olivo/SunOS)
 ifeq ($(shell hostname), encina)
@@ -11,8 +12,13 @@ ifeq ($(shell hostname), olivo)
 	CC := gcc
 endif
 
-ifeq ($(shell uname), SunOS)
+ifeq ($(UNAME), SunOS)
 	CLINKFLAGS := $(CLINKFLAGS) -lsocket
+	CFLAGS := $(CFLAGS) -DSOLARIS
+endif
+
+ifeq ($(UNAME), Linux)
+	CFLAGS := $(CFLAGS) -DLINUX
 endif
 
 TARGET_NAMES := server client

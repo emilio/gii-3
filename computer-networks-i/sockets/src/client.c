@@ -3,7 +3,6 @@
  *
  * @author Emilio Cobos Álvarez (70912324N)
  */
-#define _POSIX_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>

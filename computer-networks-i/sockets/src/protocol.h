@@ -2,7 +2,6 @@
 #define PROTOCOL_H
 
 #include <stdint.h>
-#define __USE_XOPEN // For strptime
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>

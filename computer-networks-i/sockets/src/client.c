@@ -19,7 +19,7 @@
 #include "logger.h"
 #include "protocol.h"
 #include "utils.h"
-#include "socket_utils.h"
+#include "socket-utils.h"
 
 #define SIZE 512
 
@@ -125,15 +125,6 @@ int main(int argc, char** argv) {
 
     freeaddrinfo(info); // Now we don't need this anymore
 
-    /// UDP requires to pass a pointer to the address to `sendto()`,
-    /// while TCP requires NOT to pass it
-    struct sockaddr* serv_addr_send_arg = NULL;
-    size_t len_send_arg = 0;
-    if (use_udp) {
-        serv_addr_send_arg = (struct sockaddr*)&serv_addr;
-        len_send_arg = sizeof(serv_addr);
-    }
-
     char buff[SIZE];
     size_t len;
     bool interactive = src_file == stdin;
@@ -170,7 +161,7 @@ int main(int argc, char** argv) {
 
         LOG("sending %zu bytes: %s", len, buff);
 
-        ret = sendto(sock, buff, len, 0, serv_addr_send_arg, len_send_arg);
+        ret = send(sock, buff, len, 0);
         if (ret == -1) {
             WARN("Send error: %s", strerror(errno));
             continue;

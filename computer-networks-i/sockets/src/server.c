@@ -23,6 +23,7 @@
 #include "protocol.h"
 #include "connection-state.h"
 #include "utils.h"
+#include "socket-utils.h"
 #include "vector.h"
 
 #define TCP_MAX_CONNECTIONS 1024
@@ -731,17 +732,26 @@ cleanup_and_return:
     return NULL;
 }
 
-struct udp_cache_data {
-    struct sockaddr_in address;
-    time_t last_time_accessed;
+typedef struct udp_cache_data {
+    connection_state_t state;
+    struct sockaddr address;
+    socklen_t address_len;
+    time_t last_access;
 } udp_cache_data_t;
+
+// Again, here we consciously rely on the non-portable fact that time_t is an
+// integral in seconds...
+#define UDP_SESSION_TIMEOUT 30
 
 void* start_udp_server(void* info) {
     long port = *((long*)info);
     struct sockaddr_in serv_addr;
     int sock;
     int ret;
-    connection_state_t fake_connection_state;
+    vector_t connection_state_data;
+    vector_init(&connection_state_data, sizeof(udp_cache_data_t), 20);
+
+    udp_cache_data_t data;
 
     LOG("start_udp_server(%p); port: %ld", info, port);
 
@@ -767,13 +777,7 @@ void* start_udp_server(void* info) {
 
     LOG("UDP socket bound to port: %ld", port);
 
-    // TODO: handle chunked datagrams?
-    // It's arguably difficult (if not impossible) with UDP.
     while (true) {
-        // FIXME: This resets the connection every time.
-        // We should have a different connection per peer.
-        memset(&fake_connection_state, 0, sizeof(connection_state_t));
-
         struct sockaddr_in src_addr;
         socklen_t src_addr_len = sizeof(src_addr);
         ssize_t len;
@@ -789,14 +793,43 @@ void* start_udp_server(void* info) {
         buff[len] = 0;
 
         LOG("udp: Received %zu bytes: \"%s\"", len, buff);
+        LOG("udp: State vector size: \"%zu\"", vector_size(&connection_state_data));
 
-        parse_message_and_reply(sock, &fake_connection_state, buff,
+        // Find the state associated with this connection (if any)
+        time_t now = time(NULL);
+        ssize_t free_index = -1;
+        size_t i;
+        for (i = 0; i < vector_size(&connection_state_data); ++i) {
+            vector_get(&connection_state_data, i, &data);
+            // We've got our old state \o/
+            if (sockaddr_cmp((struct sockaddr*) &src_addr, &data.address) == 0)
+                break;
+            else if (free_index == -1 && now - data.last_access > UDP_SESSION_TIMEOUT)
+                free_index = i;
+        }
+
+        // If we didn't find a single reusable slot, look if there's a reusable one
+        if (i == vector_size(&connection_state_data)) {
+            memcpy(&data.address, &src_addr, sizeof(struct sockaddr));
+            data.address_len = src_addr_len;
+            connection_state_init(&data.state);
+            data.last_access = now;
+
+            // If there's none, push a new one,
+            // else reuse that one
+            if (free_index == -1) {
+                vector_push(&connection_state_data, &data);
+            } else {
+                i = free_index;
+            }
+        }
+
+        // Now we have on `data` what we want, and we can also update it
+        // since the corresponding index is in `i`.
+        parse_message_and_reply(sock, &data.state, buff,
                                 (struct sockaddr*)&src_addr, src_addr_len);
 
-        if (len == -1) {
-            WARN("UDP response lost: %s", strerror(errno));
-            continue;
-        }
+        vector_set(&connection_state_data, i, &data);
     }
 
     LOG("UDP server closing");

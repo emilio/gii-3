@@ -201,16 +201,72 @@ bool send_assistance_list(int sock, struct sockaddr* target_addr,
         }
     }
 
+    pthread_mutex_unlock(&GLOBAL_DATA.mutex);
+
     response[0] = '\0';
     ret = sendto(sock, response, 1, 0, target_addr, target_addr_len);
     if (ret == -1) {
         WARN("Ignoring sendto() error (socket: %d, response: %s)", sock,
              response);
-        pthread_mutex_unlock(&GLOBAL_DATA.mutex);
         return false;
     }
 
+    return true;
+}
+
+bool fill_assistance(int sock, struct sockaddr* target_addr,
+                     socklen_t target_addr_len, client_message_t* message) {
+    protocol_assistance_t assistance;
+    protocol_event_t event;
+    bool found = false;
+    char response[512];
+    int ret;
+
+    assert(message->type == MESSAGE_TYPE_ASSISTANCE);
+
+    time_t assistance_time = mktime(&message->content.assistance_info.datetime);
+
+    for (size_t i = 0; i < vector_size(&GLOBAL_DATA.events); ++i) {
+        vector_get(&GLOBAL_DATA.events, i, &event);
+        if (strcmp(event.id, message->content.assistance_info.event_id) == 0 &&
+            mktime(&event.starts_at) < assistance_time &&
+            mktime(&event.ends_at) > assistance_time) {
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        snprintf(response, sizeof(response),
+                 "ERROR invalid event_id (maybe it's over)");
+        ret = sendto(sock, response, strlen(response) + 1, 0, target_addr,
+                     target_addr_len);
+        if (ret == -1) {
+            WARN("Ignoring sendto() error (socket: %d, response: %s)", sock,
+                 response);
+            return false;
+        }
+        return true;
+    }
+
+    strcpy(assistance.uid, message->content.assistance_info.uid);
+    strcpy(assistance.event_id, message->content.assistance_info.event_id);
+    memcpy(&assistance.at, &message->content.assistance_info.datetime,
+           sizeof(struct tm));
+
+    // TODO: Maybe check that assistance wasn't previously registered?
+    pthread_mutex_lock(&GLOBAL_DATA.mutex);
+    vector_push(&GLOBAL_DATA.assistances, &assistance);
     pthread_mutex_unlock(&GLOBAL_DATA.mutex);
+
+    snprintf(response, sizeof(response), "OK");
+    ret = sendto(sock, response, strlen(response) + 1, 0, target_addr,
+                 target_addr_len);
+    if (ret == -1) {
+        WARN("Ignoring sendto() error (socket: %d, response: %s)", sock,
+             response);
+        return false;
+    }
     return true;
 }
 
@@ -259,6 +315,9 @@ bool parse_message_and_reply(int sock, connection_state_t* state,
 
     // If the first character of the response is null at the end of it, we
     // assume success and reply "OK"
+    //
+    // TODO: We allocate too much space in the stack here if we end up calling
+    // to another function
     char response[512];
     ssize_t ret;
 
@@ -313,6 +372,10 @@ bool parse_message_and_reply(int sock, connection_state_t* state,
         case MESSAGE_TYPE_ASSISTANCE_LIST:
             return send_assistance_list(sock, target_addr, target_addr_len,
                                         &message);
+
+        case MESSAGE_TYPE_ASSISTANCE:
+            return fill_assistance(sock, target_addr, target_addr_len,
+                                   &message);
 
         default:
             WARN("Unexpected message type %d", message.type);

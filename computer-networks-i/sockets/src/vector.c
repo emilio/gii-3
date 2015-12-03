@@ -6,11 +6,10 @@ bool vector_init(vector_t* v, size_t element_size, size_t initial_capacity) {
     v->buffer = NULL;
     v->element_size = element_size;
     v->size = 0;
+    v->capacity = 0;
 
     if (initial_capacity)
         return vector_reserve(v, initial_capacity);
-
-    v->capacity = initial_capacity;
 
     return true;
 }

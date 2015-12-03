@@ -35,20 +35,19 @@ TEST(parse_message_list_request, {
 
 TEST(parse_message_assistance, {
     client_message_t result;
-    const char* message = "FICHAR abc def 20-11-2015";
+    const char* message = "FICHAR abc def";
 
     ASSERT(ERROR_NONE == parse_client_message(message, &result));
     ASSERT(MESSAGE_TYPE_ASSISTANCE == result.type);
 
     ASSERT(strcmp(result.content.assistance_info.event_id, "abc") == 0);
     ASSERT(strcmp(result.content.assistance_info.uid, "def") == 0);
-
-    ASSERT(result.content.assistance_info.datetime.tm_year == 2015 - 1900);
-    ASSERT(result.content.assistance_info.datetime.tm_mon == 10);
-
-    char buff[20];
-    strftime(buff, 20, "%d-%m-%Y", &result.content.assistance_info.datetime);
-    ASSERT(strcmp(buff, "20-11-2015") == 0);
+    time_t now = time(NULL);
+    struct tm* tm = localtime(&now);
+    ASSERT(result.content.assistance_info.datetime.tm_year == tm->tm_year);
+    ASSERT(result.content.assistance_info.datetime.tm_mon == tm->tm_mon);
+    ASSERT(result.content.assistance_info.datetime.tm_mday == tm->tm_mday);
+    ASSERT(result.content.assistance_info.datetime.tm_hour == tm->tm_hour);
 })
 
 TEST(parse_failure_invalid_type, {
@@ -79,13 +78,6 @@ TEST(parse_failure_missing_ident, {
     ASSERT(ERROR_EXPECTED_VALID_EVENT_ID == parse_client_message(message, &result));
 })
 
-TEST(parse_failure_invalid_date, {
-    client_message_t result;
-    const char* message = "FICHAR abc def fweafew";
-
-    ASSERT(ERROR_EXPECTED_VALID_DATE == parse_client_message(message, &result));
-})
-
 TEST(parse_failure_extra_newline, {
     client_message_t result;
     const char* message = "HOLA abc\n";
@@ -103,7 +95,7 @@ TEST(parse_failure_extra_newline_in_content, {
 TEST(vector_base, {
     vector_t v;
 
-    vector_init(&v, sizeof(int), 10);
+    ASSERT(vector_init(&v, sizeof(int), 10));
 
     ASSERT(v.buffer != NULL);
     ASSERT(vector_size(&v) == 0);
@@ -195,7 +187,6 @@ TEST_MAIN({
     RUN_TEST(parse_failure_extra_content);
     RUN_TEST(parse_failure_too_long_ident);
     RUN_TEST(parse_failure_missing_ident);
-    RUN_TEST(parse_failure_invalid_date);
     RUN_TEST(parse_failure_extra_newline);
     RUN_TEST(parse_failure_extra_newline_in_content);
 

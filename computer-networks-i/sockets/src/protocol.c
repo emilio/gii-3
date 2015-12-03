@@ -192,15 +192,13 @@ parse_error_t parse_client_message(const char* in_source,
                                 MAX_UID_LEN))
                 return ERROR_EXPECTED_VALID_UID;
 
-            if (!try_consume(&cursor, " "))
-                return ERROR_EXPECTED_VALID_DATE;
-
-            if (!parse_date(&cursor,
-                            &message->content.assistance_info.datetime))
-                return ERROR_EXPECTED_VALID_DATE;
-
             if (*cursor != '\0')
                 return ERROR_UNEXPECTED_CONTENT;
+
+            // The datetime of the assistance message is always the current one,
+            // This was changed during development
+            time_t now = time(NULL);
+            localtime_r(&now, &message->content.assistance_info.datetime);
             break;
 
         default:

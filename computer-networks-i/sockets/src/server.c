@@ -128,6 +128,11 @@ bool get_events_from(const char* filename) {
             continue;
         }
 
+        if (mktime(&tmp_event.starts_at) > mktime(&tmp_event.ends_at)) {
+            WARN("Event can't start after it ends");
+            continue;
+        }
+
         vector_push(&GLOBAL_DATA.events, &tmp_event);
     }
 

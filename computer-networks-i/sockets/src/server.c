@@ -736,6 +736,8 @@ void* start_udp_server(void* info) {
     // TODO: handle chunked datagrams?
     // It's arguably difficult (if not impossible) with UDP.
     while (true) {
+        // FIXME: This resets the connection every time.
+        // We should have a different connection per peer.
         memset(&fake_connection_state, 0, sizeof(connection_state_t));
 
         struct sockaddr_in src_addr;

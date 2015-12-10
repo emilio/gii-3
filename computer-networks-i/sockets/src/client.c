@@ -15,6 +15,8 @@
 #include <netinet/udp.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
+#include <poll.h>
+#include <fcntl.h>
 
 #include "logger.h"
 #include "protocol.h"
@@ -22,6 +24,7 @@
 #include "socket-utils.h"
 
 #define SIZE 512
+#define RECV_TIMEOUT 30
 
 /// Shows usage of the program
 void show_usage(int argc, char** argv) {
@@ -117,14 +120,6 @@ int main(int argc, char** argv) {
     if (sock == -1)
         FATAL("Error creating socket: %s", strerror(errno));
 
-    /// Set a recv timeout, to allow closing connections if they fail
-    /// This is neccesary overall for udp
-    struct timeval tv;
-    memset(&tv, 0, sizeof(struct timeval));
-    tv.tv_sec = 30;
-    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv,
-               sizeof(struct timeval));
-
     if (!use_udp) {
         ret = connect(sock, info->ai_addr, info->ai_addrlen);
         if (ret == -1)
@@ -140,6 +135,16 @@ int main(int argc, char** argv) {
     size_t len;
     bool interactive = src_file == stdin;
     size_t lines_read = 0;
+
+    // Set non-blocking mode, to use `poll`
+    int flags = fcntl(sock, F_GETFL, 0);
+    int fcntl_ret = fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+    if (fcntl_ret == -1)
+        FATAL("fcntl() error: %s", strerror(errno));
+
+    struct pollfd pollfds[1] = {
+        { sock, POLLIN, 0 }
+    };
 
     while (true) {
         if (interactive)
@@ -192,7 +197,19 @@ int main(int argc, char** argv) {
 
         ssize_t recv_size;
         size_t recv_count = 0;
+        int poll_ret = 0;
     retry_recv:
+        poll_ret = poll(pollfds, 1, RECV_TIMEOUT * 1000);
+        if (poll_ret == -1) {
+            WARN("poll() error: %s", strerror(errno));
+            break;
+        }
+
+        if (poll_ret == 0) {
+            WARN("timeout reached");
+            break;
+        }
+
         /// The server always replies with and ending null char, that should
         /// not be present in the body response
         recv_size = recvfrom(sock, buff, SIZE, 0, &from_addr, &from_size);

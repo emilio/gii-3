@@ -18,6 +18,8 @@
 #include <netinet/udp.h>
 #include <netinet/tcp.h>
 #include <unistd.h>
+#include <poll.h>
+#include <fcntl.h>
 
 #include "logger.h"
 #include "protocol.h"
@@ -29,6 +31,15 @@
 #define TCP_MAX_CONNECTIONS 1024
 #define UDP_MAX_CONNECTIONS 1024
 #define MAX_MESSAGE_SIZE 512
+#define SESSION_TIMEOUT 30
+
+typedef struct udp_cache_data {
+    connection_state_t state;
+    struct sockaddr address;
+    socklen_t address_len;
+    time_t last_access;
+} udp_cache_data_t;
+
 
 struct server_data {
     pthread_mutex_t mutex;
@@ -634,18 +645,35 @@ void* handle_tcp_connection(void* sent_socket) {
     free(sent_socket);
     connection_state_t state;
     connection_state_init(&state);
-
-    /// Set a recv timeout, to allow closing connections
-    struct timeval tv;
-    memset(&tv, 0, sizeof(struct timeval));
-    tv.tv_sec = 30;
-    setsockopt(socket, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv,
-               sizeof(struct timeval));
+    bool should_run = true;
 
     LOG("tcp: Connection handling routine started (fd: %d)", socket);
 
+    // Set non-blocking mode, to use `poll`
+    int flags = fcntl(socket, F_GETFL, 0);
+    int fcntl_ret = fcntl(socket, F_SETFL, flags | O_NONBLOCK);
+    if (fcntl_ret == -1) {
+        WARN("tcp: (fd: %d) fcntl() error: %s", socket, strerror(errno));
+        should_run = false;
+    }
+
     char buff[MAX_MESSAGE_SIZE] = {0};
-    while (true) {
+    struct pollfd fds[1] = {
+        { socket, POLLIN, 0 }
+    };
+
+    while (should_run) {
+        int ret = poll(fds, 1, SESSION_TIMEOUT * 1000);
+        if (ret == -1) {
+            WARN("tcp: (fd: %d) poll() error: %s", socket, strerror(errno));
+            break;
+        }
+
+        if (ret == 0) {
+            LOG("tcp: (fd: %d) timeout reached", socket);
+            break;
+        }
+
         // TODO: We don't handle chunked messages because we know the message
         // size is fixed, and that messages longer than `MAX_MESSAGE_SIZE`
         // can't be valid. We should have a growing buffer otherwise.
@@ -745,17 +773,6 @@ cleanup_and_return:
     return NULL;
 }
 
-typedef struct udp_cache_data {
-    connection_state_t state;
-    struct sockaddr address;
-    socklen_t address_len;
-    time_t last_access;
-} udp_cache_data_t;
-
-// Again, here we consciously rely on the non-portable fact that time_t is an
-// integral in seconds...
-#define UDP_SESSION_TIMEOUT 30
-
 void* start_udp_server(void* info) {
     long port = *((long*)info);
     struct sockaddr_in serv_addr;
@@ -823,7 +840,7 @@ void* start_udp_server(void* info) {
             if (sockaddr_cmp((struct sockaddr*)&src_addr, &data.address) == 0)
                 break;
             else if (free_index == -1 &&
-                     now - data.last_access > UDP_SESSION_TIMEOUT)
+                     now - data.last_access > SESSION_TIMEOUT)
                 free_index = i;
         }
 
@@ -853,7 +870,7 @@ void* start_udp_server(void* info) {
                                      src_addr_len)) {
             LOG("udp: ended session");
             // Reset the session
-            data.last_access = now - UDP_SESSION_TIMEOUT - 1;
+            data.last_access = now - SESSION_TIMEOUT - 1;
             connection_state_init(&data.state);
         }
 

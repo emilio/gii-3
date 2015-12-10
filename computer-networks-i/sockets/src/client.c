@@ -39,6 +39,7 @@ void show_usage(int argc, char** argv) {
     printf("Options:\n");
     printf("  --help\t Display this message and exit\n");
     printf("  -udp, --use-udp\t Use UDP instead of TCP\n");
+    printf("  -l, --log [file]\t Log to [file]\n");
     printf("  -p, --port [port]\t Connect to [port]\n");
     printf("  -h, --host [host]\t Connect to [host]\n");
     printf("  -v, --verbose\t Be verbose about what is going on\n");
@@ -69,6 +70,17 @@ int main(int argc, char** argv) {
         } else if (strcmp(argv[i], "-v") == 0 ||
                    strcmp(argv[i], "--verbose") == 0) {
             LOGGER_CONFIG.verbose = true;
+        } else if (strcmp(argv[i], "-l") == 0 ||
+                   strcmp(argv[i], "--log") == 0) {
+            ++i;
+            if (i == argc)
+                FATAL("The %s option needs a value", argv[i - 1]);
+
+            FILE* log_file = fopen(argv[i], "w");
+            if (log_file)
+                LOGGER_CONFIG.log_file = log_file;
+            else
+                WARN("Could not open \"%s\", using stderr: %s", argv[i], strerror(errno));
         } else if (strcmp(argv[i], "-p") == 0 ||
                    strcmp(argv[i], "--port") == 0) {
             ++i;
@@ -219,6 +231,9 @@ int main(int argc, char** argv) {
 
     LOG("Closing client");
     close(sock);
+
+    if (LOGGER_CONFIG.log_file)
+        fclose(LOGGER_CONFIG.log_file);
 
     return 0;
 }

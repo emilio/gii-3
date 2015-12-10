@@ -463,8 +463,11 @@ bool fill_assistance(int sock, struct sockaddr* target_addr,
         snprintf(response, sizeof(response), "OK");
     }
 
+    LOG("fill_assistance: %s", response);
+
     ret = sendto(sock, response, strlen(response) + 1, 0, target_addr,
                  target_addr_len);
+
     if (ret == -1) {
         WARN("Ignoring sendto() error (socket: %d, response: %s)", sock,
              response);

@@ -39,6 +39,8 @@ void show_usage(int argc, char** argv) {
     printf("Options:\n");
     printf("  --help\t Display this message and exit\n");
     printf("  -udp, --use-udp\t Use UDP instead of TCP\n");
+    printf("  -f, --file [file]\t Read commands from a file instead of being "
+           "interactive\n");
     printf("  -l, --log [file]\t Log to [file]\n");
     printf("  -p, --port [port]\t Connect to [port]\n");
     printf("  -h, --host [host]\t Connect to [host]\n");
@@ -58,7 +60,6 @@ int main(int argc, char** argv) {
     const char* port = "8000";
     const char* host = "localhost";
 
-    /// TODO: add file argument
     FILE* src_file = stdin;
 
     LOGGER_CONFIG.log_file = stderr;
@@ -80,7 +81,18 @@ int main(int argc, char** argv) {
             if (log_file)
                 LOGGER_CONFIG.log_file = log_file;
             else
-                WARN("Could not open \"%s\", using stderr: %s", argv[i], strerror(errno));
+                WARN("Could not open \"%s\", using stderr: %s", argv[i],
+                     strerror(errno));
+        } else if (strcmp(argv[i], "-f") == 0 ||
+                   strcmp(argv[i], "--file") == 0) {
+            ++i;
+            if (i == argc)
+                FATAL("The %s option needs a value", argv[i - 1]);
+
+            src_file = fopen(argv[i], "r");
+            if (!src_file)
+                FATAL("Could not open \"%s\" for reading. Reason: %s", argv[i],
+                      strerror(errno));
         } else if (strcmp(argv[i], "-p") == 0 ||
                    strcmp(argv[i], "--port") == 0) {
             ++i;
@@ -128,14 +140,16 @@ int main(int argc, char** argv) {
     setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv,
                sizeof(struct timeval));
 
+    if (!use_udp) {
+        ret = connect(sock, info->ai_addr, info->ai_addrlen);
+        if (ret == -1)
+            FATAL("Error connecting to remote: %s", strerror(errno));
+    }
+
     struct sockaddr_in serv_addr;
-    ret = connect(sock, info->ai_addr, info->ai_addrlen);
-    if (ret == -1)
-        FATAL("Error connecting to remote: %s", strerror(errno));
+    memcpy(&serv_addr, info->ai_addr, sizeof(serv_addr));
 
-    memcpy(&serv_addr, info->ai_addr, info->ai_addrlen);
-
-    freeaddrinfo(info); // Now we don't need this anymore
+    freeaddrinfo(info);
 
     char buff[SIZE];
     size_t len;
@@ -143,7 +157,8 @@ int main(int argc, char** argv) {
     size_t lines_read = 0;
 
     while (true) {
-        printf("> ");
+        if (interactive)
+            printf("> ");
 
         if (buff != fgets(buff, SIZE, src_file)) {
             if (feof(src_file)) {
@@ -151,8 +166,14 @@ int main(int argc, char** argv) {
                 break;
             }
 
-            LOG("Ignoring fgets() error, err: %s", strerror(ferror(src_file)));
-            continue;
+            if (interactive) {
+                LOG("Ignoring fgets() error, err: %s",
+                    strerror(ferror(src_file)));
+                continue;
+            } else {
+                WARN("fgets() error, err: %s", strerror(ferror(src_file)));
+                break;
+            }
         }
 
         lines_read++;
@@ -173,13 +194,18 @@ int main(int argc, char** argv) {
 
         LOG("sending %zu bytes: %s", len, buff);
 
-        ret = send(sock, buff, len, 0);
+        if (use_udp)
+            ret = sendto(sock, buff, len, 0, (struct sockaddr*)&serv_addr,
+                         sizeof(serv_addr));
+        else
+            ret = send(sock, buff, len, 0);
+
         if (ret == -1) {
             WARN("Send error: %s", strerror(errno));
             continue;
         }
 
-        struct sockaddr_in from_addr;
+        struct sockaddr from_addr;
         socklen_t from_size = sizeof(from_addr);
 
         ssize_t recv_size;
@@ -187,21 +213,23 @@ int main(int argc, char** argv) {
     retry_recv:
         /// The server always replies with and ending null char, that should
         /// not be present in the body response
-        recv_size = recvfrom(sock, buff, SIZE, 0, (struct sockaddr*)&from_addr,
-                             &from_size);
+        recv_size = recvfrom(sock, buff, SIZE, 0, &from_addr, &from_size);
 
         if (recv_size < 0) {
             WARN("Recv error: %s", strerror(errno));
             break;
         }
 
-        if (use_udp) {
-            if (sockaddr_cmp((struct sockaddr*)&from_addr,
-                             (struct sockaddr*)&serv_addr) != 0) {
-                WARN("Received message not from server: %s", buff);
-                goto retry_recv;
-            }
-        }
+        // TODO: try to restore this, since it does not work under some
+        // circumstances, for example, if using the local machine name instead
+        // of localhost.
+        // if (use_udp) {
+        //     if (sockaddr_cmp(&from_addr,
+        //                      (struct sockaddr*)&serv_addr) != 0) {
+        //         WARN("Received message not from server: %s", buff);
+        //         goto retry_recv;
+        //     }
+        // }
 
         if (recv_size == 0) {
             WARN("Server unexpectedly closed connection");
@@ -215,7 +243,7 @@ int main(int argc, char** argv) {
         bool is_first_message = recv_count == 1;
         bool is_last_message = buff[recv_size - 1] == '\0';
 
-        if (is_first_message)
+        if (is_first_message && interactive)
             printf("< ");
 
         buff[recv_size] = 0;

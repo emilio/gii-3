@@ -1,0 +1,6 @@
+HOLA id_usuario
+FICHAR id_evento id_usuario
+FICHAR id_evento id_usuario
+FICHAR id_evento id_usuario
+FICHAR id_evento id_usuario
+ADIOS id_usuario

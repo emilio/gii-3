@@ -1,0 +1,9 @@
+FICHAR id_evento id_usuario
+HOLA id_usuario
+LISTAR EVENTOS
+FICHAR id_evento id_usuario
+FICHA id_evento id_usuario
+FICHAR id_evento id_usuario_1
+FICHAR id_evento id_usuario
+LISTAR id_evento id_usuario
+ADIOS id_usuario

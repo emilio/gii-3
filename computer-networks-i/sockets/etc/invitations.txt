@@ -1,0 +1,9 @@
+# Here we have the invitations to events, in the form
+# user_id#event_id.
+#
+# In order for this invitations to be registered, both
+# the user and the event must be registered.
+id_usuario#id_evento
+id_usuario_1#id_evento
+id_usuario#id_evento_1
+pepe#id_evento

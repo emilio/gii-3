@@ -191,6 +191,11 @@ int main(int argc, char** argv) {
             }
         }
 
+        if (recv_size == 0) {
+            WARN("Server unexpectedly closed connection");
+            break;
+        }
+
         ++recv_count;
 
         // The server always replies with a trailing zero on end,

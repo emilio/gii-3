@@ -489,10 +489,7 @@ void daemonize_sig_handler(int signal) {
 }
 
 /// Do a clean exit when interrupted or TERM'd
-void clean_exit(int _signal) {
-    exit(0);
-}
-
+void clean_exit(int _signal) { exit(0); }
 
 /// Shows usage of the program
 void show_usage(int argc, char** argv) {
@@ -555,6 +552,7 @@ bool parse_message_and_reply(int sock, connection_state_t* state,
             return false;
         }
 
+        LOG("reply: success");
         return true;
     }
 
@@ -620,6 +618,7 @@ bool parse_message_and_reply(int sock, connection_state_t* state,
         return false;
     }
 
+    LOG("reply: success");
     return true;
 #undef RESPOND
 #undef RESPOND_ERROR
@@ -721,7 +720,8 @@ void* start_tcp_server(void* info) {
             continue;
         }
 
-        if(!inet_ntop(client_addr.sin_family, &client_addr.sin_addr, readable_ip, sizeof(readable_ip)))
+        if (!inet_ntop(client_addr.sin_family, &client_addr.sin_addr,
+                       readable_ip, sizeof(readable_ip)))
             WARN("tcp: inet_ntop failed, reason: %s", strerror(errno));
 
         LOG("tcp: New connection (fd: %d, ip: %s)", new_socket, readable_ip);
@@ -759,7 +759,6 @@ void* start_udp_server(void* info) {
     vector_t connection_state_data;
     vector_init(&connection_state_data, sizeof(udp_cache_data_t), 20);
 
-
     LOG("start_udp_server(%p); port: %ld", info, port);
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -792,6 +791,7 @@ void* start_udp_server(void* info) {
         udp_cache_data_t data;
         char readable_ip[20] = {0};
 
+        memset(&src_addr, 0, sizeof(src_addr));
         len = recvfrom(sock, buff, sizeof(buff) - 1, 0,
                        (struct sockaddr*)&src_addr, &src_addr_len);
         if (len == -1) {
@@ -801,7 +801,8 @@ void* start_udp_server(void* info) {
 
         buff[len] = 0;
 
-        if(!inet_ntop(src_addr.sin_family, &src_addr.sin_addr, readable_ip, sizeof(readable_ip)))
+        if (!inet_ntop(src_addr.sin_family, &src_addr.sin_addr, readable_ip,
+                       sizeof(readable_ip)))
             WARN("udp: inet_ntop failed, reason: %s", strerror(errno));
 
         LOG("udp: [%s] Received %zu bytes: \"%s\"", readable_ip, len, buff);
@@ -814,33 +815,44 @@ void* start_udp_server(void* info) {
         for (i = 0; i < vector_size(&connection_state_data); ++i) {
             vector_get(&connection_state_data, i, &data);
             // We've got our old state \o/
-            if (sockaddr_cmp((struct sockaddr*) &src_addr, &data.address) == 0)
+            if (sockaddr_cmp((struct sockaddr*)&src_addr, &data.address) == 0)
                 break;
-            else if (free_index == -1 && now - data.last_access > UDP_SESSION_TIMEOUT)
+            else if (free_index == -1 &&
+                     now - data.last_access > UDP_SESSION_TIMEOUT)
                 free_index = i;
         }
 
-        // If we didn't find a single reusable slot, look if there's a reusable one
+        // If we didn't find a single reusable slot, look if there's a reusable
+        // one
         if (i == vector_size(&connection_state_data)) {
             memcpy(&data.address, &src_addr, sizeof(struct sockaddr));
             data.address_len = src_addr_len;
             connection_state_init(&data.state);
             data.last_access = now;
 
-            // If there's none, push a new one,
-            // else reuse that one
+            // If there's none, push a new one, else reuse that one
             if (free_index == -1) {
+                LOG("udp: State vector entry not found, creating");
                 vector_push(&connection_state_data, &data);
             } else {
+                LOG("udp: Reusing entry %zu", i);
                 i = free_index;
             }
         }
 
+        LOG("udp: replying");
         // Now we have on `data` what we want, and we can also update it
         // since the corresponding index is in `i`.
-        parse_message_and_reply(sock, &data.state, buff,
-                                (struct sockaddr*)&src_addr, src_addr_len);
+        if (!parse_message_and_reply(sock, &data.state, buff,
+                                     (struct sockaddr*)&src_addr,
+                                     src_addr_len)) {
+            LOG("udp: ended session");
+            // Reset the session
+            data.last_access = now - UDP_SESSION_TIMEOUT - 1;
+            connection_state_init(&data.state);
+        }
 
+        LOG("udp: setting data");
         vector_set(&connection_state_data, i, &data);
     }
 
@@ -896,7 +908,8 @@ int main(int argc, char** argv) {
             if (log_file)
                 LOGGER_CONFIG.log_file = log_file;
             else
-                WARN("Could not open \"%s\", using stderr: %s", argv[i], strerror(errno));
+                WARN("Could not open \"%s\", using stderr: %s", argv[i],
+                     strerror(errno));
         } else if (strcmp(argv[i], "-p") == 0 ||
                    strcmp(argv[i], "--port") == 0) {
             ++i;

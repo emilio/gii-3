@@ -2,3 +2,4 @@ target/
 *.pdf
 log/*
 !log/.keep
+etc/assistances.txt

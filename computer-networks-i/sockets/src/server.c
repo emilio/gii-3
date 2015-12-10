@@ -498,12 +498,13 @@ void show_usage(int argc, char** argv) {
     printf("  -h, --help\t Display this message and exit\n");
     printf("  -p, --port [port]\t Listen to [port]\n");
     printf("  -v, --verbose\t Be verbose about what is going on\n");
+    printf("  -l, --log [file]\t Log to [file]\n");
     printf("  -d, --daemonize\t Start server as a daemon\n");
-    printf("  -e, --events [filename]\t Use [file] as event data source\n");
-    printf("  -u, --users [filename]\t Use [file] as user data source\n");
-    printf("  -a, --assistances [filename]\t Use [file] as assistance data "
+    printf("  -e, --events [file]\t Use [file] as event data source\n");
+    printf("  -u, --users [file]\t Use [file] as user data source\n");
+    printf("  -a, --assistances [file]\t Use [file] as assistance data "
            "source\n");
-    printf("  -i, --invitations [filename]\t Use [file] as invitation data "
+    printf("  -i, --invitations [file]\t Use [file] as invitation data "
            "source\n");
     printf("\n");
     printf("Author(s):\n");
@@ -707,6 +708,7 @@ void* start_tcp_server(void* info) {
     while (true) {
         struct sockaddr_in client_addr;
         socklen_t client_size = sizeof(client_addr);
+        char readable_ip[20] = {0};
 
         int new_socket =
             accept(sock, (struct sockaddr*)&client_addr, &client_size);
@@ -716,7 +718,10 @@ void* start_tcp_server(void* info) {
             continue;
         }
 
-        LOG("tcp: New connection (fd: %d)", new_socket);
+        if(!inet_ntop(client_addr.sin_family, &client_addr.sin_addr, readable_ip, sizeof(readable_ip)))
+            WARN("tcp: inet_ntop failed, reason: %s", strerror(errno));
+
+        LOG("tcp: New connection (fd: %d, ip: %s)", new_socket, readable_ip);
         int* sent_socket = malloc(sizeof(int));
         *sent_socket = new_socket;
 
@@ -751,7 +756,6 @@ void* start_udp_server(void* info) {
     vector_t connection_state_data;
     vector_init(&connection_state_data, sizeof(udp_cache_data_t), 20);
 
-    udp_cache_data_t data;
 
     LOG("start_udp_server(%p); port: %ld", info, port);
 
@@ -782,6 +786,8 @@ void* start_udp_server(void* info) {
         socklen_t src_addr_len = sizeof(src_addr);
         ssize_t len;
         char buff[MAX_MESSAGE_SIZE];
+        udp_cache_data_t data;
+        char readable_ip[20] = {0};
 
         len = recvfrom(sock, buff, sizeof(buff) - 1, 0,
                        (struct sockaddr*)&src_addr, &src_addr_len);
@@ -792,8 +798,11 @@ void* start_udp_server(void* info) {
 
         buff[len] = 0;
 
-        LOG("udp: Received %zu bytes: \"%s\"", len, buff);
-        LOG("udp: State vector size: \"%zu\"", vector_size(&connection_state_data));
+        if(!inet_ntop(src_addr.sin_family, &src_addr.sin_addr, readable_ip, sizeof(readable_ip)))
+            WARN("udp: inet_ntop failed, reason: %s", strerror(errno));
+
+        LOG("udp: [%s] Received %zu bytes: \"%s\"", readable_ip, len, buff);
+        LOG("udp: State vector size: %zu", vector_size(&connection_state_data));
 
         // Find the state associated with this connection (if any)
         time_t now = time(NULL);
@@ -843,6 +852,13 @@ void cleanup_global_data() {
     vector_destroy(&GLOBAL_DATA.users);
     vector_destroy(&GLOBAL_DATA.assistances);
     vector_destroy(&GLOBAL_DATA.invitations);
+
+    // TODO: This probably should be in logger.h
+    if (LOGGER_CONFIG.log_file) {
+        pthread_mutex_lock(&LOGGER_CONFIG.mutex);
+        fclose(LOGGER_CONFIG.log_file);
+        pthread_mutex_unlock(&LOGGER_CONFIG.mutex);
+    }
 }
 
 int main(int argc, char** argv) {
@@ -867,6 +883,17 @@ int main(int argc, char** argv) {
         } else if (strcmp(argv[i], "-v") == 0 ||
                    strcmp(argv[i], "--verbose") == 0) {
             LOGGER_CONFIG.verbose = true;
+        } else if (strcmp(argv[i], "-l") == 0 ||
+                   strcmp(argv[i], "--log") == 0) {
+            ++i;
+            if (i == argc)
+                FATAL("The %s option needs a value", argv[i - 1]);
+
+            FILE* log_file = fopen(argv[i], "w");
+            if (log_file)
+                LOGGER_CONFIG.log_file = log_file;
+            else
+                WARN("Could not open \"%s\", using stderr: %s", argv[i], strerror(errno));
         } else if (strcmp(argv[i], "-p") == 0 ||
                    strcmp(argv[i], "--port") == 0) {
             ++i;

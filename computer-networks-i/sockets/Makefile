@@ -13,7 +13,7 @@ ifeq ($(shell hostname), olivo)
 endif
 
 ifeq ($(UNAME), SunOS)
-	CLINKFLAGS := $(CLINKFLAGS) -lsocket
+	CLINKFLAGS := $(CLINKFLAGS) -lsocket -lnsl
 	CFLAGS := $(CFLAGS) -DSOLARIS
 endif
 

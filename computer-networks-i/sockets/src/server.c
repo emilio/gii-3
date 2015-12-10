@@ -594,6 +594,11 @@ bool parse_message_and_reply(int sock, connection_state_t* state,
                                         &message);
 
         case MESSAGE_TYPE_ASSISTANCE:
+            if (!state->logged_in) {
+                RESPOND_ERROR("Not logged in");
+                break;
+            }
+
             return fill_assistance(sock, target_addr, target_addr_len,
                                    &message);
 

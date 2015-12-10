@@ -23,16 +23,6 @@
 
 #define SIZE 512
 
-struct program_author {
-    const char* name;
-    const char* email;
-};
-
-const struct program_author AUTHORS[] = {
-    {"Emilio Cobos Álvarez", "emiliocobos@usal.es"},
-    {NULL, NULL}, // End of list
-};
-
 /// Shows usage of the program
 void show_usage(int argc, char** argv) {
     printf("Usage: %s [options]\n", argv[0]);
@@ -47,12 +37,7 @@ void show_usage(int argc, char** argv) {
     printf("  -v, --verbose\t Be verbose about what is going on\n");
     printf("\n");
     printf("Author(s):\n");
-
-    const struct program_author* current_author = AUTHORS;
-    while (current_author->name) {
-        printf("  %s (<%s>)\n", current_author->name, current_author->email);
-        current_author++;
-    }
+    printf("  Emilio Cobos Álvarez (<emiliocobos@usal.es>)\n");
 }
 
 int main(int argc, char** argv) {
@@ -178,9 +163,6 @@ int main(int argc, char** argv) {
 
         lines_read++;
 
-        if (!interactive)
-            printf("%s", buff);
-
         len = strlen(buff);
 
         // Trim trailing newline
@@ -249,12 +231,13 @@ int main(int argc, char** argv) {
         buff[recv_size] = 0;
         LOG("recv(%zu, last: %d): %s", recv_size, is_last_message, buff);
 
-        printf("%s", buff);
+        if (interactive)
+            printf("%s", buff);
 
-        if (is_last_message)
-            printf("\n");
-        else
+        if (!is_last_message)
             goto retry_recv;
+        else if (interactive)
+            printf("\n");
     }
 
     LOG("Closing client");

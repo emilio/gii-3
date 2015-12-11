@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 # launch.sh
 # Launches the server (daemonized) and multiple clients with different orders
@@ -28,6 +28,13 @@ echo "server: $SERVER"
 echo "client: $CLIENT"
 
 "$SERVER" -v -d -l "$LOG_DIR/server.log"
+
+echo "Server PID:"
+ps -a | grep [s]erver
+
+echo "Kill the server with:"
+echo " * SIGINT or SIGTERM: Terminate and dump data"
+echo " * SIGUSR1: Dump data, but keep running"
 
 "$CLIENT" -l "$LOG_DIR/tcp-client-0.log" -h "$(hostname)" -f "$SCRIPT_DIR/ordenes.txt" -v &
 "$CLIENT" -l "$LOG_DIR/tcp-client-1.log" -h "$(hostname)" -f "$SCRIPT_DIR/ordenes1.txt" -v &

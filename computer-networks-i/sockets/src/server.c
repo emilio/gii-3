@@ -883,6 +883,10 @@ void* start_udp_server(void* info) {
     return NULL;
 }
 
+void dump_data_signal(int _sig) {
+    dump_assistances_to(GLOBAL_DATA.assistances_filename);
+}
+
 void cleanup_global_data() {
     dump_assistances_to(GLOBAL_DATA.assistances_filename);
     vector_destroy(&GLOBAL_DATA.events);
@@ -996,6 +1000,9 @@ int main(int argc, char** argv) {
 
     if (signal(SIGINT, clean_exit) == SIG_ERR)
         FATAL("Error registering SIGINT: %s", strerror(errno));
+
+    if (signal(SIGUSR1, dump_data_signal) == SIG_ERR)
+        FATAL("Error registering SIGUSR1: %s", strerror(errno));
 
     // TODO: Some kind of lockfile?
     if (daemonize) {

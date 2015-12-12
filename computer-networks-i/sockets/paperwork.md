@@ -176,8 +176,9 @@ el comando:
 $ make test
 ```
 
-Esta práctica ha resultado tener un valor incalculable a la hora de ahorrar
-tiempo de desarrollo.
+Esta forma de desarrollo ha resultado tener un valor incalculable a la hora de
+ahorrar tiempo y asegurar el funcionamiento correcto de la práctica en cualquier
+tipo de situación.
 
 ## Problemas en Solaris y olivo
 

@@ -3,6 +3,41 @@
 #include "protocol.h"
 #include "vector.h"
 #include "tests.h"
+#include "parsing.h"
+
+TEST(consume_simple, {
+    const char* msg = "ABCD ECF";
+    const char* cursor = msg;
+
+    ASSERT(try_consume(&cursor, "ABCD"));
+    ASSERT(cursor == msg + 4);
+
+    ASSERT(try_consume(&cursor, " "));
+    ASSERT(cursor == msg + 5);
+
+    ASSERT(!try_consume(&cursor, "DEA"));
+    ASSERT(cursor == msg + 5);
+
+    ASSERT(try_consume(&cursor, "ECF"));
+    ASSERT(cursor == msg + 8);
+
+    // Reset cursor
+    cursor = msg;
+    char buff[20];
+
+    ASSERT(!try_consume_until(&cursor, 'A', buff, sizeof(buff)));
+    ASSERT(cursor == msg);
+
+    ASSERT(try_consume_until(&cursor, '.', buff, sizeof(buff)));
+    ASSERT(cursor == msg + 8);
+    ASSERT(strcmp(buff, msg) == 0);
+
+    cursor = msg;
+
+    ASSERT(try_consume_until(&cursor, ' ', buff, sizeof(buff)));
+    ASSERT(cursor == msg + 4);
+    ASSERT(strcmp(buff, "ABCD") == 0);
+})
 
 TEST(parse_message_simple, {
     client_message_t result;
@@ -210,6 +245,8 @@ TEST(parse_user_simple, {
 })
 
 TEST_MAIN({
+    RUN_TEST(consume_simple);
+
     RUN_TEST(parse_message_simple);
     RUN_TEST(parse_message_list_events);
     RUN_TEST(parse_message_list_request);

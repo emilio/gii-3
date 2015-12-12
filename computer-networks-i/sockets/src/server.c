@@ -657,9 +657,7 @@ void* handle_tcp_connection(void* sent_socket) {
     }
 
     char buff[MAX_MESSAGE_SIZE] = {0};
-    struct pollfd fds[1] = {
-        { socket, POLLIN, 0 }
-    };
+    struct pollfd fds[1] = {{socket, POLLIN, 0}};
 
     while (should_run) {
         int ret = poll(fds, 1, SESSION_TIMEOUT * 1000);

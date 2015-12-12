@@ -142,9 +142,7 @@ int main(int argc, char** argv) {
     if (fcntl_ret == -1)
         FATAL("fcntl() error: %s", strerror(errno));
 
-    struct pollfd pollfds[1] = {
-        { sock, POLLIN, 0 }
-    };
+    struct pollfd pollfds[1] = {{sock, POLLIN, 0}};
 
     while (true) {
         if (interactive)

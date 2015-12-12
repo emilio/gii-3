@@ -11,11 +11,10 @@
 
 bool parse_date(const char** cursor, struct tm* tm);
 
-bool try_consume(const char** in_source,
-                               const char* text_to_match);
+bool try_consume(const char** in_source, const char* text_to_match);
 
-bool try_consume_until(const char** current_cursor, char separator,
-                              char* buff, size_t max_len);
+bool try_consume_until(const char** current_cursor, char separator, char* buff,
+                       size_t max_len);
 
 /// Converts a string to a long.
 /// Returns true on success and false on failure.

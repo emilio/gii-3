@@ -37,8 +37,7 @@ bool parse_date(const char** cursor, struct tm* tm) {
     return false;
 }
 
-bool try_consume(const char** in_source,
-                               const char* text_to_match) {
+bool try_consume(const char** in_source, const char* text_to_match) {
     while (*text_to_match) {
         if (!**in_source) // the source string ended
             return false;
@@ -52,8 +51,8 @@ bool try_consume(const char** in_source,
     return true;
 }
 
-bool try_consume_until(const char** current_cursor, char separator,
-                              char* buff, size_t max_len) {
+bool try_consume_until(const char** current_cursor, char separator, char* buff,
+                       size_t max_len) {
     size_t len = 0;
     while (**current_cursor && **current_cursor != separator) {
         if (len++ == max_len)

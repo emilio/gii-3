@@ -20,7 +20,7 @@
 
 #include "logger.h"
 #include "protocol.h"
-#include "utils.h"
+#include "parsing.h"
 #include "socket-utils.h"
 
 #define SIZE 512

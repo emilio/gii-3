@@ -2,15 +2,16 @@
 #define LOGGER_H
 
 #include <stdlib.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <pthread.h>
 
 /// A `logger` abstraction could be fine to encapsulate and reuse this.
-static struct {
+extern struct logger_config {
     bool verbose;
     FILE* log_file;
     pthread_mutex_t mutex;
-} LOGGER_CONFIG = {false, NULL, PTHREAD_MUTEX_INITIALIZER};
+} LOGGER_CONFIG;
 
 #define LOG(...)                                                               \
     do {                                                                       \

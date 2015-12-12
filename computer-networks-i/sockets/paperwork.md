@@ -227,7 +227,7 @@ resulta que no lo soporta[^solaris-recvtimeo].
 Hubo que hacer una migración de `SO_RCVTIMEO` a `poll()`, aunque fueron cambios
 menores.
 
-[solaris-recvtimeo]: Tras verlo con mis propios ojos encontré [esta issue de
+[^solaris-recvtimeo]: Tras verlo con mis propios ojos encontré [esta issue de
 Apache](https://issues.apache.org/jira/browse/THRIFT-1371), y [esta
 página](http://www.pixelstech.net/article/1399694359-Socket-programming-tips-in-Solaris).
 

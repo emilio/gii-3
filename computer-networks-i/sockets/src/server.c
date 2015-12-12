@@ -40,7 +40,6 @@ typedef struct udp_cache_data {
     time_t last_access;
 } udp_cache_data_t;
 
-
 struct server_data {
     pthread_mutex_t mutex;
     vector_t events;                  // Inmutable
@@ -879,6 +878,8 @@ void* start_udp_server(void* info) {
     }
 
     LOG("UDP server closing");
+
+    vector_destroy(&connection_state_data);
     close(sock);
     return NULL;
 }

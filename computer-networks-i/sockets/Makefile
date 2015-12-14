@@ -21,6 +21,10 @@ ifeq ($(UNAME), Linux)
 	CFLAGS := $(CFLAGS) -DLINUX
 endif
 
+ifeq ($(UNAME), Darwin)
+	CFLAGS := $(CFLAGS) -DDARWIN -D_DARWIN_C_SOURCE
+endif
+
 TARGET_NAMES := server client
 TARGETS := $(patsubst %, target/%, $(TARGET_NAMES))
 

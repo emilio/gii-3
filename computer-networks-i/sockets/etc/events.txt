@@ -1,7 +1,7 @@
 # Here lies the information of events, any event with adequate dates can
 # be registered here.
 
-id_evento#descripci髇 del evento#01/11/2015 09:00:00#01/01/2016 14:00:00
-id_evento_1#descripci髇 del evento 1#01/11/2015 09:00:00#01/12/2015 14:00:00
-id_evento_2#descripci髇 del evento 2#01/11/2015 09:00:00#01/12/2016 10:00:00
-id_evento_3#descripci髇 del evento 3#01/11/2015 09:00:00#01/12/2016 10:00:00
+id_evento#descripci贸n del evento#01/11/2015 09:00:00#01/01/2016 14:00:00
+id_evento_1#descripci贸n del evento 1#01/11/2015 09:00:00#01/12/2015 14:00:00
+id_evento_2#descripci贸n del evento 2#01/11/2015 09:00:00#01/12/2016 10:00:00
+id_evento_3#descripci贸n del evento 3#01/11/2015 09:00:00#01/12/2016 10:00:00

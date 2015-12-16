@@ -1,8 +1,0 @@
-# This file is an example, and contains
-# the id of registered users.
-#
-# No-one except these users can log in
-# Lines which fail to parse are ignored,
-# that's why we can write comments like this.
-id_usuario
-id_usuario_1

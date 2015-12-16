@@ -1,7 +1,0 @@
-# This file is parsed after users, events and invitations are registered.
-# Only existing users invited to existing events, with adequate times can
-# be registered here.
-
-id_usuario#id_evento#08/11/2015 11:11:30
-id_usuario#id_evento#09/11/2015 11:11:30
-pepe#id_evento#01/10/2015 11:11:30

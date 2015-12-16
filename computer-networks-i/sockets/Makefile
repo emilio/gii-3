@@ -74,6 +74,10 @@ release: clean-binaries binaries
 test: target/tests/tests
 	@$<
 
+.PHONY: run
+run: run/launch-server.sh
+	@$<
+
 .PHONY: clean-test
 clean-test:
 	$(RM) -r target/tests

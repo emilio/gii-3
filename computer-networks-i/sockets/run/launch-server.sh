@@ -45,7 +45,8 @@ fi
 echo "run: server: $SERVER"
 echo "run: client: $CLIENT"
 
-"$SERVER" -v -d -l "$LOG_DIR/server.log"
+SERVER_LOG="$LOG_DIR/server.log"
+"$SERVER" -v -d -l "$SERVER_LOG"
 if [ $? -ne 0 ]; then
   echo "run: server exited, probably another instance is running"
 fi
@@ -53,8 +54,21 @@ fi
 # SERVER_PID=`pidof "$SERVER"`
 SERVER_PID=`pgrep -f "$SERVER"`
 if [ $? -ne 0 ]; then
-  echo "run: running server not found, aborting..."
-  exit 1
+  echo "run: previous server launched with this script not found"
+
+  SERVER_PID=`pgrep -x $(basename "$SERVER")`
+  if [ $? -ne 0 ]; then
+    echo "run: no other running server was found, aborting..."
+    exit 1
+  fi
+
+  echo "run: server found with pid $SERVER_PID"
+  echo "run: it might be not killable, continue anyways? (y/N)"
+  read -p "run: " option
+  case "$option" in
+    y|Y) echo "run: continuing" ;;
+    *)   echo "run: aborting"; exit 1 ;;
+  esac
 fi
 
 echo "run: server pid: $SERVER_PID"
@@ -88,8 +102,20 @@ echo "  1) Kill the server"
 echo "  2) Keep the server running but dump the data"
 echo "  *) Do nothing"
 read -p "choose: " option
-case $option in
+case "$option" in
   1) kill $SERVER_PID ;;
   2) kill -SIGUSR1 $SERVER_PID ;;
+  *) echo "run: finished"; exit 0 ;;
 esac
 
+if [ $? -ne 0 ]; then
+  echo "run: warning: kill might have failed"
+fi
+
+echo "run: finished: do you want to open the server log? (Y/n)"
+read -p "run: " option
+case $option in
+  n|N) echo "run: bye"; exit 0; ;;
+esac
+
+less "$SERVER_LOG"

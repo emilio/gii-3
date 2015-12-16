@@ -89,12 +89,14 @@ all: binaries test docs
 	@echo > /dev/null
 
 .PHONY: bundle
-# Ensure everything is passing before bundling everything
 bundle:
+	# Ensure everything is passing before bundling everything
 	$(MAKE) --quiet clean-binaries binaries test release test docs > /dev/null 2>&1
 	git archive HEAD . -o $(BUNDLE_NAME).tar
 	tar -r $(DOC_TARGETS) -f $(BUNDLE_NAME).tar
 	gzip -f $(BUNDLE_NAME).tar
+	git archive HEAD . -o $(BUNDLE_NAME).zip
+	zip $(BUNDLE_NAME).zip $(DOC_TARGETS)
 
 .PHONY: clean-bundle
 clean-bundle:

@@ -4,3 +4,4 @@ log/*
 !log/.keep
 etc/assistances.txt
 bundle.tar.gz
+bundle.zip

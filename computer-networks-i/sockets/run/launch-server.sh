@@ -45,14 +45,13 @@ fi
 echo "run: server: $SERVER"
 echo "run: client: $CLIENT"
 
-"$SERVER" -v -d -l "$LOG_DIR/server.log"
+"$SERVER" -v -d # -l "$LOG_DIR/server.log"
 if [ $? -ne 0 ]; then
   echo "run: server exited, probably another instance is running"
 fi
 
 # SERVER_PID=`pidof "$SERVER"`
-SERVER_NAME=`basename "$SERVER"`
-SERVER_PID=`pgrep -x "$SERVER_NAME"`
+SERVER_PID=`pgrep -f "$SERVER"`
 if [ $? -ne 0 ]; then
   echo "run: running server not found, aborting..."
   exit 1

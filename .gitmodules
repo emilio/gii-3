@@ -7,3 +7,6 @@
 [submodule "interfaces/final"]
 	path = interfaces/final
 	url = git@github.com:ecoal95/gii-3-interfaces-final.git
+[submodule "computer-networks-i/sockets"]
+	path = computer-networks-i/sockets
+	url = git@github.com:ecoal95/sockets-2015

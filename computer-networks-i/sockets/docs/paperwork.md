@@ -293,9 +293,40 @@ Pero si eres demasiado vago/a, hay una regla escrita para tí en el `Makefile`:
 $ [g]make run
 ```
 
+Cualquiera de esos dos métodos debería de dar una salida como la siguiente:
+
+```
+run: Server or client not found, trying to run make on the root dir
+make[1]: Entering directory 'xxx'
+# Omitido
+make[1]: Leaving directory 'xxx'
+run: server: run/../target/server
+run: client: run/../target/client
+run: server pid: 15076
+run: clients:  15080  15081  15083  15085  15087  15089
+run: waiting for: 15080
+run: waiting for: 15081
+run: waiting for: 15083
+run: waiting for: 15085
+run: waiting for: 15087
+run: waiting for: 15089
+run: Seems like all the clients have exited, what do you want to do?
+  1) Kill the server
+  2) Keep the server running but dump the data
+  *) Do nothing
+choose:
+```
+
+Tras esa ejecución, se puede o bien matar al servidor[^killing-the-server],
+o bien mantener el servidor corriendo, pero escribir los fichajes al archivo de
+fichajes (por defecto `etc/assistances.txt`), o no hacer nada.
+
 [^multidir-disclaimer]: Nótese que si se ejecuta el script desde otro
 directorio, el servidor no encontrará los archivos de donde tiene que leer salvo
 que se los pases como argumentos, por lo que el script abortará.
+
+[^killing-the-server]: Matar al servidor también vuelca los datos al fichero de
+fichajes.
 
 ## Archivos
 

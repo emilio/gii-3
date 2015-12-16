@@ -232,9 +232,85 @@ menores.
 Apache](https://issues.apache.org/jira/browse/THRIFT-1371), y [esta
 página](http://www.pixelstech.net/article/1399694359-Socket-programming-tips-in-Solaris).
 
+## Posibles mejoras y optimizaciones
+
+A pesar de que la práctica rinde muy bien para un número más que razonable de
+clientes, y que no es prioridad del enunciado el rendimiento, siempre se puede
+hacer mejor. A continuación se presentan una serie de posibles optimizaciones
+y mejoras diferentes a la práctica.
+
+### Soportar IPv6
+
+No se soporta actualmente, pero sería relativamente sencillo con un par de
+modificaciones en el código.
+
+### Distribuir las conexiones TCP en un pool de hilos "trabajadores"
+
+Nuestro modelo de servidor TCP asigna un hilo a cada conexión. Esto, pese a que
+no es muy ineficiente, se podría mejorar usando un modelo similar al del
+servidor web *Nginx*, **atendiendo las peticiones según están listas para
+enviar/recibir datos, pero sin crear excesivos hilos**.
+
+La idea sería crear una serie de hilos al comienzo del programa, y repartir las
+conexiones equitativamente entre ellos.
+
+Dentro de cada uno de los hilos, **las conexiones se manejarían de un modo
+orientado a eventos**: Cada conexión es atendida según se desbloquea. En este
+aspecto `epoll`, `kqueue`, `poll()`, o alguna biblioteca del estilo a `libevent`
+podrían ser de gran ayuda.
+
+### Evitar búsquedas lineales
+
+Para UDP usamos un vector y buscamos linealmente por él, sería mucho mejor hacer
+un *hashmap*, usando como clave un entero de 64 bits que compondrían el puerto
+y la dirección IP (o algo más si quisiéramos soportar IPv6).
+
+Igualmente, para encontrar eventos o similar, es necesario buscar linealmente
+por los datos globales. Esto funciona bien para la cantidad de datos con la que
+nos manejamos, pero según aumentara el número empezaríamos a notarlo.
+
+### Usar una BBDD de verdad
+
+Aunque usemos memoria para almacenar los datos, sería mucho más óptimo usar
+algún tipo de BBDD de verdad, aunque fuera `SQLite`. Esto ayudaría de forma
+fácil e inmediata con el problema comentado arriba.
+
+# Ejecución
+
+Hay varias formas de ejecutar la práctica de forma acorde al enunciado. Los
+archivos están un poco reorganizados para poder tener un poco de orden en el
+directorio.
+
+La forma evidente de ejecutarlo es usar[^multidir-disclaimer]:
+
+```sh
+$ ./run/launch-server.sh
+```
+
+Pero si eres demasiado vago/a, hay una regla escrita para tí en el `Makefile`:
+
+```sh
+$ [g]make run
+```
+
+[^multidir-disclaimer]: Nótese que si se ejecuta el script desde otro
+directorio, el servidor no encontrará los archivos de donde tiene que leer salvo
+que se los pases como argumentos, por lo que el script abortará.
+
+## Archivos
+
+El servidor por defecto lee desde los archivos:
+
+ * `etc/events.txt`: Listado de eventos.
+ * `etc/assistances.txt`: Fichajes previos (si los hay).
+ * `etc/invitations.txt`: Invitaciones a eventos.
+ * `etc/users.txt`: Lista de usuarios registrados.
+
+Los clientes pueden ser lanzados en modo interactivo (`./target/client`), o en
+modo automático. Si se lanzan usando el script predefinido leerán los comandos
+automáticamente desde `run/ordenes[n].txt`.
+
 # Protocolo más adecuado para esta práctica
 
 Sin duda, dado que es una conversación que mantiene estado entre dos clientes,
 el protocolo más adecuado para esta práctica es **TCP**.
-
-

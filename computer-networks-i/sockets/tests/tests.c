@@ -108,7 +108,8 @@ TEST(parse_failure_invalid_type, {
     client_message_t result;
     const char* message = "ABC abc";
 
-    ASSERT(ERROR_INVALID_MESSAGE_TYPE == parse_client_message(message, &result));
+    ASSERT(ERROR_INVALID_MESSAGE_TYPE ==
+           parse_client_message(message, &result));
 })
 
 TEST(parse_failure_extra_content, {
@@ -129,7 +130,8 @@ TEST(parse_failure_missing_ident, {
     client_message_t result;
     const char* message = "LISTAR abc ";
 
-    ASSERT(ERROR_EXPECTED_VALID_EVENT_ID == parse_client_message(message, &result));
+    ASSERT(ERROR_EXPECTED_VALID_EVENT_ID ==
+           parse_client_message(message, &result));
 })
 
 TEST(parse_failure_extra_newline, {
@@ -143,7 +145,8 @@ TEST(parse_failure_extra_newline_in_content, {
     client_message_t result;
     const char* message = "HOLA\nabc\n";
 
-    ASSERT(ERROR_INVALID_MESSAGE_TYPE == parse_client_message(message, &result));
+    ASSERT(ERROR_INVALID_MESSAGE_TYPE ==
+           parse_client_message(message, &result));
 })
 
 TEST(vector_base, {
@@ -203,7 +206,8 @@ TEST(parse_event_simple_nonzero, {
 
 TEST(parse_event_complex, {
     protocol_event_t result;
-    const char* str = "id_evento_1#descripción del evento 1#01/11/2015 09:00:00#01/12/2015 14:00:00";
+    const char* str = "id_evento_1#descripción del evento 1#01/11/2015 "
+                      "09:00:00#01/12/2015 14:00:00";
 
     ASSERT(ERROR_NONE == parse_event(str, &result));
     ASSERT(strcmp(result.id, "id_evento_1") == 0);
@@ -218,7 +222,6 @@ TEST(parse_event_complex, {
     strftime(buff, sizeof(buff), "%d/%m/%Y %H:%M:%S", &result.ends_at);
     ASSERT(strcmp(buff, "01/12/2015 14:00:00") == 0);
 })
-
 
 TEST(parse_failure_event_invalid_date, {
     protocol_event_t result;

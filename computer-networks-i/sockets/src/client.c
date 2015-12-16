@@ -269,8 +269,10 @@ int main(int argc, char** argv) {
             printf("\n");
     }
 
+
     LOG("Closing client");
     close(sock);
+    fclose(src_file);
 
     if (LOGGER_CONFIG.log_file)
         fclose(LOGGER_CONFIG.log_file);

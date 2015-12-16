@@ -45,7 +45,7 @@ fi
 echo "run: server: $SERVER"
 echo "run: client: $CLIENT"
 
-"$SERVER" -v -d # -l "$LOG_DIR/server.log"
+"$SERVER" -v -d -l "$LOG_DIR/server.log"
 if [ $? -ne 0 ]; then
   echo "run: server exited, probably another instance is running"
 fi

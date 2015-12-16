@@ -96,6 +96,9 @@ bundle:
 	tar -r $(DOC_TARGETS) -f $(BUNDLE_NAME).tar
 	gzip -f $(BUNDLE_NAME).tar
 
+.PHONY: clean-bundle
+clean-bundle:
+	$(RM) $(BUNDLE_NAME).tar.gz
 
 .PHONY: clean-test
 clean-test:
@@ -110,7 +113,7 @@ clean-logs:
 	$(RM) log/*.log
 
 .PHONY: clean
-clean: clean-test clean-docs clean-logs clean-binaries
+clean: clean-test clean-docs clean-logs clean-binaries clean-bundle
 	@echo > /dev/null
 
 .PHONY: autoformat

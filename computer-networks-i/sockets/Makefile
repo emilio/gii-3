@@ -57,7 +57,7 @@ TEST_OBJECTS := $(patsubst tests/%.c, target/tests/%.o, $(TEST_SOURCES))
 DOC_SOURCES := $(wildcard docs/*.md)
 DOC_TARGETS := $(DOC_SOURCES:.md=.pdf)
 
-BUNDLE := bundle.tar.gz
+BUNDLE_NAME := bundle
 
 .PHONY: binaries
 binaries: $(TARGETS)
@@ -89,14 +89,13 @@ all: binaries test docs
 	@echo > /dev/null
 
 .PHONY: bundle
-bundle: $(BUNDLE)
-	@echo > /dev/null
-
 # Ensure everything is passing before bundling everything
-$(BUNDLE): binaries test release clean-test test clean-binaries clean-test docs clean-logs
-	$(info [BUNDLE] $@)
-	@$(RM) $@
-	@tar -caf $@ *
+bundle:
+	$(MAKE) --quiet clean-binaries binaries test release test docs > /dev/null 2>&1
+	git archive HEAD . -o $(BUNDLE_NAME).tar
+	tar -r $(DOC_TARGETS) -f $(BUNDLE_NAME).tar
+	gzip -f $(BUNDLE_NAME).tar
+
 
 .PHONY: clean-test
 clean-test:
@@ -124,29 +123,34 @@ autoformat:
 # Target programs
 target/%.o: src/%.c src/%.h
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(info [cc] $@)
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 target/%.o: src/%.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(info [cc] $@)
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 target/%: target/%.o $(COMMON_OBJS)
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $^ -o $@ $(CLINKFLAGS)
+	$(info [cc] $@)
+	@$(CC) $(CFLAGS) $^ -o $@ $(CLINKFLAGS)
 
 
 # Tests
 target/tests/%.o: CFLAGS := $(CFLAGS) -I src
 target/tests/%.o: tests/%.c tests/%.h
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(info [cc] $@)
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 target/tests/tests: $(TEST_OBJECTS) $(COMMON_OBJS)
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(info [cc] $@)
+	@$(CC) $(CFLAGS) $^ -o $@
 
 # Docs
 %.pdf: %.md
-	$(info [DOC] $< -> $@)
+	$(info [doc] $< -> $@)
 	@pandoc $(PANDOC_FLAGS) --from=markdown --latex-engine=xelatex --to=latex $< -o $@
 

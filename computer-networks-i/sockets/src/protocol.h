@@ -1,3 +1,22 @@
+/**
+ * protocol.h:
+ *   Protocol interface and types
+ *
+ * Copyright (C) 2015 Emilio Cobos Álvarez <emiliocobos@usal.es>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
@@ -8,16 +27,10 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-/// It is mandatory that the protocol must be text based.
-///
-/// The client orders are:
-/// HOLA user_id
-///
-/// TODO document the rest
-///
-///
-
-/// There are some constraints like:
+/**
+ * To see the full documentation of the protocol see
+ * statement.md
+ */
 #define MAX_UID_LEN 20
 #define MAX_EVENT_ID_LEN 20
 #define MAX_EVENT_DESCRIPTION_LEN 140
@@ -26,18 +39,20 @@ typedef char protocol_uid_t[MAX_UID_LEN + 1];
 typedef char protocol_event_id_t[MAX_EVENT_ID_LEN + 1];
 typedef char protocol_description_t[MAX_EVENT_DESCRIPTION_LEN + 1];
 
-typedef uint8_t client_message_type_t;
-
-/// Using defines we loose type checking but we gain the same
-/// message structure, so if we want to send raw binary data
-/// from the client it will work regardless of the architecture.
 #define MESSAGE_TYPE_BEGIN MESSAGE_TYPE_HELLO
-#define MESSAGE_TYPE_HELLO 1
-#define MESSAGE_TYPE_BYE 2
-#define MESSAGE_TYPE_EVENT_LIST 3
-#define MESSAGE_TYPE_ASSISTANCE_LIST 4
-#define MESSAGE_TYPE_ASSISTANCE 5
-#define MESSAGE_TYPE_END 6
+typedef enum client_message_type {
+    MESSAGE_TYPE_HELLO,
+    MESSAGE_TYPE_BYE,
+    MESSAGE_TYPE_EVENT_LIST,
+    MESSAGE_TYPE_ASSISTANCE_LIST,
+    MESSAGE_TYPE_ASSISTANCE,
+    MESSAGE_TYPE_END
+} client_message_type_t;
+
+typedef struct connection_state {
+    protocol_uid_t uid;
+    bool logged_in;
+} connection_state_t;
 
 typedef struct client_message {
     client_message_type_t type;
@@ -95,13 +110,6 @@ typedef enum parse_error {
     ERROR_COUNT,
 } parse_error_t;
 
-/// Here we rely in non-portable behaviour (that time_t is an integer value).
-/// It's really this way in every sane platform, but if it was not this way,
-/// we should make the multiplication by hand from the fields on `struct tm`.
-static inline int64_t tm_to_seconds(struct tm* tm) {
-    return (int64_t)mktime(tm);
-}
-
 static inline const char* parse_error_string(parse_error_t error) {
     if (error < 0 || error >= ERROR_COUNT - 1)
         return PARSE_ERROR_MESSAGES[ERROR_UNKNOWN];
@@ -112,6 +120,8 @@ static inline const char* parse_error_string(parse_error_t error) {
 static inline bool is_valid_id_char(char c) {
     return isalnum(c) || c == '-' || c == '_';
 }
+
+void connection_state_init(connection_state_t* state);
 
 parse_error_t parse_client_message(const char* in_source,
                                    client_message_t* message);

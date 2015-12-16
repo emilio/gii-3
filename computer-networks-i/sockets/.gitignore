@@ -3,3 +3,4 @@ target/
 log/*
 !log/.keep
 etc/assistances.txt
+bundle.tar.gz

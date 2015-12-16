@@ -54,8 +54,10 @@ TEST_SOURCES := $(wildcard tests/*.c)
 TEST_OBJECTS := $(patsubst tests/%.c, target/tests/%.o, $(TEST_SOURCES))
 
 # Paperwork and statement in pdf
-DOC_SOURCES := $(wildcard *.md)
+DOC_SOURCES := $(wildcard docs/*.md)
 DOC_TARGETS := $(DOC_SOURCES:.md=.pdf)
+
+BUNDLE := bundle.tar.gz
 
 .PHONY: binaries
 binaries: $(TARGETS)
@@ -78,24 +80,38 @@ test: target/tests/tests
 run: run/launch-server.sh
 	@$<
 
-.PHONY: clean-test
-clean-test:
-	$(RM) -r target/tests
-
 .PHONY: docs
 docs: $(DOC_TARGETS)
 	@echo > /dev/null
-
-.PHONY: clean-docs
-clean-docs:
-	$(RM) $(DOC_TARGETS)
 
 .PHONY: all
 all: binaries test docs
 	@echo > /dev/null
 
+.PHONY: bundle
+bundle: $(BUNDLE)
+	@echo > /dev/null
+
+# Ensure everything is passing before bundling everything
+$(BUNDLE): binaries test release clean-test test clean-binaries clean-test docs clean-logs
+	$(info [BUNDLE] $@)
+	@$(RM) $@
+	@tar -caf $@ *
+
+.PHONY: clean-test
+clean-test:
+	$(RM) -r target/tests
+
+.PHONY: clean-docs
+clean-docs:
+	$(RM) $(DOC_TARGETS)
+
+.PHONY: clean-logs
+clean-logs:
+	$(RM) log/*.log
+
 .PHONY: clean
-clean: clean-test clean-docs clean-binaries
+clean: clean-test clean-docs clean-logs clean-binaries
 	@echo > /dev/null
 
 .PHONY: autoformat

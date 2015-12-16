@@ -142,8 +142,15 @@ bool get_events_from(const char* filename) {
         size_t len = strlen(line);
 
         // Trim last newline
-        if (line[len - 1] == '\n')
-            line[len - 1] = '\0';
+        if (len > 0 && line[len - 1] == '\n')
+            line[--len] = '\0';
+
+        LOG("event_parse: %s", line);
+
+        if (len == 0 || *line == '#') {
+            LOG("event_parse: Ignoring empty line or comment");
+            continue;
+        }
 
         LOG("event_parse: %s", line);
 
@@ -182,10 +189,15 @@ bool get_users_from(const char* filename) {
         size_t len = strlen(line);
 
         // Trim last newline
-        if (line[len - 1] == '\n')
-            line[len - 1] = '\0';
+        if (len > 0 && line[len - 1] == '\n')
+            line[--len] = '\0';
 
         LOG("user_parse: %s", line);
+
+        if (len == 0 || *line == '#') {
+            LOG("user_parse: Ignoring empty line or comment");
+            continue;
+        }
 
         parse_error_t error = parse_user(line, &tmp_user);
         if (error != ERROR_NONE) {
@@ -219,8 +231,15 @@ bool get_invitations_from(const char* filename) {
         size_t len = strlen(line);
 
         // Trim last newline
-        if (line[len - 1] == '\n')
-            line[len - 1] = '\0';
+        if (len > 0 && line[len - 1] == '\n')
+            line[--len] = '\0';
+
+        LOG("invitation_parse: %s", line);
+
+        if (len == 0 || *line == '#') {
+            LOG("invitation_parse: Ignoring empty line or comment");
+            continue;
+        }
 
         LOG("invitation_parse: %s", line);
 
@@ -271,8 +290,15 @@ bool get_assistances_from(const char* filename) {
         size_t len = strlen(line);
 
         // Trim last newline
-        if (line[len - 1] == '\n')
-            line[len - 1] = '\0';
+        if (len > 0 && line[len - 1] == '\n')
+            line[--len] = '\0';
+
+        LOG("assistance_parse: %s", line);
+
+        if (len == 0 || *line == '#') {
+            LOG("assistance_parse: Ignoring empty line or comment");
+            continue;
+        }
 
         LOG("assistance_parse: %s", line);
 
@@ -907,11 +933,11 @@ void cleanup_global_data() {
     vector_destroy(&GLOBAL_DATA.invitations);
 
     // TODO: This probably should be in logger.h
+    pthread_mutex_lock(&LOGGER_CONFIG.mutex);
     if (LOGGER_CONFIG.log_file) {
-        pthread_mutex_lock(&LOGGER_CONFIG.mutex);
         fclose(LOGGER_CONFIG.log_file);
-        pthread_mutex_unlock(&LOGGER_CONFIG.mutex);
     }
+    pthread_mutex_unlock(&LOGGER_CONFIG.mutex);
 }
 
 int main(int argc, char** argv) {
@@ -1001,7 +1027,7 @@ int main(int argc, char** argv) {
 
     LOG("Assistances source: %s", assistances_src_filename);
     if (!get_assistances_from(assistances_src_filename))
-        FATAL("Couldn't get assistance data");
+        WARN("Couldn't get assistance data, assuming empty file");
 
     GLOBAL_DATA.assistances_filename = assistances_src_filename;
 

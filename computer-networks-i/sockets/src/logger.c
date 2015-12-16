@@ -2,7 +2,7 @@
  * logger.c:
  *   Logging "instantiation"
  *
- * Copyright (C) 2015 Emilio Cobos Álvarez <emiliocobos@usal.es>
+ * Copyright (C) 2015 Emilio Cobos Álvarez (70912324N) <emiliocobos@usal.es>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

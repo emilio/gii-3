@@ -7,8 +7,8 @@ all: $(TARGET)
 
 .PHONY: test
 test:
-	timeout 60 ./$(TARGET) > test.txt || true
-	[ $$(cat test.txt | grep 'ESTABLE\|PELIGRO' | wc -l) -eq 200 ] || (echo "Failure!" && false)
+	timeout 15 ./$(TARGET) > test.txt || true
+	[ $$(cat test.txt | grep 'ESTABLE\|PELIGRO' | wc -l) -eq 50 ] || (echo "Failure!" && false)
 	@echo "Ok!"
 
 %.o: %.adb

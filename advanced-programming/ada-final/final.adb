@@ -1,5 +1,6 @@
 with Ada.Text_IO;
 with Ada.Real_Time; use Ada.Real_Time;
+with Ada.Containers.Generic_Array_Sort;
 with Ada.Numerics.Discrete_Random;
 
 procedure Final is
@@ -23,7 +24,7 @@ procedure Final is
     current_operation_time: Time;
     SENSOR_JITTER: constant Duration := Ada.Real_Time.To_Duration(Ada.Real_Time.Milliseconds(50));
   begin
-    current_production := 0;
+    current_production := 15;
 
     loop
       select
@@ -89,9 +90,15 @@ procedure Final is
   end CityUpdater;
 
   centrals: Array(1..3) of NuclearCentral;
+  centrals_used: Array(1..3) of Boolean;
   current_values: Array(1..3) of Integer;
   city: CityUpdater;
   city_requirements: Integer;
+
+  min_value: Integer;
+  min_value_index: Integer;
+  max_value: Integer;
+  max_value_index: Integer;
 
   production: Integer;
   expected_production: Integer;
@@ -127,22 +134,51 @@ begin
 
     Ada.Text_IO.Put_Line(" consumo:" & city_requirements'Img & " producción:" & production'Img);
 
-    -- Calculate the appropiate movements to get the things working
-    --
-    -- TODO: This could be better distributed, this makes to work more
-    -- to the first centrals.
-    --
-    -- It works though, since we have in account the limits.
+    for i in centrals_used'Range loop
+      centrals_used(i) := false;
+    end loop;
+
+    -- TODO: This could probably be more efficient (and elegant) with a sorted
+    -- dequeue, but doing that deserves a big time investment so...
     expected_production := production;
     for i in current_values'Range loop
-      if expected_production < city_requirements and current_values(i) < CENTRAL_MAX_PRODUCTION then
-        Ada.Text_IO.Put_Line("SUBO " & i'Img);
-        expected_production := expected_production + 1;
-        centrals(i).increment;
-      elsif expected_production > city_requirements and current_values(i) > CENTRAL_MIN_PRODUCTION then
-        Ada.Text_IO.Put_Line("BAJO " & i'Img);
-        expected_production := expected_production - 1;
-        centrals(i).decrement;
+      if expected_production < city_requirements then
+        min_value := CENTRAL_MAX_PRODUCTION;
+        min_value_index := -1;
+        for j in current_values'Range loop
+          if current_values(j) <= min_value and centrals_used(j) = false then
+            min_value_index := j;
+            min_value := current_values(j);
+          end if;
+        end loop;
+
+        if min_value_index /= -1 then
+          Ada.Text_IO.Put_Line("SUBO " & min_value_index'Img);
+          expected_production := expected_production + 1;
+          centrals(min_value_index).increment;
+          centrals_used(min_value_index) := true;
+        else
+          Ada.Text_IO.Put_Line("Central to increment not found. This is an error.");
+        end if;
+      elsif expected_production > city_requirements then
+        max_value := CENTRAL_MIN_PRODUCTION;
+        max_value_index := -1;
+
+        for j in current_values'Range loop
+          if current_values(j) >= max_value and centrals_used(j) = false then
+            max_value_index := j;
+            max_value := current_values(j);
+          end if;
+        end loop;
+
+        if max_value_index /= -1 then
+          Ada.Text_IO.Put_Line("BAJO " & max_value_index'Img);
+          expected_production := expected_production - 1;
+          centrals(max_value_index).decrement;
+          centrals_used(max_value_index) := true;
+        else
+          Ada.Text_IO.Put_Line("Central to decrement not found. This is an error.");
+        end if;
       end if;
     end loop;
 

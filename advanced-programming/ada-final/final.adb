@@ -1,7 +1,7 @@
 with Ada.Text_IO;
 with Ada.Real_Time; use Ada.Real_Time;
-with Ada.Containers.Generic_Array_Sort;
 with Ada.Numerics.Discrete_Random;
+with Nuclear_Central;
 
 procedure Final is
   -- Some shared constants here
@@ -10,52 +10,9 @@ procedure Final is
   CITY_MAX_REQUIREMENTS: constant Integer := 90;
   CITY_MIN_REQUIREMENTS: constant Integer := 15;
 
-  -- The `NuclearCentral` task represents a nuclear central that can
-  -- increment, decrement or keep the energy production
-  task type NuclearCentral is
-    entry read_value(value: out Integer);
-    entry increment;
-    entry decrement;
-  end NuclearCentral;
-
-  task body NuclearCentral is
-    current_production: Integer;
-    last_operation_time: Time := Ada.Real_Time.Clock;
-    current_operation_time: Time;
-    SENSOR_JITTER: constant Duration := Ada.Real_Time.To_Duration(Ada.Real_Time.Milliseconds(50));
-  begin
-    current_production := 15;
-
-    loop
-      select
-        accept read_value(value: out Integer) do
-          -- Artificial delay required by the statement
-          delay SENSOR_JITTER;
-          value := current_production;
-        end read_value;
-        or
-        accept increment;
-          current_operation_time := Ada.Real_Time.Clock;
-          -- This operation can be done just once per second
-          if current_operation_time - last_operation_time >= Ada.Real_Time.Seconds(1) then
-            last_operation_time := current_operation_time;
-            current_production := current_production + 1;
-          end if;
-        or
-        accept decrement;
-          current_operation_time := Ada.Real_Time.Clock;
-          -- This operation can be done just once per second
-          if current_operation_time - last_operation_time >= Ada.Real_Time.Seconds(1) then
-            last_operation_time := current_operation_time;
-            current_production := current_production - 1;
-          end if;
-      end select;
-    end loop;
-  end NuclearCentral;
-
   -- This is the atomic var used to update the city requirements:
   -- The `CityUpdater` task sets it, and the main task reads it.
-  requirements: Integer := 45;
+  requirements: Integer := 35;
   pragma Volatile(requirements);
   pragma Atomic(requirements);
 
@@ -89,7 +46,7 @@ procedure Final is
     end loop;
   end CityUpdater;
 
-  centrals: Array(1..3) of NuclearCentral;
+  centrals: Array(1..3) of Nuclear_Central.Nuclear_Central;
   centrals_used: Array(1..3) of Boolean;
   current_values: Array(1..3) of Integer;
   city: CityUpdater;
@@ -107,6 +64,10 @@ procedure Final is
   ratio: Float;
 begin
   current_operation := Ada.Real_Time.Clock;
+
+  for i in centrals'Range loop
+    centrals(i).start;
+  end loop;
 
   loop
     city_requirements := requirements;
@@ -179,6 +140,12 @@ begin
         else
           Ada.Text_IO.Put_Line("Central to decrement not found. This is an error.");
         end if;
+      end if;
+    end loop;
+
+    for i in centrals_used'Range loop
+      if centrals_used(i) = false then
+        centrals(i).maintain;
       end if;
     end loop;
 

@@ -10,3 +10,6 @@
 [submodule "computer-networks-i/sockets"]
 	path = computer-networks-i/sockets
 	url = git@github.com:ecoal95/sockets-2015
+[submodule "advanced-programming/ada-final"]
+	path = advanced-programming/ada-final
+	url = git@github.com:ecoal95/ada-final-2015

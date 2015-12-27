@@ -3,42 +3,33 @@ with Ada.Real_Time; use Ada.Real_Time;
 with Ada.Numerics.Discrete_Random;
 
 procedure Final is
-  -- The `Monitor` task is responsible of reading the NuclearCentral
-  -- values and manage them
+  -- Some shared constants here
+  CENTRAL_MAX_PRODUCTION: constant Integer := 30;
+  CENTRAL_MIN_PRODUCTION: constant Integer := 0;
+  CITY_MAX_REQUIREMENTS: constant Integer := 90;
+  CITY_MIN_REQUIREMENTS: constant Integer := 15;
 
   -- The `NuclearCentral` task represents a nuclear central that can
   -- increment, decrement or keep the energy production
   task type NuclearCentral is
-    entry start(the_id: in Integer);
     entry read_value(value: out Integer);
     entry increment;
     entry decrement;
-    entry stop;
   end NuclearCentral;
 
   task body NuclearCentral is
     current_production: Integer;
-    id: Integer;
-    last_operation_time: Time := Clock;
+    last_operation_time: Time := Ada.Real_Time.Clock;
     current_operation_time: Time;
+    SENSOR_JITTER: constant Duration := Ada.Real_Time.To_Duration(Ada.Real_Time.Milliseconds(50));
   begin
     current_production := 0;
 
-    -- First wait for the start message
-    select
-      accept start(the_id: in Integer) do
-        Ada.Text_IO.put_line("Start: " & the_id'Img);
-        id := the_id;
-      end start;
-    end select;
-
-    -- Now enter in the main loop
     loop
-      -- Ada.Text_IO.put("Nuclear Central" & id'Img & ": ");
       select
         accept read_value(value: out Integer) do
           -- Artificial delay required by the statement
-          delay 0.05;
+          delay SENSOR_JITTER;
           value := current_production;
         end read_value;
         or
@@ -54,54 +45,68 @@ procedure Final is
           current_operation_time := Ada.Real_Time.Clock;
           -- This operation can be done just once per second
           if current_operation_time - last_operation_time >= Ada.Real_Time.Seconds(1) then
-            current_operation_time := Ada.Real_Time.Clock;
+            last_operation_time := current_operation_time;
             current_production := current_production - 1;
           end if;
-        or
-        accept stop;
-          Ada.Text_IO.put_line("Stop");
-          exit;
       end select;
     end loop;
   end NuclearCentral;
 
-  subtype RngRange is Integer range -3..3;
-  package Random is new Ada.Numerics.Discrete_Random(RngRange);
-  seed: Random.Generator;
+  -- This is the atomic var used to update the city requirements:
+  -- The `CityUpdater` task sets it, and the main task reads it.
+  requirements: Integer := 45;
+  pragma Volatile(requirements);
+  pragma Atomic(requirements);
 
-  city_requirements: Integer;
+  -- The `CityUpdater` task represents a city, and updates the requirements
+  -- once per second.
+  task type CityUpdater is
+  end CityUpdater;
+
+  task body CityUpdater is
+    subtype RngRange is Integer range -3..3;
+    package Random is new Ada.Numerics.Discrete_Random(RngRange);
+    seed: Random.Generator;
+    current_operation: Ada.Real_Time.Time;
+    current_requirements: Integer;
+  begin
+    Random.reset(seed);
+
+    current_operation := Ada.Real_Time.Clock;
+    loop
+      current_requirements := requirements;
+      current_requirements := current_requirements + Random.random(seed);
+      if current_requirements > CITY_MAX_REQUIREMENTS then
+        current_requirements := CITY_MAX_REQUIREMENTS;
+      end if;
+      if current_requirements < CITY_MIN_REQUIREMENTS then
+        current_requirements := CITY_MIN_REQUIREMENTS;
+      end if;
+      requirements := current_requirements;
+      current_operation := current_operation + Ada.Real_Time.Seconds(1);
+      delay until current_operation;
+    end loop;
+  end CityUpdater;
+
   centrals: Array(1..3) of NuclearCentral;
   current_values: Array(1..3) of Integer;
-  iterations: Integer;
+  city: CityUpdater;
+  city_requirements: Integer;
+
   production: Integer;
   expected_production: Integer;
+
+  current_operation: Ada.Real_Time.Time;
   ratio: Float;
 begin
-  iterations := 0;
-  city_requirements := 45;
-  Random.reset(seed);
-
-  for i in centrals'Range loop
-    centrals(i).start(i);
-  end loop;
+  current_operation := Ada.Real_Time.Clock;
 
   loop
-    -- Update the city requirements if appropiate
-    if iterations rem 3 = 0 then
-      city_requirements := city_requirements + Random.random(seed);
-      if city_requirements > 90 then
-        city_requirements := 90;
-      end if;
-      if city_requirements < 15 then
-        city_requirements := 15;
-      end if;
-      -- Ada.Text_IO.put_line("Updating city requirements: " & city_requirements'Img);
-    end if;
+    city_requirements := requirements;
 
     -- Read the current values
     for i in centrals'Range loop
       centrals(i).read_value(current_values(i));
-      -- Ada.Text_IO.put_line("Current value for " & i'Img & ": " & current_values(i)'Img);
     end loop;
 
     -- Sum the current values to get the actual production
@@ -112,33 +117,36 @@ begin
 
     -- Calculate the current production / requirements ratio
     ratio := Float(production - city_requirements) / Float(city_requirements);
-
-    -- Ada.Text_IO.put_line("Ratio: " & ratio'Img);
     if ratio < -0.05 then
-      Ada.Text_IO.put_line("PELIGRO BAJADA consumo:" & city_requirements'Img & " producción " & production'Img);
+      Ada.Text_IO.Put("PELIGRO BAJADA");
     elsif ratio > 0.05 then
-      Ada.Text_IO.put_line("PELIGRO SOBRECARGA consumo:" & city_requirements'Img & " producción " & production'Img);
+      Ada.Text_IO.Put("PELIGRO SOBRECARGA");
     else
-      Ada.Text_IO.put_line("ESTABLE consumo:" & city_requirements'Img & " producción " & production'Img);
+      Ada.Text_IO.Put("ESTABLE");
     end if;
 
+    Ada.Text_IO.Put_Line(" consumo:" & city_requirements'Img & " producción:" & production'Img);
+
     -- Calculate the appropiate movements to get the things working
-    -- TODO: This could be better distributed, this "overcharges" the first
-    -- centrals
+    --
+    -- TODO: This could be better distributed, this makes to work more
+    -- to the first centrals.
+    --
+    -- It works though, since we have in account the limits.
     expected_production := production;
     for i in current_values'Range loop
-      if expected_production < city_requirements then
-        Ada.Text_IO.put_line("SUBO " & i'Img);
+      if expected_production < city_requirements and current_values(i) < CENTRAL_MAX_PRODUCTION then
+        Ada.Text_IO.Put_Line("SUBO " & i'Img);
         expected_production := expected_production + 1;
         centrals(i).increment;
-      elsif expected_production > city_requirements and ratio > 0.05 then
-        Ada.Text_IO.put_line("BAJO " & i'Img);
+      elsif expected_production > city_requirements and current_values(i) > CENTRAL_MIN_PRODUCTION then
+        Ada.Text_IO.Put_Line("BAJO " & i'Img);
         expected_production := expected_production - 1;
         centrals(i).decrement;
       end if;
     end loop;
 
-    iterations := iterations + 1;
-    delay 0.3;
+    current_operation := current_operation + Ada.Real_Time.Milliseconds(300);
+    delay until current_operation;
   end loop;
 end Final;

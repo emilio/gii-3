@@ -1,0 +1,143 @@
+17:00:24.049762 IP 10.200.24.43 > all-systems.mcast.net: igmp query v2
+E..........=
+..+.....d........................
+17:00:24.151255 IP 172.20.50.233 > 224.0.0.251: igmp v2 report 224.0.0.251
+F.. ..@...$...2...........	.....
+17:00:26.120367 IP 172.20.50.233.16432 > zafiro.usal.es.domain: 8899+ A? informatica.usal.es. (37)
+E..Au.@.@.....2.....@0.5.-.&"............informatica.usal.es.....
+17:00:26.120381 IP 172.20.50.233.16432 > agata.usal.es.domain: 8899+ A? informatica.usal.es. (37)
+E..A|.@.@..H..2....
+@0.5.-.'"............informatica.usal.es.....
+17:00:26.120395 IP 172.20.50.233.17502 > zafiro.usal.es.domain: 49457+ AAAA? informatica.usal.es. (37)
+E..Au.@.@.....2.....D^.5.-...1...........informatica.usal.es.....
+17:00:26.123754 IP zafiro.usal.es.domain > 172.20.50.233.16432: 8899* 2/3/3 CNAME roble.fis.usal.es., A 212.128.144.90 (188)
+E....$..=..g......2..5@0...I"............informatica.usal.es..................roble.fis...1....... .....Z.7....... .	.zafiro...7....... .
+.topacio...7....... ...agata........... .....
+.Y....... .......n....... ......
+17:00:26.123772 IP agata.usal.es.domain > 172.20.50.233.16432: 8899* 2/3/3 CNAME roble.fis.usal.es., A 212.128.144.90 (188)
+E.......=......
+..2..5@0..d."............informatica.usal.es..................roble.fis...1....... .....Z.7....... .
+.topacio...7....... .	.zafiro...7....... ...agata........... .....
+.o....... .......Y....... ......
+17:00:26.123776 IP zafiro.usal.es.domain > 172.20.50.233.17502: 49457* 1/1/0 CNAME roble.fis.usal.es. (111)
+E....%..=.........2..5D^.w...1...........informatica.usal.es..................roble.fis...7....... .&.topacio...admin..w.....Q.... .'......
+17:00:26.124018 IP 172.20.50.233.52680 > roble.fis.usal.es.http: Flags [S], seq 552356369, win 29200, options [mss 1460,sackOK,TS val 510626 ecr 0,nop,wscale 7], length 0
+E..<..@.@.v0..2....Z...P .J.......r..W.........
+............
+17:00:26.127145 IP roble.fis.usal.es.http > 172.20.50.233.52680: Flags [S.], seq 2843602867, ack 552356370, win 5792, options [mss 1460,sackOK,TS val 2296160376 ecr 510626,nop,wscale 7], length 0
+E..<..@.?......Z..2..P...}.. .J.....'0.........
+...x........
+17:00:26.127173 IP 172.20.50.233.52680 > roble.fis.usal.es.http: Flags [.], ack 1, win 229, options [nop,nop,TS val 510626 ecr 2296160376], length 0
+E..4..@.@.v7..2....Z...P .J..}......k......
+.......x
+17:00:26.127352 IP 172.20.50.233.52680 > roble.fis.usal.es.http: Flags [P.], seq 1:135, ack 1, win 229, options [nop,nop,TS val 510627 ecr 2296160376], length 134: HTTP: GET / HTTP/1.1
+E.....@.@.u...2....Z...P .J..}......@......
+.......xGET / HTTP/1.1
+Host: informatica.usal.es
+User-Agent: ELinks (textmode)
+Accept: */*
+Accept-Language: en
+Connection: Keep-Alive
+
+
+17:00:26.130379 IP roble.fis.usal.es.http > 172.20.50.233.52680: Flags [.], ack 135, win 54, options [nop,nop,TS val 2296160377 ecr 510627], length 0
+E..4O.@.?......Z..2..P...}.. .J....6k......
+...y....
+17:00:26.135930 IP roble.fis.usal.es.http > 172.20.50.233.52680: Flags [.], seq 1:1449, ack 135, win 54, options [nop,nop,TS val 2296160377 ecr 510627], length 1448: HTTP: HTTP/1.1 200 OK
+E...O.@.?..u...Z..2..P...}.. .J....6G4.....
+...y....HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Accept-Ranges: bytes
+ETag: W/"3908-1410619434000"
+Last-Modified: Sat, 13 Sep 2014 14:43:54 GMT
+Content-Type: text/html
+Content-Length: 3908
+Date: Wed, 17 Feb 2016 16:00:26 GMT
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <title>....Estudios de Ingenier.a Inform.tica en la Universidad de
+  Salamanca....</title>
+  <meta name="description"
+  content="Esta es la p.gina de presentaci.n de los estudios de Ingenier.a Inform.tica en la Universidad de Salamanca. Esta mantenida por el Departamento de Inform.tica y Autom.tica como parte de la aplicaci.n Diaweb que est. destinada a la gesti.n integral de un Departamento Universitario. Cubre aspectos docentes, investigadores, administrativos, etc. personalizando la interfaz de usuario a tipos de perfiles como alumnos, profesores, personal de administraci.n y servicios, becarios, etc.">
+  <meta name="keywords"
+  content="estudios, Ingenier.a Inform.tica,II ,usal, Universidad de Salamanca, Ingener.a T.cnica en Inform.tica de Sistemas, ITIS,  Ingenier.a T.cnica en Inform.tica de Gesti.n, ITIG, Computer Science, Master en Sistemas Inteligentes, sistemas inteligentes, doctorado, docencia, investigaci.n, inform.tica, doctorado, primer ciclo, segundo ciclo, tercer ciclo, departamento, master, postgrado, maestr.a">
+</head>
+
+<body>
+<h1 align="center" class="style1">Estudios de Inform.tica en la Unive
+17:00:26.135935 IP 172.20.50.233.52680 > roble.fis.usal.es.http: Flags [.], ack 1449, win 251, options [nop,nop,TS val 510629 ecr 2296160377], length 0
+E..4..@.@.v5..2....Z...P .J..}.\....eo.....
+.......y
+17:00:26.140478 IP roble.fis.usal.es.http > 172.20.50.233.52680: Flags [.], seq 1449:2897, ack 135, win 54, options [nop,nop,TS val 2296160377 ecr 510627], length 1448: HTTP
+E...O.@.?..t...Z..2..P...}.\ .J....6=......
+...y....rsidad de
+Salamanca </h1>
+<h2 align="center" class="style1">Pulse sobre la imagen de cada uno de los estudios para m&aacute;s informaci&oacute;n</h2>
+<table border="0" align="center">
+  <tbody>
+    <tr>
+      <td align="center"><img src="CartelB.gif"
+        title="Poster Inform.tica. Habilite la visualizaci.n de im.genes y pulse en cada una de las titulaciones."
+        width="600" border="0" align="top" usemap="#mapa1"> <map name="mapa1"
+        id="mapa1">
+          <area shape="rect" coords="552,148,600,224"
+          href="http://informatica.usal.es/PresentacionInformatica"
+          target="_blank"
+          title="Pulsa para ver la presentaci.n del Grado en Ingenieria Inform.tica de la Facultad de Ciencias preparada para las Jornadas de Puertas Abiertas">
+          <area shape="rect" coords="1,161,552,222"
+          href="http://informatica.usal.es/gii" target="_blank"
+          title="Pulsa para informaci.n del Grado en Ingenier.a Inform.tica)">
+          <area shape="rect" coords="39,32,297,153"
+          href="http://informatica.usal.es/giisi"
+          target="_blank"
+          title="Pulsa para informaci.n del Grado en Ingenier.a Inform.tica en Sistemas de Informaci.n">
+          <area shape="rect" coords="490,400,599,450"
+          href="http://diaweb.usal.es" target="_blank"
+          title="Departamento de Inform.tica y Autom.tica">
+          <area shape="rect" coords="103,406,476,434" href="http://www.usal.es
+17:00:26.140500 IP 172.20.50.233.52680 > roble.fis.usal.es.http: Flags [.], ack 2897, win 274, options [nop,nop,TS val 510630 ecr 2296160377], length 0
+E..4..@.@.v4..2....Z...P .J..}......_......
+.......y
+17:00:26.141204 IP roble.fis.usal.es.http > 172.20.50.233.52680: Flags [P.], seq 2897:4137, ack 135, win 54, options [nop,nop,TS val 2296160377 ecr 510627], length 1240: HTTP
+E...O.@.?..C...Z..2..P...}.. .J....6.T.....
+...y...."
+          target="_blank" title="Universidad de Salamanca">
+          <area shape="rect" coords="23,436,120,449"
+          href="http://diaweb.usal.es" target="_blank"
+          title="Departamento de Inform.tica y Autom.tica">
+          <area shape="rect" coords="2,394,37,433" href="http://www.usal.es"
+          target="_blank" title="Universidad de Salamanca">
+          <area shape="rect" coords="20,236,237,316"
+          href="http://mastersi.usal.es" target="_blank"
+          title="Pulsa para informaci.n sobre el M.ster en Sistemas Inteligentes">
+          <area shape="rect" coords="308,7,556,126"
+          href="http://informatica.usal.es/gii" target="_blank"
+          title="Pulsa para informaci.n del Grado en Ingenier.a Inform.tica">
+          <area shape="rect" coords="300,228,547,313"
+          href="http://informatica.usal.es/mii" target="_blank"
+          title="Pulsa para informaci.n del M.ster Universitario en Ingenier.a Inform.tica">
+          <area shape="rect" coords="225,318,442,393"
+          href="http://informatica.usal.es/docii" target="_blank"
+          title="Pulsa para informaci.n del Doctorado en Ingenier.a Inform.tica">
+        </map>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>
+
+17:00:26.141211 IP 172.20.50.233.52680 > roble.fis.usal.es.http: Flags [.], ack 4137, win 296, options [nop,nop,TS val 510630 ecr 2296160377], length 0
+E..4..@.@.v3..2....Z...P .J..}.....(Z......
+.......y
+17:00:29.888628 IP 172.20.50.233.52680 > roble.fis.usal.es.http: Flags [F.], seq 135, ack 4137, win 296, options [nop,nop,TS val 511567 ecr 2296160377], length 0
+E..4..@.@.v2..2....Z...P .J..}.....(W......
+...O...y
+17:00:29.890265 IP roble.fis.usal.es.http > 172.20.50.233.52680: Flags [F.], seq 4137, ack 136, win 54, options [nop,nop,TS val 2296161317 ecr 511567], length 0
+E..4O.@.?......Z..2..P...}.. .J....6T\.....
+...%...O
+17:00:29.890278 IP 172.20.50.233.52680 > roble.fis.usal.es.http: Flags [.], ack 4138, win 296, options [nop,nop,TS val 511567 ecr 2296161317], length 0
+E..4..@.@.v1..2....Z...P .J..}.....(Sj.....
+...O...%

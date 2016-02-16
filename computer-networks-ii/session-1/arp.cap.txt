@@ -1,0 +1,2 @@
+20:12:09.043895 ARP, Request who-has 172.20.48.1 tell 172.20.50.233, length 28
+20:12:09.045464 ARP, Reply 172.20.48.1 is-at 00:0a:42:38:ec:00 (oui Unknown), length 28

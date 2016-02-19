@@ -239,75 +239,7 @@ Mandando un correo de ejemplo a `me@emiliocobos.me`, nos llega correctamente:
 Return-Path: <ecoal95@gmail.com>
 X-Original-To: me@emiliocobos.me
 Delivered-To: me@emiliocobos.me
-Received: from mail-wm0-f42.google.com (mail-wm0-f42.google.com [74.125.82.42])
-	by mail.emiliocobos.me (Postfix) with ESMTPS id 40E5612039F
-	for <me@emiliocobos.me>; Thu, 18 Feb 2016 07:45:42 -0500 (EST)
-Received: by mail-wm0-f42.google.com with SMTP id g62so25484657wme.1
-        for <me@emiliocobos.me>; Thu, 18 Feb 2016 04:45:42 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20120113;
-        h=date:from:to:subject:message-id:mime-version:content-type
-         :content-disposition:user-agent;
-        bh=S7UR6xbkaf/Xs2np9nTb6dCGDntqDcAhuS9OnRaogtI=;
-        b=T76BN7RY9Zczk0vg+BxZfO+G3SeCggwrjAM1QJDcMhk3gF9Bv+HVEfwOx5s66TtpR2
-         cQgZznjoaBSzQ9yKilfwl1pDzHnEn0uaYVkYlKP1LQm9hghuEwtjZYFTQdfM1d84oXri
-         q8PXDkRfpx1WtqHfPXqot1dFaYlErBfOrbtj18EPXCUG9lXunTyUh1tQeEhhGr5Qxpt1
-         d2neEG1qLtZZscpxFDfV+bYmAAVFYT+gPsmkPV872TFq3Ldatp9BWLJQMkt28QmN8CnT
-         bK4uaxPR1X8EQsubEH+OtYQ9+ir0pCPtFjCHmNcKptiAI+DbayPX/MH/dYjLXqzQsiYo
-         SOXQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20130820;
-        h=x-gm-message-state:date:from:to:subject:message-id:mime-version
-         :content-type:content-disposition:user-agent;
-        bh=S7UR6xbkaf/Xs2np9nTb6dCGDntqDcAhuS9OnRaogtI=;
-        b=CuEOsWJ9IzlfSqCtIwiqym7vI8x2gCH7RpyD4JCZVt/yMyDe7UiAUKsmCQajktDEKO
-         SxQmeQQs5vfEveM11rh8V1eoRUkXwrRZ+Nme9Yfe3mD39GXqx0AA35k2YH7lwb/tdwBz
-         sQRHWcde3ANSlONnthynzEjN+xYPD9U6ygeFv/myaJDQPhJNWiRJV38P07AXiGBrR+29
-         gWDE6uTpVm5/kWV4IY8/lhuftD0fY8E+gJjIZr9zahpcqEQ4Mn7Fo2w/3u+XgAyfzhru
-         BlQFKGlqW0eQkq80ltZOLNT2w5T0mgjtR/5Q3H/UeCcfaUX7o10k8rYIkSGKrGUUttKm
-         HGPA==
-X-Gm-Message-State: AG10YOQre+VcGITp/vHxxoBHTubeIXxpbyuLq1YvRNtpYwhZXJK+Sj9JYU42qejYkRPsKw==
-X-Received: by 10.28.51.74 with SMTP id z71mr3123825wmz.15.1455799542126;
-        Thu, 18 Feb 2016 04:45:42 -0800 (PST)
-Received: from localhost (cpdnat78.usal.es. [212.128.135.78])
-        by smtp.gmail.com with ESMTPSA id ll9sm6415326wjc.29.2016.02.18.04.45.40
-        for <me@emiliocobos.me>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 18 Feb 2016 04:45:40 -0800 (PST)
-Date: Thu, 18 Feb 2016 13:45:40 +0100
-From: Emilio Cobos =?utf-8?Q?=C3=81lvarez?= <ecoal95@gmail.com>
-To: me@emiliocobos.me
-Subject: Hola!
-Message-ID: <20160218124540.GB13119@emilio.wifi.usal.es>
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="eAbsdosE1cNLO4uF"
-Content-Disposition: inline
-User-Agent: Mutt/1.5.24 (2015-08-30)
-
-
---eAbsdosE1cNLO4uF
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-
-Hola!
-
---eAbsdosE1cNLO4uF
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQEcBAEBAgAGBQJWxbz0AAoJEAVrcnu5wQJ81PsH+gKoaQkzZwiahxsDQOXlX24W
-rBzvrmhaWT26TI8FGYwhSnK6mw9MRYYpA3zCSKA1RdHs5LO0hbnmU57yfGf7oFqx
-c6FFbl6/xMbMeX1TjMrupatqn62KXb+HvPb2UZHvz5o+vOAWRlWeO/fv8eYXglqE
-cZeGOo1qdx/aCfTUOa8aggM50BTs7b6Z9P5lWYRg47FUvHupRqpyC4oODa7OFgrZ
-0aYvjYEsX66zP/jB/YXq8Qd+jspig2f2L2g/cWqPw5QEqSKh7bXRIetTH8o1Nnue
-qlXD2gRNJQrL2xyZuA7wYcjMki41s9/8awY5fVZGIRbrgRIkN3Zy+2mG0VRGNF4=
-=vvfn
------END PGP SIGNATURE-----
-
---eAbsdosE1cNLO4uF--
+...
 ```
 
 # Configurando imap con mutt y msmtp

@@ -310,7 +310,7 @@ qlXD2gRNJQrL2xyZuA7wYcjMki41s9/8awY5fVZGIRbrgRIkN3Zy+2mG0VRGNF4=
 --eAbsdosE1cNLO4uF--
 ```
 
-# Configurando imap con mutt
+# Configurando imap con mutt y msmtp
 
 Asignaremos una contraseña a nuestro usuario `me`:
 
@@ -334,6 +334,18 @@ mailboxes       = +INBOX
 set mbox = +INBOX.All
 set postponed = +INBOX.Drafts
 set record = +INBOX.Sent
+```
+
+con una cuenta en `.msmtprc` definida así:
+
+```
+account personal
+host mail.emiliocobos.me
+from "me@emiliocobos.me"
+port 25
+auth on
+user "me"
+password "xxx"
 ```
 
 **Ahora podemos enviar y recibir mails desde nuestro propio correo!**

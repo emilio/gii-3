@@ -579,3 +579,30 @@ Si no lo estuviera, podríais hacer:
 # php5enmod mcrypt
 # service apache2 restart
 ```
+
+## El SPF record
+
+El record SPF (*Sender Policy Framework*) es un DNS record del tipo TXT que
+indica o puede indicar, entre otras cosas, la dirección IP de tu servidor de
+correo.
+
+Usarlo ayuda, por ejemplo, a que clientes de correo muy utilizados no marquen tu
+correo como spam, y a que marquen como spam el email de gente que te está
+tratando de impersonar.
+
+La [sintaxis detallada](http://www.openspf.org/SPF_Record_Syntax) es
+relativamente compleja, pero un buen intento puede ser el siguiente:
+
+```
+v=spf1 a mx -all
+```
+
+o (más estricto):
+
+```
+v=spf1 a mx ip4:188.166.145.122 -all
+```
+
+Otras técnicas más sofisticadas (como `DMARK`, que combina `DKIM` y `SPF`),
+existen, pero el autor no se siente con la suficiente confianza como para hablar
+de ellas.

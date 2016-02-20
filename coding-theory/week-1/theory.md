@@ -31,8 +31,8 @@ Number of errors   Probability
 3                  $p^3$
 
 Note that the extra multiplication by three means "how many different
-combinations of 1 error might be?", that is: ${3}\choose{1}$ in the 1 error
-case, ${3}\choose{2}$ in the next, etc...
+combinations of 1 error might be?", that is: $\binom{3}{1}$ in the 1 error
+case, $\binom{3}{2}$ in the next, etc...
 
 # Some vocabulary
 

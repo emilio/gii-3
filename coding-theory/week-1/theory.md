@@ -114,8 +114,8 @@ $$C(p) = 1 + log_2(p) + (1 - p) \cdot log_2(1 - p)$$
 
 # Hamming bound
 
-> If C is a binary code of block length $n$ and minimum distance $2r + 1$, then
-> $C$ has at most $\frac{2^n}{\sum\limits^{r}_{i=0} \binom{n}{i}}$ words.
+> If $C$ is a binary code of block length $n$ and minimum distance $2r + 1$,
+> then $C$ has at most $\frac{2^n}{\sum\limits^{r}_{i=0} \binom{n}{i}}$ words.
 
 This can easily be expanded to $q$-ary block codes, where the bound will become:
 
@@ -139,3 +139,24 @@ As before, you can generalise to a $q$ block:
 
 $$|B(c, r)| = 1 + (q - 1) \cdot n + (q - 1)^2 \cdot n \cdot (n - 1) + ... + (q
 - 1)^r \cdot \binom{n}{r} = \sum\limits^{r}_{i=0} \binom{n}{i} \cdot (q - 1)^i$$
+
+## Perfect code
+
+We call perfect code a code that reaches the Hamming bound.
+
+# Singleton bound
+
+> If $C$ is a q-ary block of length $n$ and minimum distance $d$, then $A_q(n,
+d) \leq q^{n - d + 1}$.
+
+Here $A_q(n, d)$ means the maximum number of words in a $q$-ary code of length
+$n$ an minimum distance $d$.
+
+This, for linear codes, implies that:
+
+$$dim(C) \leq n - d + 1$$
+
+# Gilbert-Varshamod bound
+
+$$|C| = A_q(n, d) \geq \frac{q^n}{\sum\limits^{d - 1}_{i = 0} \binom{n}{i} \cdot
+(q - 1)^i}$$

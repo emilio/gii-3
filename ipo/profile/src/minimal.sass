@@ -1,0 +1,67 @@
+$link_color: #0485b0
+$profile_image_width: 100px
+
+*, *::before, *::after
+  box-sizing: border-box
+
+html, body
+  margin: 0
+  padding: 0
+
+html
+  background: $link_color
+  font-family: sans-serif
+  color: #333
+
+p
+  line-height: 1.3
+  margin: 1em 0
+
+a
+  color: $link_color
+  text-decoration: none
+  &:hover
+    text-decoration: underline
+    color: darken($link_color, 5%)
+
+.wrapper
+  padding: 0 1em
+
+.profile
+  max-width: 30em
+  margin: 3em auto
+  padding: 1em
+  padding-bottom: .1em
+  border-radius: 15px
+  background: white
+  position: relative
+
+  h1
+    text-align: center
+    padding-top: $profile_image_width / 2
+
+  img
+    width: $profile_image_width
+    height: $profile_image_width
+    border: 2px solid white
+    box-shadow: 0 0 0 1px rgba(black, .4), inset 0 0 4px rgba(black, .4)
+    position: absolute
+    left: 50%
+    margin-left: -$profile_image_width / 2
+    margin-top: -$profile_image_width / 2
+    border-radius: 50%
+    box-shadow: 0 0 3px rgba(black, .3)
+    transition: transform 1s ease
+    transform: rotate(0)
+
+    &:hover
+      transform: rotate(360deg)
+
+.style-chooser
+  position: fixed
+  bottom: 0
+  left: 0
+
+  a
+    color: white
+    display: inline-block

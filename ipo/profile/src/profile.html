@@ -1,0 +1,85 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport"
+      content="width=device-width, minimum-scale=1.0">
+<meta name="description"
+      content="Perfil de Emilio Cobos Álvarez para la asignatura de IPO">
+<title>Emilio Cobos Álvarez - IPO 2016</title>
+<link id="main-stylesheet"
+      rel="stylesheet"
+      href="minimal.css">
+<div class="wrapper">
+  <section class="profile">
+    <img src="img/profile.jpg" alt="Emilio Cobos Álvarez">
+    <h1>Emilio Cobos Álvarez</h1>
+
+    <div class="profile-content">
+      <p>Hola! Soy Emilio, un estudiante de
+      Ingeniería Informática en la USAL.
+
+      <p>Mis intereses actuales (disclaimer: cambian rápido) son la
+      programación de sistemas, especialmente en C++ y Rust.
+
+      <p>Últimamente dedico bastante tiempo a jugar en
+      <a href="https://github.com/servo/servo">servo</a>,
+      un navegador desarrollado por Mozilla.
+
+      <p>También soy miembro de la Junta Directiva del
+      <a href="http://usal.acm.org">ACM USAL chapter</a>, una asociación de
+      estudiantes de la Universidad, en la que estáis invitados a participar.
+
+      <p>Soy miembro de la
+      <a href="https://fsf.org" title="Free Software Foundation">FSF</a>, y
+      considero imprescindible el papel que juega el Software Libre en la
+      batalla por tus derechos.
+
+      <p>Ya he hablado bastante sobre mí, puedes encontrarme
+      <a href="http://emiliocobos.me">mi página personal</a>, en
+      <a href="https://github.com/ecoal95">mi perfil de GitHub</a>, en
+      <a href="https://twitter.com/ecbos_">Twitter</a>, o mandarme un e-mail a
+      <a href="mailto:emiliocobos@usal.es">emiliocobos@usal.es</a>.
+  </section>
+</div>
+
+<div class="style-chooser">
+</div>
+
+<script>
+(function() {
+  var styles = [
+    'minimal',
+    'serif'
+  ];
+
+  var main_stylesheet = document.getElementById("main-stylesheet");
+  var style_chooser = document.querySelector(".style-chooser");
+
+  var set_style = function(style) {
+    main_stylesheet.href = style + ".css";
+  };
+
+  var is_first = true;
+  styles.forEach(function(style) {
+    if (!is_first) {
+      style_chooser.appendChild(document.createTextNode(" | "));
+    } else {
+      is_first = false;
+    }
+
+    var link = document.createElement("a");
+
+    link.href = "#" + style;
+    link.setAttribute("data-style", style);
+    link.appendChild(document.createTextNode(style));
+
+    link.addEventListener("click", function(e) {
+      set_style(this.getAttribute("data-style"));
+    }, false);
+
+    style_chooser.appendChild(link);
+  });
+
+  if (location.hash !== "")
+    set_style(location.hash.substring(1));
+}());
+</script>

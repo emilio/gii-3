@@ -550,3 +550,35 @@ v=spf1 a mx ip4:188.166.145.122 -all
 Otras técnicas más sofisticadas (como `DMARK`, que combina `DKIM` y `SPF`),
 existen, pero el autor no se siente con la suficiente confianza como para hablar
 de ellas.
+
+# Cambiando el puerto por defecto de SMTP
+
+La red eduroam bloquea el puerto 25 para evitar envío de SPAM.
+
+Este es el puerto por defecto del daemon SMTP, lo que implica que desde la usal
+no podemos enviar correo.
+
+Para cambiar esta configuración, hay que cambiar la configuración del proceso
+`master` de postfix (`/etc/postfix/master.cf`) y cambiar la primera línea, que
+debería ser algo así:
+
+```
+smtp      inet  n       -       -       -       -       smtpd
+```
+
+por:
+
+```
+# SMTP over the port 587 due to restrictions in USAL networks
+587        inet  n       -       -       -       -       smtpd
+```
+
+El puerto 587 no es casualidad, es el puerto que usa Gmail, y eso da más
+posibilidades para que no esté bloqueado.
+
+Como siempre que se cambia la configuración, hay que reiniciar postfix:
+
+```
+# service postfix restart
+```
+

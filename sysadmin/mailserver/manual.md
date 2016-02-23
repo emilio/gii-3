@@ -558,23 +558,19 @@ La red eduroam bloquea el puerto 25 para evitar envío de SPAM.
 Este es el puerto por defecto del daemon SMTP, lo que implica que desde la usal
 no podemos enviar correo.
 
-Para cambiar esta configuración, hay que cambiar la configuración del proceso
-`master` de postfix (`/etc/postfix/master.cf`) y cambiar la primera línea, que
-debería ser algo así:
+Para cambiar esta configuración, hay que descomentar la configuración del
+proceso `master` de postfix (`/etc/postfix/master.cf`) referente a `smtps`.
 
 ```
-smtp      inet  n       -       -       -       -       smtpd
+smtps     inet  n       -       -       -       -       smtpd
 ```
 
-por:
+`smtps` es equivalente al puerto 587, que es estándar, y al ser también el
+puerto que utiliza GMail es probable que nunca esté bloqueado.
 
-```
-# SMTP over the port 587 due to restrictions in USAL networks
-587        inet  n       -       -       -       -       smtpd
-```
-
-El puerto 587 no es casualidad, es el puerto que usa Gmail, y eso da más
-posibilidades para que no esté bloqueado.
+Podríamos descomentar la línea `submission` en vez de `smtps`. `submission`
+garantiza que el mail esté encriptado, pero nuestra configuración de `smtp(s)`
+también, así que no creo que haya una diferencia práctica.
 
 Como siempre que se cambia la configuración, hay que reiniciar postfix:
 
@@ -582,3 +578,52 @@ Como siempre que se cambia la configuración, hay que reiniciar postfix:
 # service postfix restart
 ```
 
+# Instalando spamassassin
+
+Spamassassin es un servicio creado por Apache para el filtrado de correos. Es el
+programa anti-spam más utilizado con diferencia.
+
+Para ello instalaremos los siguientes paquetes:
+
+```
+# apt-get install spamassassin spamc
+```
+
+Posteriormente editaremos la configuración en `/etc/postfix/master.cf`.
+
+Lo primero es añadir el servicio `spamassassin` al final del fichero:
+
+```
+spamassassin unix -     n       n       -       -       pipe
+  user=debian-spamd argv=/usr/bin/spamc -f -e /usr/sbin/sendmail -oi -f ${sender} ${recipient}
+```
+
+Lo siguiente es poner el filtro en todas las líneas que reciban correos (todas
+las líneas que acaben en `smtpd`).
+
+Reiniciamos postfix otra vez:
+
+```
+# service postfix restart
+```
+
+## Configuración de spamassassin
+
+Spamassassin tiene una gran cantidad de configuración, que se puede editar en
+`/etc/spamassassin/local.cf`.
+
+Yo sólo he descomentado la línea correspondiente a `rewrite_header Subject` y la
+he modificado para que sea:
+
+```
+rewrite_header Subject [SPAM]
+```
+
+El resto de opciones están documentadas en la [documentación
+oficial](https://spamassassin.apache.org/full/3.1.x/doc/Mail_SpamAssassin_Conf.html).
+
+## Comprobando que funciona
+
+Para comprobar que spamassassin está correctamente instalado puedes usar
+[GTUBE](http://spamassassin.apache.org/gtube/). En la URL anterior hay un
+mensaje de ejemplo que puedes enviar desde otra cuenta.

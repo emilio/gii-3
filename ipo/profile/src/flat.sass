@@ -1,0 +1,59 @@
+$link_color: #0485b0
+
+*, *::before, *::after
+  box-sizing: border-box
+
+html, body
+  margin: 0
+  padding: 0
+
+html
+  background: url(img/panoramic-gray.jpg)
+  background-size: cover
+  font-family: sans-serif
+  color: #333
+
+p
+  line-height: 1.3
+  margin: 1em 0
+
+a
+  color: $link_color
+  text-decoration: none
+  &:hover
+    text-decoration: underline
+    color: darken($link_color, 5%)
+
+.wrapper
+  padding: 0 1em
+
+.profile
+  max-width: 35em
+  margin: 3em auto
+  padding: 0
+  padding-bottom: .1em
+  background: white
+  box-shadow: .1em .5em 1em rgba(black, .5)
+
+  h1
+    text-align: center
+
+  img
+    display: none
+
+  .back
+    display: block
+    width: 100%
+    box-shadow: 0 -5px 5px inset rgba(black, .8)
+
+  p
+    padding: 0 1em
+
+.style-chooser
+  position: fixed
+  bottom: 0
+  left: 0
+
+  a
+    color: white
+    display: inline-block

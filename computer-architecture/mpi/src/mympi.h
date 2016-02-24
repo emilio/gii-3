@@ -24,13 +24,31 @@ class Channel {
 
     explicit Channel(int to): Channel(to, MPI_COMM_WORLD) {}
 
-    void send(const std::vector<T>& vec, int tag) {
+    void send(const T* data, size_t len, int tag) {
         mympi_traits<T> traits_instance;
-        MPI_Send(const_cast<T*>(vec.data()), vec.size(), traits_instance.mpi_data_type, m_to, tag, m_comm);
+        MPI_Send(const_cast<T*>(data), len, traits_instance.mpi_data_type, m_to, tag, m_comm);
+    }
+
+    void send(const std::vector<T>& vec, int tag) {
+        send(vec.data(), vec.size(), tag);
+    }
+
+    template<size_t N>
+    void send(const std::array<T, N>& ary, int tag) {
+        send(ary.data(), ary.size(), tag);
+    }
+
+    void send(const T* data, size_t len) {
+        send(data, len, 0);
     }
 
     void send(const std::vector<T>& vec) {
         send(vec, 0);
+    }
+
+    template<size_t N>
+    void send(const std::array<T, N>& ary) {
+        send(ary, 0);
     }
 
     void send_one(const T& element, int tag) {

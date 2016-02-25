@@ -1,0 +1,330 @@
+autostart = False
+version = 0.8.7
+[127.0.0.1:7200]
+    workingdir = /tmp
+    udp = 10001
+    [[3725]]
+        image = /home/emilio/GNS3/Images/c3725-adventerprisek9-mz124-15.image
+        idlepc = 0x60264f28
+        sparsemem = True
+        ghostios = True
+    [[ROUTER R4]]
+        model = 3725
+        console = 2104
+        aux = 2504
+        cnfg = configs/R4.cfg
+        f0/0 = HUB4 1
+        slot1 = NM-4T
+        s1/0 = R3 s1/1
+        s1/1 = R1 s1/0
+        x = -194.0
+        y = -50.0
+        z = 1.0
+    [[ROUTER R1]]
+        model = 3725
+        console = 2101
+        aux = 2501
+        cnfg = configs/R1.cfg
+        f0/0 = HUB1 1
+        slot1 = NM-4T
+        s1/0 = R4 s1/1
+        s1/1 = R2 s1/0
+        x = -334.0
+        y = -185.0
+        z = 1.0
+    [[ROUTER R2]]
+        model = 3725
+        console = 2102
+        aux = 2502
+        cnfg = configs/R2.cfg
+        f0/0 = HUB2 1
+        slot1 = NM-4T
+        s1/0 = R1 s1/1
+        s1/1 = R3 s1/0
+        x = -194.0
+        y = -330.0
+        z = 1.0
+    [[ROUTER R3]]
+        model = 3725
+        console = 2103
+        aux = 2503
+        cnfg = configs/R3.cfg
+        f0/0 = HUB3 1
+        slot1 = NM-4T
+        s1/0 = R2 s1/1
+        s1/1 = R4 s1/0
+        x = -54.0
+        y = -189.0
+        z = 1.0
+    [[Hub HUB3]]
+        1 = R3 f0/0
+        2 = nio_gen_eth:lo
+        3 = nio_gen_eth:eth0
+        x = -52.5
+        y = -288.932667397
+        z = 1.0
+    [[Hub HUB2]]
+        1 = R2 f0/0
+        2 = nio_gen_eth:lo
+        3 = nio_gen_eth:lo
+        x = -327.0
+        y = -284.0
+        z = 1.0
+        hx = 13.8125
+        hy = -20.0
+    [[Hub HUB1]]
+        1 = R1 f0/0
+        2 = nio_gen_eth:eth0
+        3 = nio_gen_eth:eth0
+        x = -321.0
+        y = -69.0
+        z = 1.0
+    [[Hub HUB4]]
+        1 = R4 f0/0
+        2 = nio_gen_eth:lo
+        3 = nio_gen_eth:lo
+        x = -53.5
+        y = -53.0673326026
+        z = 1.0
+[GNS3-DATA]
+    configs = configs
+    [[NOTE 1]]
+        text = "1"
+        x = -3.9203864135
+        y = 18.5224489285
+        interface = HUB4 1
+        color = "#3c3c3c"
+    [[NOTE 2]]
+        text = "3"
+        x = 10.3990227637
+        y = 46.7341823471
+        interface = HUB4 3
+        color = "#3c3c3c"
+    [[NOTE 3]]
+        text = "2"
+        x = 61.9039279508
+        y = 46.4792801214
+        interface = HUB4 2
+        color = "#3c3c3c"
+    [[NOTE 4]]
+        text = "1"
+        x = 30.4878767514
+        y = -23.6183858492
+        interface = HUB1 1
+        color = "#3c3c3c"
+    [[NOTE 5]]
+        text = "3"
+        x = 3.60231513828
+        y = -7.46039248607
+        interface = HUB1 3
+        color = "#3c3c3c"
+    [[NOTE 6]]
+        text = "2"
+        x = 13.5668696418
+        y = 49.1172864578
+        interface = HUB1 2
+        color = "#3c3c3c"
+    [[NOTE 7]]
+        text = "1"
+        x = 74.2311603489
+        y = 4.2365660465
+        interface = HUB2 1
+        color = "#3c3c3c"
+    [[NOTE 8]]
+        text = "3"
+        x = 61.5360520256
+        y = -14.7881478323
+        interface = HUB2 3
+        color = "#3c3c3c"
+    [[NOTE 9]]
+        text = "2"
+        x = 14.2550891866
+        y = -17.5731865291
+        interface = HUB2 2
+        color = "#3c3c3c"
+    [[NOTE 10]]
+        text = "1"
+        x = 34.3023384969
+        y = 55.96395808
+        interface = HUB3 1
+        color = "#3c3c3c"
+    [[NOTE 11]]
+        text = "3"
+        x = 67.4709332489
+        y = 40.6896812544
+        interface = HUB3 3
+        color = "#3c3c3c"
+    [[NOTE 12]]
+        text = "2"
+        x = 60.5315042813
+        y = -15.5943871233
+        interface = HUB3 2
+        color = "#3c3c3c"
+    [[NOTE 13]]
+        text = "f0/0"
+        x = 34.6976615031
+        y = -17.96395808
+        interface = R3 f0/0
+        color = "#3c3c3c"
+    [[NOTE 14]]
+        text = "s1/0"
+        x = 2.22136628273
+        y = -3.54751859766
+        interface = R3 s1/0
+        color = "#3c3c3c"
+    [[NOTE 15]]
+        text = "s1/1"
+        x = 7.47073890981
+        y = 52.7937790501
+        interface = R3 s1/1
+        color = "#3c3c3c"
+    [[NOTE 16]]
+        text = "s1/1"
+        x = 63.7786337173
+        y = 47.5475185977
+        interface = R2 s1/1
+        color = "#3c3c3c"
+    [[NOTE 17]]
+        text = "f0/0"
+        x = -5.23116034888
+        y = 33.7634339535
+        interface = R2 f0/0
+        color = "#3c3c3c"
+    [[NOTE 18]]
+        text = "s1/0"
+        x = 7.57170988556
+        y = 52.8772094247
+        interface = R2 s1/0
+        color = "#3c3c3c"
+    [[NOTE 19]]
+        text = "s1/1"
+        x = 58.4282901144
+        y = -8.87720942468
+        interface = R1 s1/1
+        color = "#3c3c3c"
+    [[NOTE 20]]
+        text = "f0/0"
+        x = 38.5121232486
+        y = 61.6183858492
+        interface = R1 f0/0
+        color = "#3c3c3c"
+    [[NOTE 21]]
+        text = "s1/0"
+        x = 63.8772094247
+        y = 47.4282901144
+        interface = R1 s1/0
+        color = "#3c3c3c"
+    [[NOTE 22]]
+        text = "s1/1"
+        x = 2.12279057532
+        y = -3.42829011444
+        interface = R4 s1/1
+        color = "#3c3c3c"
+    [[NOTE 23]]
+        text = "s1/0"
+        x = 58.5292610902
+        y = -8.79377905014
+        interface = R4 s1/0
+        color = "#3c3c3c"
+    [[NOTE 24]]
+        text = "f0/0"
+        x = 72.9203864135
+        y = 19.4775510715
+        interface = R4 f0/0
+        color = "#3c3c3c"
+    [[NOTE 25]]
+        text = "nio_gen_eth:lo"
+        x = 54.2449108134
+        y = 63.0731865291
+        interface = C10 nio_gen_eth:lo
+        color = "#3c3c3c"
+    [[Cloud C10]]
+        symbol = Host
+        x = -380.489898732
+        y = -385.489898732
+        z = 1.0
+        connections = HUB2:2:nio_gen_eth:lo
+    [[NOTE 26]]
+        text = "nio_gen_eth:eth0"
+        x = 72.9971060772
+        y = 58.8254906076
+        interface = C9 nio_gen_eth:eth0
+        color = "#3c3c3c"
+    [[Cloud C9]]
+        symbol = Host
+        x = -462.5
+        y = -187.5
+        z = 1.0
+        connections = HUB1:3:nio_gen_eth:eth0
+    [[NOTE 27]]
+        text = "nio_gen_eth:lo"
+        x = 58.1009772363
+        y = -1.23418234714
+        interface = C15 nio_gen_eth:lo
+        color = "#3c3c3c"
+    [[Cloud C15]]
+        symbol = Host
+        x = -182.5
+        y = 92.5
+        z = 1.0
+        connections = HUB4:3:nio_gen_eth:lo
+    [[NOTE 28]]
+        text = "nio_gen_eth:lo"
+        x = 6.59607204922
+        y = -0.979280121435
+        interface = C14 nio_gen_eth:lo
+        color = "#3c3c3c"
+    [[Cloud C14]]
+        symbol = Host
+        x = 15.4898987322
+        y = 10.4898987322
+        z = 1.0
+        connections = HUB4:2:nio_gen_eth:lo
+    [[NOTE 29]]
+        text = "nio_gen_eth:eth0"
+        x = 54.9331303582
+        y = -3.61728645784
+        interface = C16 nio_gen_eth:eth0
+        color = "#3c3c3c"
+    [[Cloud C16]]
+        symbol = Host
+        x = -380.489898732
+        y = 10.4898987322
+        z = 1.0
+        connections = HUB1:2:nio_gen_eth:eth0
+    [[NOTE 30]]
+        text = "nio_gen_eth:lo"
+        x = 6.96394797437
+        y = 60.2881478323
+        interface = C11 nio_gen_eth:lo
+        color = "#3c3c3c"
+    [[Cloud C11]]
+        symbol = Host
+        x = -182.5
+        y = -467.5
+        z = 1.0
+        connections = HUB2:3:nio_gen_eth:lo
+    [[NOTE 31]]
+        text = "nio_gen_eth:eth0"
+        x = -6.83866656112
+        y = -1.36210156799
+        interface = C13 nio_gen_eth:eth0
+        color = "#3c3c3c"
+    [[Cloud C13]]
+        symbol = Host
+        x = 97.5
+        y = -187.5
+        z = 1.0
+        connections = HUB3:3:nio_gen_eth:eth0
+    [[NOTE 32]]
+        text = "nio_gen_eth:lo"
+        x = 7.9684957187
+        y = 61.0943871233
+        interface = C12 nio_gen_eth:lo
+        color = "#3c3c3c"
+    [[Cloud C12]]
+        symbol = Host
+        x = 15.4898987322
+        y = -385.489898732
+        z = 1.0
+        connections = HUB3:2:nio_gen_eth:lo

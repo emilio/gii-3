@@ -634,14 +634,26 @@ Postfix permite usar fácilmente direcciones virtuales (que son diferentes a los
 alias).
 
 Con cuentas virtuales un sólo servidor de correo puede hostear cuentas para
-n dominios diferentes.
+múltiples dominios diferentes.
+
+Habrá que tener un usuario que sea el propietario de todos los mailboxes
+virtuales. Puede ser cualquiera, incluído uno ya existente, pero nosotros
+crearemos uno llamado `virtual`. Le daremos un UID específico para la
+configuración de postfix:
+
+```
+# useradd -u 5000 -m virtual
+```
 
 Lo primero que tendríamos que hacer sería configurar postfix para usarlo:
 
 ```
-# postconf "virtual_mailbox_domains = emiliocobos.me"
-# postconf "virtual_mailbox_base = /var/spool/mail"
-# postconf "virtual_mailbox_maps = hash:/etc/postfix/virtual-mailbox-maps.cf"
+# postconf -e "virtual_mailbox_domains = emiliocobos.me"
+# postconf -e "virtual_mailbox_base = /var/spool/mail"
+# postconf -e "virtual_mailbox_maps = hash:/etc/postfix/virtual-mailbox-maps.cf"
+# postconf -e "virtual_minimum_uid = 100"
+# postconf -e "virtual_uid_maps = static:5000"
+# postconf -e "virtual_gid_maps = static:5000"
 # cat /etc/postfix/virtual-mailbox-maps.cf
 me@emiliocobos.me          emiliocobos.me/me
 other@emiliocobos.me       emiliocobos.me/other
@@ -650,3 +662,17 @@ yet-another@emiliocobos.me emiliocobos.me/yet-another
 # service postfix restart
 ```
 
+También habrá que asegurarse de que ninguno de los dominios virtuales esté
+también en `mydestination`.
+
+Tenemos que crear los directorios correspondientes y asociarlos al usuario
+`virtual`:
+
+```
+# mkdir /var/spool/mail/emiliocobos.me
+# chown virtual:virtual /var/spool/mail/emiliocobos.me/
+```
+
+Si enviamos un correo ahora deberíamos de poder ser capaces de recibirlo en el
+directorio correspondiente, pero tendremos que reconfigurar `courier-imap`, para
+que busque en los directorios nuevos.

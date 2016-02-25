@@ -432,7 +432,7 @@ Tras eso reiniciaremos `courier-imap`:
 
 # Extras
 
-## Direcciones virtuales
+## Aliases
 
 Especificar direcciones virtuales es extremadamente simple, sólo hay que alterar
 el archivo de aliases: `/etc/aliases`.
@@ -627,3 +627,26 @@ oficial](https://spamassassin.apache.org/full/3.1.x/doc/Mail_SpamAssassin_Conf.h
 Para comprobar que spamassassin está correctamente instalado puedes usar
 [GTUBE](http://spamassassin.apache.org/gtube/). En la URL anterior hay un
 mensaje de ejemplo que puedes enviar desde otra cuenta.
+
+# Direcciones virtuales
+
+Postfix permite usar fácilmente direcciones virtuales (que son diferentes a los
+alias).
+
+Con cuentas virtuales un sólo servidor de correo puede hostear cuentas para
+n dominios diferentes.
+
+Lo primero que tendríamos que hacer sería configurar postfix para usarlo:
+
+```
+# postconf "virtual_mailbox_domains = emiliocobos.me"
+# postconf "virtual_mailbox_base = /var/spool/mail"
+# postconf "virtual_mailbox_maps = hash:/etc/postfix/virtual-mailbox-maps.cf"
+# cat /etc/postfix/virtual-mailbox-maps.cf
+me@emiliocobos.me          emiliocobos.me/me
+other@emiliocobos.me       emiliocobos.me/other
+yet-another@emiliocobos.me emiliocobos.me/yet-another
+# postmap /etc/postfix/virtual-mailbox-maps.cf
+# service postfix restart
+```
+

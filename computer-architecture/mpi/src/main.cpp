@@ -10,6 +10,7 @@
 #include <crypt.h>
 #include "mympi.h"
 #include "job.h"
+#include "reply.h"
 
 bool process_job(const DecryptJob& job, char* result) {
     uint32_t len = job.length();
@@ -69,20 +70,48 @@ int main(int argc, char** argv) {
                     }
                 }
             }
+
+            MPI_Finalize();
+            return 0;
         }
 
+        int workers = process_count - 1;
         std::cout << "Process 0 sending data to "
-                  << process_count - 1 << " processes" << std::endl;
-        for (int i = 1; i < process_count; ++i) {
-            mympi::Channel<int32_t> chan(i);
-            chan.send_one(4);
+                  << workers << " processes" << std::endl;
+
+        for (int i = 0; i < argc; ++i) {
+            size_t len = 0;
+
+            // Theoretically this *could* overflow
+            while (++len) {
+                size_t perms = max_permutations(255 - 48, len);
+                size_t perms_per_worker = perms / workers;
+                size_t current = 0;
+                for (int j = 1; i < process_count; ++j) {
+                    mympi::Channel<Job> chan(j);
+                    chan.send_one(DecryptJob(len, current, perms_per_worker, argv[i]));
+                    current += perms_per_worker;
+                }
+            }
         }
         break;
     default:
-        mympi::Channel<int32_t> chan(0);
-        int32_t result = chan.recv_one();
-        std::cout << "Process " << process_id << " received " << result
-                  << std::endl;
+        mympi::Channel<Job> chan(0);
+        while (true) {
+            Job job_ = chan.recv();
+            if (job_.type() == JobType::End)
+                break;
+
+            DecryptJob job = dynamic_cast<DecryptJob>(job_);
+            std::vector<char> result;
+            size_t len = job.len();
+            result.resize(len + 1); // TODO: Be smarter about allocs here
+            result.data()[len] = 0;
+            if (process_job(job, result.data()))
+                chan.send(SuccessReply(result.data()));
+            else
+                chan.send(FailureReply());
+        }
     }
 
     MPI_Finalize();

@@ -4,11 +4,14 @@ TESTS := bin/tests/main
 CXX := mpic++
 CC := mpicc
 
+# crypt("10", "aa");
+TEST_PASSWORDS := aal9/sIHZQyhA
+
 COMMON_FLAGS := -Wall -pedantic
 
 CFLAGS := $(COMMON_FLAGS) -std=c99 -pedantic
 CXXFLAGS := $(COMMON_FLAGS) -std=c++11
-CXXLINKFLAGS :=
+CXXLINKFLAGS := -lcrypt
 
 NP ?= 4
 
@@ -30,7 +33,7 @@ test: $(TESTS)
 
 .PHONY: run
 run: $(TARGET)
-	mpirun -np $(NP) $(TARGET)
+	mpirun -np $(NP) $(TARGET) $(TEST_PASSWORDS)
 
 obj/%.o: src/%.cpp src/%.hpp
 	@mkdir -p $(dir $@)

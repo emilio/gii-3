@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "mympi.h"
+#include "permutations.h"
 
 using mympi::Channel;
 
@@ -14,9 +15,34 @@ int main(int argc, char** argv) {
     MPI_Comm_size(MPI_COMM_WORLD, &process_count);
     MPI_Comm_rank(MPI_COMM_WORLD, &process_id);
 
+    unsigned char test[4] = { 0 };
+    get_permutation<255, 0>(test, 3, 0);
+    assert(test[0] == 0 && test[1] == 0 && test[2] == 0);
+
+
+    next_permutation<255, 0>(test, 3);
+    assert(test[0] == 0 && test[1] == 0 && test[2] == 1);
+
+    next_permutation<255, 0>(test, 3);
+    assert(test[0] == 0 && test[1] == 0 && test[2] == 2);
+
+    test[2] = 255;
+
+    next_permutation<255, 0>(test, 3);
+    assert(test[0] == 0 && test[1] == 1 && test[2] == 0);
+
+    get_permutation<255, 0>(test, 3, 256);
+    assert(test[0] == 0 && test[1] == 1 && test[2] == 1);
+
     assert(process_count > 1 && "Need more than 1 process"
                                 "to test channels");
 
+    get_permutation<255 - 48, 48>(test, 3, 0);
+    assert(test[0] == 48 && test[1] == 48 && test[2] == 48);
+
+    test[2] = 255;
+    next_permutation<255 - 48, 48>(test, 3);
+    assert(test[0] == 48 && test[1] == 49 && test[2] == 48);
 
     if (process_id == 0) {
         std::cout << "Testing with process count = " << process_count << std::endl;

@@ -2,6 +2,7 @@
 #define JOB_H
 
 #include <cstring>
+#include "mympi_traits.h"
 #include "permutations.h"
 
 typedef char crypt_password_t[13];
@@ -10,9 +11,12 @@ enum class JobType { DECRYPT, END, };
 
 class Job {
     JobType m_type;
-public:
+
+protected:
     explicit constexpr Job(JobType type): m_type(type) {}
 
+public:
+    explicit constexpr Job(): Job(JobType::END) {}
     JobType type() { return m_type; } };
 
 class DecryptJob: public Job {
@@ -50,5 +54,13 @@ public:
 class EndJob: public Job {
     explicit constexpr EndJob(): Job(JobType::END) {}
 };
+
+namespace mympi {
+template<>
+struct mympi_traits<Job> {
+    enum { length_multiplier = sizeof(Job) };
+    const MPI_Datatype mpi_data_type = MPI_INT8_T;
+};
+} // namespace mympi
 
 #endif

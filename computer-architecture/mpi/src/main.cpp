@@ -8,26 +8,49 @@
 #endif
 
 #include <crypt.h>
-#include "mympi.h"
 #include "job.h"
+#include "mympi.h"
 #include "reply.h"
+#include "permutations.h"
+
+void distribute_jobs(int argc, char** argv, int process_count) {
+    int workers = process_count - 1;
+    std::cout << "Process 0 sending data to "
+              << workers << " processes" << std::endl;
+
+    for (int i = 0; i < argc; ++i) {
+        size_t len = 0;
+
+        // Theoretically this *could* overflow
+        while (++len) {
+            size_t perms = CryptPermutator::max_permutations(len);
+            size_t perms_per_worker = perms / workers;
+            size_t current = 0;
+            for (int j = 1; i < process_count; ++j) {
+                mympi::Channel<Job> chan(j);
+                chan.send_one(DecryptJob(len, current, perms_per_worker, argv[i]));
+                current += perms_per_worker;
+            }
+        }
+    }
+}
 
 bool process_job(const DecryptJob& job, char* result) {
     uint32_t len = job.length();
     char salt[3] = {0};
     job.fill_salt(salt);
 
-    get_permutation<255 - 48, 48>(reinterpret_cast<unsigned char*>(result),
-                                  len, job.initial_permutation());
+    CryptPermutator permutator(len, job.initial_permutation());
 
     size_t permutations = job.permutations();
     struct crypt_data data;
     while (permutations--) {
-        next_permutation<255 - 48, 48>(reinterpret_cast<unsigned char*>(result), len);
-        char* maybe_pass = crypt_r(result, salt, &data);
+        data.initialized = false;
+        char* maybe_pass = crypt_r(*permutator, salt, &data);
         if (job.password_is(maybe_pass)) {
             return true;
         }
+        ++permutator;
     }
 
     return false;
@@ -61,7 +84,7 @@ int main(int argc, char** argv) {
                 // Theoretically this *could* overflow
                 std::vector<char> result;
                 while (++len) {
-                    DecryptJob job(len, 0, max_permutations(255 - 48, len), argv[i]);
+                    DecryptJob job(len, 0, CryptPermutator::max_permutations(len), argv[i]);
                     result.resize(len + 1); // TODO: Be smarter about allocs here
                     result.data()[len] = 0;
                     if (process_job(job, result.data())) {
@@ -75,42 +98,27 @@ int main(int argc, char** argv) {
             return 0;
         }
 
-        int workers = process_count - 1;
-        std::cout << "Process 0 sending data to "
-                  << workers << " processes" << std::endl;
+        distribute_jobs(argc, argv, process_count);
 
-        for (int i = 0; i < argc; ++i) {
-            size_t len = 0;
-
-            // Theoretically this *could* overflow
-            while (++len) {
-                size_t perms = max_permutations(255 - 48, len);
-                size_t perms_per_worker = perms / workers;
-                size_t current = 0;
-                for (int j = 1; i < process_count; ++j) {
-                    mympi::Channel<Job> chan(j);
-                    chan.send_one(DecryptJob(len, current, perms_per_worker, argv[i]));
-                    current += perms_per_worker;
-                }
-            }
-        }
         break;
     default:
-        mympi::Channel<Job> chan(0);
+        mympi::Channel<Job> job_chan(0);
+        mympi::Channel<Reply> reply_chan(0);
         while (true) {
-            Job job_ = chan.recv();
-            if (job_.type() == JobType::End)
+            Job job_ = job_chan.recv_one();
+            if (job_.type() == JobType::END)
                 break;
 
-            DecryptJob job = dynamic_cast<DecryptJob>(job_);
+            DecryptJob& job = static_cast<DecryptJob&>(job_);
+
             std::vector<char> result;
-            size_t len = job.len();
+            size_t len = job.length();
             result.resize(len + 1); // TODO: Be smarter about allocs here
             result.data()[len] = 0;
             if (process_job(job, result.data()))
-                chan.send(SuccessReply(result.data()));
+                reply_chan.send_one(SuccessReply(result.data()));
             else
-                chan.send(FailureReply());
+                reply_chan.send_one(FailureReply());
         }
     }
 

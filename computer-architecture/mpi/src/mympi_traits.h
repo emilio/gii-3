@@ -11,7 +11,9 @@ namespace mympi {
 // I think the instancing should be optimised away though.
 
 template <typename T>
-struct mympi_traits;
+struct mympi_traits {
+    enum { length_multiplier = 1 };
+};
 
 template<>
 struct mympi_traits<float> {

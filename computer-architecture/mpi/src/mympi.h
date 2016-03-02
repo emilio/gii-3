@@ -26,7 +26,10 @@ class Channel {
 
     void send(const T* data, size_t len, int tag) {
         mympi_traits<T> traits_instance;
-        MPI_Send(const_cast<T*>(data), len, traits_instance.mpi_data_type, m_to, tag, m_comm);
+        MPI_Send(const_cast<T*>(data),
+                 len * mympi_traits<T>::lenght_multiplier,
+                 traits_instance.mpi_data_type,
+                 m_to, tag, m_comm);
     }
 
     void send(const std::vector<T>& vec, int tag) {
@@ -66,7 +69,13 @@ class Channel {
 
         mympi_traits<T> traits_instance;
 
-        MPI_Recv(ret.data(), count, traits_instance.mpi_data_type, m_to, tag, m_comm, status);
+        MPI_Recv(ret.data(),
+                 count * mympi_traits<T>::length_multiplier,
+                 traits_instance.mpi_data_type,
+                 m_to,
+                 tag,
+                 m_comm,
+                 status);
 
         return ret;
     }
@@ -87,7 +96,12 @@ class Channel {
         T ret;
         mympi_traits<T> traits_instance;
 
-        MPI_Recv(&ret, 1, traits_instance.mpi_data_type, m_to, tag, m_comm, status);
+        MPI_Recv(&ret,
+                 mympi_traits<T>::length_multiplier,
+                 traits_instance.mpi_data_type,
+                 m_to, tag,
+                 m_comm,
+                 status);
 
         return ret;
     }

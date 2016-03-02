@@ -30,4 +30,12 @@ public:
     }
 };
 
+namespace mympi {
+template<>
+struct mympi_traits<Reply> {
+    enum { length_multiplier = sizeof(Reply) };
+    const MPI_Datatype mpi_data_type = MPI_INT8_T;
+};
+} // namespace mympi
+
 #endif

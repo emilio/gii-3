@@ -140,4 +140,115 @@ H^T = \begin{pmatrix} -M \\ \hline Id_{n-m}\end{pmatrix} \implies \\
 H = (-M^T | Id_{n - m})
 \end{array}$$
 
+# Minimum distance in linear codes
 
+In linear codes the minimum distance calculation becomes easier, being:
+
+$$d(C) = min \{ w(c) | c \in C, c \neq 0\}$$
+
+Where $w(c)$ is the weight of a word.
+
+This is easily proven since $d(a, b) = w(a - b)$, and $a - b \in C$, since $C$
+is linear.
+
+In other words, iterating over all the weights we've iterated over all the
+possible distance, since the weight of a word is the distance between any two
+words whose difference is that word.
+
+## Control matrix
+
+We can also prove that if $H$ is a control matrix of $C$, then $d(C) > d \iff
+\exists d linearly independent columns in H$.
+
+# Syndrome of a word $m$
+
+We call **syndrome** of a received word $m$ to the value:
+
+$$m \cdot H^T$$
+
+That means that a word whose syndrome is $0$ belongs to the code.
+
+The syndrome depends exclusively of the error, and not of the transmitted value.
+
+If we write the word $m$ as $c + e$, where $c$ is the initial word transmitted
+and $e$ is the error, then:
+
+$$m \cdot H^T = (c + e) \cdot H^T = c \cdot H^T + e \cdot H^T = e \cdot H^T$$
+
+Since $c \cdot H^T$ must be $0$ ($c \in C$).
+
+# Error correction
+
+## Example: Triple repetition
+
+$$A = \mathbb{Z}/2$$
+$$T: A \rightarrow A^3$$
+$$G = \begin{pmatrix}1 & | & 1 & 1\end{pmatrix} \implies
+H = \begin{pmatrix}
+1 & | & 1 & 0 \\
+1 & | & 0 & 1 \\
+\end{pmatrix} \implies
+H^T = \begin{pmatrix}
+1 & 1 \\ \hline
+1 & 0 \\
+0 & 1 \\
+\end{pmatrix}$$
+
+$$
+d(C) = \left\{\begin{array}{l}
+d(000, 111) = 3 \\ \\
+min \{ w(c), c \neq 0 \} = 3 \\ \\
+|H| = 2 \implies d > 2, d \leq 3 \implies d = 3
+\end{array}\right.$$
+
+The number of errors corrected is $\lfloor\frac{d - 1}{2}\rfloor = 1$.
+
+Supose we receive the word $001$, we'll calculate the syndrome:
+
+$$\begin{aligned}
+syn(001) &= (0, 0, 1) \cdot H^T\\
+         &= (0, 1) \neq 0 \implies error
+\end{aligned}$$
+
+And from its definition and the previous proof:
+$$\begin{aligned}
+m \cdot H^T &= e \cdot H^T \\
+(0, 1) &= (e_1, e_2, e_3) \cdot \begin{pmatrix}1 & 1 \\ 1 & 0 \\
+1 & 1\end{pmatrix} \\
+       & \implies \left\{\begin{array}{c}
+e_1 + e_2 = 0 \\
+e_1 + e_3 = 0
+\end{array}\right.
+\end{aligned}$$
+
+We can see that there are more than one solutions to this system, but only one
+of the solutions have at most one error, and that is:
+
+$$\left\{e_1 = e_2 = 0\\ e_3 = 1\right.$$
+
+That's it, **the third bit is the erroneus one**.
+
+Since the syndrome ony depends of the error this ends up being something like:
+
+Syndrome      Result
+--------      -----------------------------------
+$(0, 0)$      $m$ is corrrect
+$(0, 1)$      3\textsuperscript{rd} bit erroneous
+$(1, 0)$      2\textsuperscript{nd} bit erroneous
+$(1, 1)$      1\textsuperscript{st} bit erroneous
+
+In practice, **you can modify the matrix so error correction is easier or more
+efficient as you wish**.
+
+# Hamming codes
+
+A $k$-Hamming code ($Ham(k)$) is a code whose control matrix is the binary
+representation of every non-null word of $k$ bits.
+
+$$H = \begin{pmatrix}
+0 & 0 & 0 & \dots & 1 \\
+0 & 0 & 0 & \dots & 1 \\
+\vdots & \vdots & \vdots &   & \vdots \\
+0 & 1 & 1 & \dots & 1 \\
+1 & 0 & 1 & \dots & 1 \\
+\end{pmatrix}$$

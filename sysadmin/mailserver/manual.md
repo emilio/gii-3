@@ -427,7 +427,7 @@ para apuntar a este nuevo archivo.
 Tras eso reiniciaremos `courier-imap`:
 
 ```
-/etc/init.d/courier-imap-ssl restart
+# service courier-imap-ssl restart
 ```
 
 # Extras
@@ -559,16 +559,16 @@ Este es el puerto por defecto del daemon SMTP, lo que implica que desde la usal
 no podemos enviar correo.
 
 Para cambiar esta configuración, hay que descomentar la configuración del
-proceso `master` de postfix (`/etc/postfix/master.cf`) referente a `smtps`.
+proceso `master` de postfix (`/etc/postfix/master.cf`) referente a `submission`.
 
 ```
-smtps     inet  n       -       -       -       -       smtpd
+submission inet  n       -       -       -       -       smtpd
 ```
 
-`smtps` es equivalente al puerto 587, que es estándar, y al ser también el
+`submission` es equivalente al puerto 587, que es estándar, y al ser también el
 puerto que utiliza GMail es probable que nunca esté bloqueado.
 
-Podríamos descomentar la línea `submission` en vez de `smtps`. `submission`
+Podríamos descomentar la línea `smtps` en vez de `submission`. `submission`
 garantiza que el mail esté encriptado, pero nuestra configuración de `smtp(s)`
 también, así que no creo que haya una diferencia práctica.
 
@@ -628,13 +628,22 @@ Para comprobar que spamassassin está correctamente instalado puedes usar
 [GTUBE](http://spamassassin.apache.org/gtube/). En la URL anterior hay un
 mensaje de ejemplo que puedes enviar desde otra cuenta.
 
-# Direcciones virtuales
+# Direcciones virtuales con postgresql
 
 Postfix permite usar fácilmente direcciones virtuales (que son diferentes a los
 alias).
 
+Lo primero es tener el paquete correspondiente instalado:
+
+```
+# apt-get install postfix-mysql courier-authlib-postgresql libsasl2-modules-sql
+```
+
 Con cuentas virtuales un sólo servidor de correo puede hostear cuentas para
 múltiples dominios diferentes.
+
+Para almacenar los usuarios usaremos postgresql, aunque se puede usar cualquier
+otra configuración, incluso archivos de texto.
 
 Habrá que tener un usuario que sea el propietario de todos los mailboxes
 virtuales. Puede ser cualquiera, incluído uno ya existente, pero nosotros
@@ -643,22 +652,55 @@ configuración de postfix:
 
 ```
 # useradd -u 5000 -m virtual
+# su -l postgres
+$ createuser -W virtual
+$ psql
+postgres=# CREATE DATABASE virtual WITH OWNER virtual;
+CREATE DATABASE
+postgres=# \c virtual
+CREATE TABLE mailbox WITH OWNER virtual (
+  id serial NOT NULL,
+  username character varying(64) NOT NULL,
+  "domain" character varying(64) NOT NULL,
+  "password" character varying(64),
+  maildir character varying(256),
+  alias character varying(32)
+);
+ALTER TABLE mailbox OWNER TO virtual;
+ALTER ROLE virtual WITH PASSWORD 'virtual';
 ```
 
-Lo primero que tendríamos que hacer sería configurar postfix para usarlo:
+La configuración de postfix necesaria es la siguiente:
 
 ```
-# postconf -e "virtual_mailbox_domains = emiliocobos.me"
+# postconf -e "virtual_mailbox_domains = pgsql:/etc/postfix/virtual-domains.cf"
+# postconf -e "virtual_mailbox_maps = pgsql:/etc/postfix/virtual-mailbox-maps.cf"
+# postconf -e "virtual_alias_maps = pgsql:/etc/postfix/virtual-alias-maps.cf"
 # postconf -e "virtual_mailbox_base = /var/spool/mail"
-# postconf -e "virtual_mailbox_maps = hash:/etc/postfix/virtual-mailbox-maps.cf"
 # postconf -e "virtual_minimum_uid = 100"
 # postconf -e "virtual_uid_maps = static:5000"
 # postconf -e "virtual_gid_maps = static:5000"
+# cat /etc/postfix/virtual-domains.cf
+user = virtual
+password = virtual
+dbname = virtual
+table = mailbox
+select_field = domain
+where_field = domain
 # cat /etc/postfix/virtual-mailbox-maps.cf
-me@emiliocobos.me          emiliocobos.me/me
-other@emiliocobos.me       emiliocobos.me/other
-yet-another@emiliocobos.me emiliocobos.me/yet-another
-# postmap /etc/postfix/virtual-mailbox-maps.cf
+user = virtual
+password = virtual
+dbname = virtual
+table = mailbox
+select_field = maildir
+where_field = username
+# cat /etc/postfix/virtual-alias-maps.cf
+user = virtual
+password = virtual
+dbname = virtual
+table = mailbox
+select_field = alias
+where_field = username
 # service postfix restart
 ```
 
@@ -670,9 +712,108 @@ Tenemos que crear los directorios correspondientes y asociarlos al usuario
 
 ```
 # mkdir /var/spool/mail/emiliocobos.me
-# chown virtual:virtual /var/spool/mail/emiliocobos.me/
+# chown virtual:virtual /var/spool/mail/emiliocobos.me
 ```
 
-Si enviamos un correo ahora deberíamos de poder ser capaces de recibirlo en el
-directorio correspondiente, pero tendremos que reconfigurar `courier-imap`, para
-que busque en los directorios nuevos.
+## Configuración de SASL
+
+Tenemos que decirle a SASL cómo obtener la información de login a partir de
+ahora:
+
+```
+# cat /etc/postfix/sasl/smtpd.conf
+mech_list: PLAIN
+allowanonymouslogin: no
+allowplaintext: no
+
+pwcheck_method: auxprop
+auxprop_plugin: sql
+sql_hostnames: localhost
+sql_engine: pgsql
+sql_database: virtual
+sql_passwd: virtual
+sql_user: virtual
+sql_select: SELECT password FROM mailbox WHERE username = '%u' AND domain = '%r'
+```
+
+## Activando cuentas virtuales en courier-imap
+
+Para ello tenemos que añadir `authpgsql` a la lista de módulos de autenticación.
+Esto permitirá a `courier-imap` tener una lista de usuarios aparte de la del
+sistema. Tendremos que editar el archivo `/etc/courier/authdaemonrc`, y editar
+la variable `authmodulelist`:
+
+```
+authmodulelist="authpgsql"
+```
+
+Tendremos que crear el archivo correspondiente a `authpgsqlrc`,
+`/etc/courier/authpgsqlrc`:
+
+```
+# cat /etc/courier/authpgsqlrc
+PGSQL_HOST           localhost
+PGSQL_PORT           5432
+PGSQL_USERNAME       virtual
+PGSQL_PASSWORD       virtual
+PGSQL_DATABASE       virtual
+# Fields
+PGSQL_USER_TABLE     mailbox
+PGSQL_CLEAR_PWFIELD  password
+PGSQL_LOGIN_FIELD    username || '@' || domain
+PGSQL_MAILDIR_FIELD  maildir
+# Makes postgres select a constant
+PGSQL_UID_FIELD      5000
+PGSQL_GID_FIELD      5000
+PGSQL_HOME_FIELD     '/var/spool/mail/'
+```
+
+Posteriormente reiniciaremos `courier-authdaemon`:
+
+```
+# service courier-authdaemon restart
+```
+
+
+## Crear un usuario virtual
+
+Para crear un usuario virtual (vamos a usar como ejemplo `pepe`) sólo tendríamos
+que añadirlo a la BBDD, para lo que haremos:
+
+```
+# su - l virtual
+$ psql
+INSERT INTO mailbox (username, "domain", "password", maildir, alias) VALUES
+('pepe', 'emiliocobos.me', 'pass', 'emiliocobos.me/pepe/', NULL);
+```
+
+**Nota**: Postfix sólo usa el estilo `maildir` si el path acaba en
+`/` (es decir, `emiliocobos/pepe/` en vez de `emiliocobos/pepe`).
+
+Esto es importante porque imap sólo funcionará con el estilo `maildir`.
+
+## Cambio de configuración del cliente
+
+Nótese que antes, en nuestro cliente de correo, nos autenticábamos con el
+usuario `me` directamente.
+
+Tendremos que cambiarlo a `me@emiliocobos.me`, ya que ahora podemos
+potencialmente hostear correo para más dominios.
+
+Lo mismo pasará con `msmpt`.
+
+## Prevenir acceso ssh al usuario `virtual`
+
+Para evitar sustos, sobre todo si has escogido una contraseña fácil como la mía
+(`virtual`), puedes cambiar `/etc/ssh/sshd_config` y añadir:
+
+```
+Match User virtual
+  PasswordAuthentication no
+```
+
+Asegurándose de usar después:
+
+```
+# service ssh restart
+```

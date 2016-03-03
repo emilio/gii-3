@@ -7,6 +7,7 @@
 #define _GNU_SOURCE
 #endif
 
+#include <unistd.h>
 #include <crypt.h>
 #include "job.h"
 #include "mympi.h"
@@ -26,7 +27,7 @@ void distribute_jobs(int argc, char** argv, int process_count) {
             size_t perms = CryptPermutator::max_permutations(len);
             size_t perms_per_worker = perms / workers;
             size_t current = 0;
-            for (int j = 1; i < process_count; ++j) {
+            for (int j = 1; j < process_count; ++j) {
                 mympi::Channel<Job> chan(j);
                 chan.send_one(DecryptJob(len, current, perms_per_worker, argv[i]));
                 current += perms_per_worker;
@@ -102,6 +103,15 @@ int main(int argc, char** argv) {
 
         break;
     default:
+        // {
+        //         int i = 0;
+        //         char hostname[256];
+        //         gethostname(hostname, sizeof(hostname));
+        //         printf("PID %d on %s ready for attach\n", getpid(), hostname);
+        //         fflush(stdout);
+        //         while (0 == i)
+        //             sleep(5);
+        // }
         mympi::Channel<Job> job_chan(0);
         mympi::Channel<Reply> reply_chan(0);
         while (true) {
@@ -109,7 +119,11 @@ int main(int argc, char** argv) {
             if (job_.type() == JobType::END)
                 break;
 
+            std::cout << "Received job" << std::endl;
+
             DecryptJob& job = static_cast<DecryptJob&>(job_);
+
+            std::cout << "DecryptJob len: " << job.length() << "perm: " << job.initial_permutation() << std::endl;
 
             std::vector<char> result;
             size_t len = job.length();

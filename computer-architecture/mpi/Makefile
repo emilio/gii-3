@@ -7,7 +7,7 @@ CC := mpicc
 # crypt("10", "aa");
 TEST_PASSWORDS := aal9/sIHZQyhA
 
-COMMON_FLAGS := -Wall -pedantic
+COMMON_FLAGS := -Wall -pedantic -g
 
 CFLAGS := $(COMMON_FLAGS) -std=c99 -pedantic
 CXXFLAGS := $(COMMON_FLAGS) -std=c++11

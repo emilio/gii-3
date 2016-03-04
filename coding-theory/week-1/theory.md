@@ -5,12 +5,26 @@ author:
   - Emilio Cobos Álvarez (70912324N)
 ---
 
-# Example of a code and a transmission: parity bit
+# Transmission scheme
+
+The general scheme of a transmission is that:
+
+ * We have some information we want to transmit over a fallible channel.
+ * We need to encode that information so we can detect errors, or even correct
+   them.
+ * The information must be decoded by the receiver easily.
+
+To encode the information we'll use what we call a block dode. We'll se a few
+definitions later, but this is the general diagram for a transmission:
+
+![Transmission scheme diagram](img/transmission-scheme.dot.png)
+
+## Example of a code and a transmission: parity bit
 
  * 2 information bits, 1 parity bit
  * Probability of error in the transmission of 1 bit: $p = 1 / 1000$
 
-## Codification
+### Codification
 
 $$ENCODED(INFO) \equiv INFO + XOR(INFO)$$
 
@@ -21,7 +35,7 @@ Info    Encoded
 10      101
 11      110
 
-## Error probability transmitting a word (3 bits)
+### Error probability transmitting a word (3 bits)
 
 Number of errors   Probability
 -----------------  ----------------------------------------------
@@ -64,7 +78,7 @@ $$C: \Sigma^k \rightarrow \Sigma^n$$
 
 We define the rate as the ratio between the message length and the block length.
 
-$$R = k / n$$
+$$R = \frac{k}{n}$$
 
 ### Distance ($d$)
 
@@ -75,9 +89,9 @@ $$d(C) = min(d(w_1, w_2)) \forall w_1, w_2 \in \Sigma | w_1 \neq w_2$$
 
 ## Channel
 
-This is a rather broad concept, but we'll be assuming **symmetric** binary codes,
-that is, codes which use the **alphabet $\{0, 1\}$** and in which **error
-probability is the same regardless of the symbol transmitted**.
+This is a rather broad concept, but we'll be assuming **symmetric** binary
+channels, that is, codes which use the **alphabet $\{0, 1\}$** and in which
+**error probability is the same regardless of the symbol transmitted**.
 
 # Properties of block codes
 
@@ -146,11 +160,11 @@ We call perfect code a code that reaches the Hamming bound.
 
 # Singleton bound
 
-> If $C$ is a q-ary block of length $n$ and minimum distance $d$, then $A_q(n,
-d) \leq q^{n - d + 1}$.
+> If $C$ is a q-ary block code of length $n$ and minimum distance $d$, then
+> $A_q(n, d) \leq q^{n - d + 1}$.
 
 Here $A_q(n, d)$ means the maximum number of words in a $q$-ary code of length
-$n$ an minimum distance $d$.
+$n$ anm minimum distance $d$.
 
 This, for linear codes, implies that:
 

@@ -14,20 +14,38 @@
 
 TEX_TARGETS := $(wildcard *.tex)
 MD_TARGETS := $(wildcard *.md)
+DOT_TARGETS := $(wildcard img/*.dot)
+DOT_TARGETS := $(DOT_TARGETS:.dot=.dot.png) \
+               $(DOT_TARGETS:.dot=.dot.ps) \
+							 $(DOT_TARGETS:.dot=.dot.pdf)
+
+TARGETS := $(TEX_TARGETS:.tex=.pdf) \
+           $(MD_TARGETS:.md=.pdf)
 
 ifeq ($(PANDOC_FLAGS),)
 PANDOC_FLAGS := --toc --filter pandoc-crossref
 endif
 
-TARGETS := $(TEX_TARGETS:.tex=.pdf) $(MD_TARGETS:.md=.pdf)
-
 .PHONY: session-notes
 session-notes: $(TARGETS)
 
-%.pdf: %.tex
+%.pdf: %.tex $(DOT_TARGETS)
 	$(info [DOC] $< -> $@)
 	@pandoc $(PANDOC_FLAGS) --from=latex --latex-engine=xelatex --to=latex $< -o $@
 
-%.pdf: %.md
+%.pdf: %.md $(DOT_TARGETS)
 	$(info [DOC] $< -> $@)
 	@pandoc $(PANDOC_FLAGS) --from=markdown --latex-engine=xelatex --to=latex $< -o $@
+
+img/%.dot.png: img/%.dot
+	dot -Gdpi=300 -Tpng $< -o $@
+
+img/%.dot.ps: img/%.dot
+	dot -Tps $< -o $@
+
+img/%.dot.pdf: img/%.dot.ps
+	ps2pdf $< $@
+
+.PHONY: clean-session-notes
+clean-session-notes:
+	$(RM) $(TARGETS) $(DOT_TARGETS)

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="spanish">
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Emilio Cobos Álvarez (70912324N)">
+  <title>Instalación y configuración de Postfix</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="https://cdn.bootcss.com/reveal.js/3.2.0/css/reveal.css">
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="https://cdn.bootcss.com/reveal.js/3.2.0/css/theme/solarized.min.css">
+  <style>
+    .reveal p { font-size: .65em; margin: 1em 0; }
+    .reveal h1 { font-size: 2em }
+    .reveal h2 { font-size: 1.5em }
+    .reveal pre { font-size: .5em }
+  </style>
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section>
+  <h1 class="title">Instalación y configuración de Postfix</h1>
+  <h2 class="author">Emilio Cobos Álvarez (70912324N)</h2>
+</section>
+
+<section id="entorno-top" class="slide level1">
+
+<section id="entorno" class="slide level2">
+  <h1>Entorno</h1>
+  <p>Droplet Ubuntu de <a href="https://digitalocean.com">DigitalOcean</a>
+  <p>Dominio: <code>emiliocobos.me</code>.</p>
+  <p>Se intentará configurar el correo <code>me@emiliocobos.me</code> como primer
+  paso, y se tratará de crear cuentas virtuales posteriormente.</p>
+</section>
+
+<section id="setup-inicial" class="slide level2">
+  <h2>Setup inicial</h2>
+  <pre><code>$ ssh root@188.166.145.122</code></pre>
+  <pre><code># apt-get install mailutils postfix</code></pre>
+  <p>Configuración de postfix como <strong>Internet Site</strong>, con el
+  nombre de dominio apropiado, en este caso <code>emiliocobos.me</code>.</p>
+</section>
+
+<section id="el-mx-record" class="slide level2">
+  <h2 id="el-mx-record">El MX record</h2>
+  <p>El MX record sólo funciona con otros nombres de dominio, así que tenemos
+  que crear uno con un A record.</p>
+  <p>Se ha utilizado el subdominio <code>mail.emiliocobos.me</code> como
+  servidor de correo, apuntando a la dirección IP de nuestro droplet.</p>
+</section>
+
+<section id="el-mx-record-figure" class="slide level2">
+  <figure>
+    <img src="screenshots/3-dns-mx-config.png" alt="Ejemplo de configuración en NameCheap" /><figcaption>Ejemplo de configuración en NameCheap</figcaption>
+  </figure>
+</section>
+
+
+<section id="el-mx-record-test" class="slide level2">
+  <p>Podemos comprobar que funciona usando los comandos <code>dig</code> y <code>nslookup</code>:</p>
+  <pre><code>$ dig mx emiliocobos.me</code></pre>
+  <pre><code>$ nslookup mail.emiliocobos.me</code></pre>
+</section>
+
+<section id="el-mx-record-user" class="slide level2">
+  <h2 id="crear-el-usuario-y-asegurarse-de-que-la-configuración-de-postfix-funciona">Crear el usuario y asegurarse de que la configuración de postfix funciona</h2>
+  <p>Creamos el usuario <code>me</code>:</p>
+  <pre><code># useradd -m -s /bin/bash me</code></pre>
+  <p>Comprobamos que <code>postfix</code> está ejecutándose:</p>
+  <pre><code># postfix status
+  postfix/postfix-script: the Postfix mail system is running: PID: 2504</code></pre>
+  <p>Podemos enviarnos un correo conectándonos al puerto 25 localmente via <code>telnet</code>.</p>
+</section>
+
+<section id="first-email">
+  <pre><code># su -l me
+  me:~$ mail
+  &quot;/var/mail/me&quot;: 1 message 1 new
+  &gt;N   1 root@localhost     Thu Feb 18 06:34  12/440   Hola desde postfix!</code></pre>
+</section>
+
+</section>
+
+<section id="instalar-el-servidor-imap-y-pop" class="slide level1">
+<h1>Instalar el servidor imap y pop</h1>
+<p>Usaremos courier como servidor IMAP y POP.</p>
+<p>Courier usa el estilo de inbox con <code>Maildir</code>s en vez del clásico:</p>
+<pre><code># postconf -e &quot;home_mailbox = Maildir/&quot;
+# postconf -e &quot;mailbox_command = &quot;</code></pre>
+<p>Y posteriormente instalar courier.</p>
+<pre><code># apt-get install courier-imap courier-pop</code></pre>
+</section>
+
+<section id="dejar-a-postfix-recibir-mail-desde-internet-top" class="slide level1">
+<section id="dejar-a-postfix-recibir-mail-desde-internet" class="slide level2">
+<h1>Hacer que postfix escuche a internet</h1>
+<p>Para ello tenemos que decirle que escuche a todas las interfaces:</p>
+<pre><code># postconf -e &quot;inet_interfaces = all&quot;
+# postconf -e &quot;inet_protocols = all&quot;</code></pre>
+<pre><code># postconf -e myhostname=mail.emiliocobos.me</code></pre>
+<pre><code># service postfix restart
+ * Stopping Postfix Mail Transport Agent postfix  [ OK ]
+ * Starting Postfix Mail Transport Agent postfix  [ OK ]</code></pre>
+</section>
+
+<section id="mandar-nuestro-primer-correo-desde-nuestro-ordenador-personal" class="slide level2">
+<h2>Prueba</h2>
+<p>Podríamos usar <code>telnet mail.emiliocobos.me 25</code>, aunque puede estar bloqueado.</p>
+<p>Mandando un correo de ejemplo a <code>me@emiliocobos.me</code>, nos llega correctamente:</p>
+<pre><code>:~$ cat Maildir/new/1455799542.Vfd01I120a80M324168.mail.emiliocobos.me
+Return-Path: &lt;ecoal95@gmail.com&gt;
+X-Original-To: me@emiliocobos.me
+Delivered-To: me@emiliocobos.me
+...</code></pre>
+</section>
+</section>
+
+<section id="configurando-imap-con-mutt-y-msmtp-top" class="slide level1">
+<section id="configurando-imap-con-mutt-y-msmtp" class="slide level2">
+  <h1>Configuración IMAP y SMTP</h1>
+</section>
+<section id="pass" class="slide level2">
+<pre><code># passwd me</code></pre>
+</section>
+<section id="mutt" class="slide level2">
+<h2>Configuración de mutt</h2>
+<p>Y configuraremos <code>mutt</code> tal que así:</p>
+<pre><code>set from = &quot;me@emiliocobos.me&quot;
+set sendmail=&quot;/usr/bin/msmtp -v -a personal&quot;
+
+set folder      = imap://mail.emiliocobos.me/
+set imap_user   = me
+set imap_pass   = xxx
+set spoolfile   = +INBOX
+
+mailboxes       = +INBOX
+
+set mbox = +INBOX.All
+set postponed = +INBOX.Drafts
+set record = +INBOX.Sent</code></pre>
+</section>
+
+<section id="msmtp" class="slide level2">
+<h2>Configuración de msmtp</h2>
+<pre><code>account personal
+host mail.emiliocobos.me
+from &quot;me@emiliocobos.me&quot;
+port 25
+auth on
+user &quot;me&quot;
+password &quot;xxx&quot;</code></pre>
+<p><strong>Ahora podemos enviar y recibir mails desde nuestro propio correo!</strong></p>
+</section>
+
+<section id="challenge-achieved" class="slide level2">
+  <h2>Achievement unlocked</h2>
+  <figure>
+    <img src="http://i.imgur.com/Uhmf6z1.gif">
+    <figcaption>Fuente: <a href="https://www.reddit.com/r/wheredidthesodago/comments/1g9lkk/shit_wasnt_the_only_thing_greg_was_sinking_on_the/">Reddit</a></figcaption>
+  </figure>
+</section>
+
+<section id="or-almost" class="slide level2">
+  <h2>O casi...</h2>
+  <ul>
+    <li>No SSL/TLS.</li>
+    <li>Cuentas individuales ligadas a usuarios de UNIX.</li>
+  </ul>
+</section>
+
+</section>
+
+<section id="forzando-tls-y-sasl-top" class="slide level1">
+<section id="forzando-tls-con-sasl" class="slide level2">
+  <h1>Forzando TLS con SASL</h1>
+  <p>SASL: <em>Simple Authentication Security Layer</em>. Mi conocimiento no
+  pasa de ahí, está explicado en el <a
+    href="http://ftp.ietf.org/rfc/rfc2222.txt">RFC 2222</a>, que no me he
+  leído.</p>
+</section>
+
+<section id="certificado" class="slide level2">
+  <pre><code># openssl req -sha256 -x509 -newkey rsa:2048 \
+    -keyout key.pem -out cert.pem -days 3650 -nodes</code></pre>
+  <p>Este comando genera un certificado y una clave válidos para 3650 días (10 años).</p>
+  <p>Pero... por suerte <strong>en los SO basados en Debian ya existe un
+    certificado y una clave a tal efecto</strong>:
+  <code>ssl-cert-snakeoil.pem</code>.</p>
+  <pre><code># postconf -e "smtpd_tls_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem"
+# postconf -e "smtpd_tls_key_file=/etc/ssl/private/ssl-cert-snakeoil.key"</code></pre>
+</section>
+
+<section id="force-tls" class="slide level2">
+<h2 id="forzando-tls-cons-sasl-en-postfix">Forzando TLS SASL</h2>
+<pre><code># postconf -e &quot;smtpd_tls_auth_only=yes&quot;
+# postconf -e &quot;smtpd_tls_security_level=encrypt&quot;</code></pre>
+# postconf -e &quot;smtp_tls_security_level=may&quot;
+<pre><code># postconf -e &quot;smtpd_sasl_auth_enable=yes&quot;
+# postconf -e &quot;smtpd_sasl_tls_security_options=noanonymous&quot;</code></pre>
+
+<pre><code># apt-get install libsasl2-modules sasl2-bin</code></pre>
+<pre><code># /etc/postfix/sasl/smtpd.conf
+pwcheck_method: saslauthd
+mech_list: PLAIN LOGIN</code></pre>
+<p>Tenemos que crear un daemon nuevo para postfix ya que se ejecuta con
+<code>chroot</code> en Debian, ver <a
+  href="https://wiki.debian.org/PostfixAndSASL#SASL_authentication_in_the_Postfix_SMTP_server">https://wiki.debian.org/PostfixAndSASL#SASL_authentication_in_the_Postfix_SMTP_server</a>
+</section>
+
+<section id="accept-cert" class="slide level2">
+<h2 id="aceptar-el-certificado">Aceptar el certificado</h2>
+<p>Para hacerlo con <code>msmtp</code>, podremos hacer:</p>
+<pre><code># openssl x509 -fingerprint -in /etc/ssl/certs/ssl-cert-snakeoil.pem
+SHA1 Fingerprint=xxxxx</code></pre>
+<p>Copiando ese fingerprint en <code>.msmtprc</code>, con la línea:</p>
+<pre><code>tls_fingerprint &quot;xxxx&quot;</code></pre>
+<p>Comprobará el fingerprint del certificado cuando se conecte.</p>
+</section>
+</section>
+
+<section id="usar-ssl-en-el-servidor-imap" class="slide level1">
+<h1>Courier IMAP SSL</h1>
+<pre><code># apt-get install courier-imap-ssl</code></pre>
+<p>Esto generará un certificado en <code>/usr/lib/courier/imapd.pem</code>,
+pero nosotros, por comodidad, usaremos el mismo que para <code>smtpd</code>, es
+decir: <code>ssl-cert-snakeoil</code>.</p>
+<pre><code># cat /etc/ssl/certs/ssl-cert-snakeoil.pem \
+      /etc/ssl/private/ssl-cert-snakeoil.key \
+      &gt; /etc/courier/ssl-cert-snakeoil.pem</code></pre>
+<p>Hay que editar la variable <code>TLS_CERTFILE</code> del archivo
+<code>/etc/courier/imapd-ssl</code> para apuntar a este nuevo archivo.</p>
+<pre><code># service courier-imap-ssl restart</code></pre>
+</section>
+<section id="extras-top" class="slide level1">
+<section id="extras" class="slide level2">
+  <h1>Extras</h1>
+</section>
+<section id="aliases" class="slide level2">
+  <h2 id="aliases-title">Aliases</h2>
+  <p>Archivo <code>/etc/aliases</code>, aunque es configurable.</p>
+  <pre><code># echo &quot;admin: me&quot; &gt;&gt; /etc/aliases
+# newaliases</code></pre>
+</section>
+<section id="cliente-web" class="slide level2">
+  <h2 id="cliente-web-title">Cliente web</h2>
+  <p>Roundcube + apache2 + postgresql
+  <pre><code># apt-get install apache2 postgresql
+# pg_createcluster 9.3 main --start
+# apt-get install roundcube roundcube-pgsql aspell-es</code></pre>
+  <p><code>/etc/apache2/conf-enabled/roundcube.conf</code>:</p>
+  <pre><code>Alias /roundcube/program/js/tiny_mce/ /usr/share/tinymce/www/
+  Alias /roundcube /var/lib/roundcube</code></pre>
+  <pre><code># service apache2 restart</code></pre>
+</section>
+
+<section id="roundcube-screenshot" class="slide level2">
+  <a href="http://mail.emiliocobos.me/roundcube">mail.emiliocobos.me/roundcube</a>
+  <figure>
+    <img src="screenshots/4-roundcube.png" alt="roundcube"/>
+    <figcaption>Roundcube funcionando (a falta de la BBDD)</figcaption>
+  </figure>
+</section>
+
+<section id="roundcube-db" class="slide level2">
+<pre><code># su -l postgres
+postgres:~$ createuser -d -W roundcube
+Password:</code></pre>
+<pre><code># dpkg-reconfigure roundcube-core</code></pre>
+<p>Ficheros de interés: <code>/var/lib/roundcube/logs/errors</code> para ver lo
+que falla, por ejemplo, hubo que habilitar el módulo <code>mcrypt</code> de
+PHP:</p>
+<pre><code># php5enmod mcrypt
+# service apache2 restart</code></pre>
+</section>
+
+<section id="spf" class="slide level2">
+<h2 id="el-spf-record">El SPF record</h2>
+
+<ul>
+  <li><em>Sender Policy Framework</em>
+  <li><a href="http://www.openspf.org/SPF_Record_Syntax">www.openspf.org</a>
+</ul>
+
+<pre><code>v=spf1 a mx -all</code></pre>
+<pre><code>v=spf1 a mx ip4:188.166.145.122 -all</code></pre>
+</section>
+</section>
+
+<section id="cambiando-el-puerto-por-defecto-de-smtp" class="slide level1">
+<h1>Cambiando el puerto de SMTP</h1>
+<ul>
+  <li>Puerto 25 (por defecto par SMTP) bloqueado
+  <li>Necesitamos activar el 587 (SMTPS).
+</ul>
+
+<p>Descomentar en (<code>/etc/postfix/master.cf</code>) referente a
+<code>submission</code>.</p>
+
+<pre><code>submission inet  n       -       -       -       -       smtpd</code></pre>
+<pre><code># service postfix restart</code></pre>
+</section>
+
+<section id="instalando-spamassassin-top" class="slide level1">
+<section id="instalando-spamassassin" class="slide level2">
+<h1>SpamAssassin</h1>
+<p>Spamassassin es un servicio creado por Apache para el filtrado de correos.
+Es el programa anti-spam más utilizado con diferencia.</p>
+
+<pre><code># apt-get install spamassassin spamc</code></pre>
+
+<p>Añadir el servicio <code>spamassassin</code> al final de <code>/etc/postfix/master.cf</code>:</p>
+<pre><code>spamassassin unix -     n       n       -       -       pipe
+  user=debian-spamd argv=/usr/bin/spamc -f -e /usr/sbin/sendmail -oi -f ${sender} ${recipient}</code></pre>
+<p>Lo siguiente es poner el filtro en todas las líneas que reciban correos
+(todas las líneas que acaben en <code>smtpd</code>).</p>
+
+<pre><code>submission inet n       -       -       -       -       smtpd
+   -o content_filter=spamassassin</code></pre>
+</section>
+<section id="spamassassin-config" class="section level2">
+<h2 id="configuración-de-spamassassin">Configuración de spamassassin</h2>
+<ul>
+  <li><code>/etc/spamassassin/local.cf</code>
+</ul>
+
+<pre><code>rewrite_header Subject [SPAM]</code></pre>
+
+<p><a
+    href="https://spamassassin.apache.org/full/3.1.x/doc/Mail_SpamAssassin_Conf.html">spamassassin.apache.org/full/3.1.x/doc/Mail_SpamAssassin_Conf.html</a>
+</section>
+
+<section id="spamassassin-testing" class="section level2">
+<h2 id="comprobando-que-funciona">Comprobando que funciona</h2>
+<ul>
+  <li>GTUBE (<a href="http://spamassassin.apache.org/gtube/">spamassassin.apache.org/gtube</a>)
+</ul>
+</section>
+</section>
+<section id="direcciones-virtuales-con-postgresql-top" class="slide level1">
+<section id="direcciones-virtuales-con-postgresql" class="slide level2">
+  <h1>Direcciones virtuales con postgresql</h1>
+  <pre><code># apt-get install postfix-mysql courier-authlib-postgresql libsasl2-modules-sql</code></pre>
+  <p>Con cuentas virtuales un sólo servidor de correo puede hostear cuentas
+  para múltiples dominios diferentes.</p>
+  <p>Usaremos postgresql, aunque se puede usar cualquier otra configuración,
+  incluso archivos de texto.</p>
+</section>
+<section id="virtual-user" class="slide level2">
+  <p>Habrá que tener un usuario que sea el propietario de todos los mailboxes
+  virtuales. Le daremos un UID específico para la configuración de postfix:</p>
+<pre><code># useradd -u 5000 -m virtual
+# su -l postgres
+$ createuser -W virtual
+$ psql
+postgres=# CREATE DATABASE virtual WITH OWNER virtual;
+CREATE DATABASE
+postgres=# \c virtual
+CREATE TABLE mailbox WITH OWNER virtual (
+  id serial NOT NULL,
+  username character varying(64) NOT NULL,
+  &quot;domain&quot; character varying(64) NOT NULL,
+  &quot;password&quot; character varying(64),
+  maildir character varying(256),
+  alias character varying(32)
+);
+ALTER TABLE mailbox OWNER TO virtual;
+ALTER ROLE virtual WITH PASSWORD &#39;virtual&#39;;</code></pre>
+</section>
+<section id="virtual-user-postfix" class="slide level2">
+<pre><code># postconf -e &quot;virtual_mailbox_domains = pgsql:/etc/postfix/virtual-domains.cf&quot;
+# postconf -e &quot;virtual_mailbox_maps = pgsql:/etc/postfix/virtual-mailbox-maps.cf&quot;
+# postconf -e &quot;virtual_alias_maps = pgsql:/etc/postfix/virtual-alias-maps.cf&quot;
+# postconf -e &quot;virtual_mailbox_base = /var/spool/mail&quot;
+# postconf -e &quot;virtual_minimum_uid = 100&quot;
+# postconf -e &quot;virtual_uid_maps = static:5000&quot;
+# postconf -e &quot;virtual_gid_maps = static:5000&quot;
+# cat /etc/postfix/virtual-domains.cf
+user = virtual
+password = virtual
+dbname = virtual
+table = mailbox
+select_field = domain
+where_field = domain
+# cat /etc/postfix/virtual-mailbox-maps.cf
+user = virtual
+password = virtual
+dbname = virtual
+table = mailbox
+select_field = maildir
+where_field = username
+# cat /etc/postfix/virtual-alias-maps.cf
+user = virtual
+password = virtual
+dbname = virtual
+table = mailbox
+select_field = alias
+where_field = username
+# service postfix restart</code></pre>
+</section>
+
+<section id="virtual-user-spool-dir" class="slide level2">
+  <pre><code># mkdir /var/spool/mail/emiliocobos.me
+# chown virtual:virtual /var/spool/mail/emiliocobos.me</code></pre>
+</section>
+
+<section id="config-changes-sasl" class="slide level2">
+  <h2 id="configuración-de-sasl">Configuración de SASL</h2>
+  <pre><code># cat /etc/postfix/sasl/smtpd.conf
+mech_list: PLAIN
+allowanonymouslogin: no
+allowplaintext: no
+
+pwcheck_method: auxprop
+auxprop_plugin: sql
+sql_hostnames: localhost
+sql_engine: pgsql
+sql_database: virtual
+sql_passwd: virtual
+sql_user: virtual
+sql_select: SELECT password FROM mailbox WHERE username = &#39;%u&#39; AND domain = &#39;%r&#39;</code></pre>
+</section>
+
+<section id="config-changes-imap" class="slide level2">
+<h2 id="activando-cuentas-virtuales-en-courier-imap">Configuración de courier-imap</h2>
+<p><code>/etc/courier/authdaemonrc</code>:</p>
+<pre><code>authmodulelist=&quot;authpgsql&quot;</code></pre>
+<pre><code># cat /etc/courier/authpgsqlrc
+PGSQL_HOST           localhost
+PGSQL_PORT           5432
+PGSQL_USERNAME       virtual
+PGSQL_PASSWORD       virtual
+PGSQL_DATABASE       virtual
+# Fields
+PGSQL_USER_TABLE     mailbox
+PGSQL_CLEAR_PWFIELD  password
+PGSQL_LOGIN_FIELD    username || &#39;@&#39; || domain
+PGSQL_MAILDIR_FIELD  maildir
+# Makes postgres select a constant
+PGSQL_UID_FIELD      5000
+PGSQL_GID_FIELD      5000
+PGSQL_HOME_FIELD     &#39;/var/spool/mail/&#39;</code></pre>
+<p>Posteriormente reiniciaremos <code>courier-authdaemon</code>:</p>
+<pre><code># service courier-authdaemon restart</code></pre>
+</section>
+
+<section id="virtual-user" class="slide level2">
+<h2 id="crear-un-usuario-virtual">Crear un usuario virtual</h2>
+<pre><code># su - l virtual
+$ psql
+INSERT INTO mailbox (username, &quot;domain&quot;, &quot;password&quot;, maildir, alias) VALUES
+(&#39;pepe&#39;, &#39;emiliocobos.me&#39;, &#39;pass&#39;, &#39;emiliocobos.me/pepe/&#39;, NULL);</code></pre>
+<p><strong>Nota</strong>: Postfix sólo usa el estilo <code>maildir</code> si el
+path acaba en <code>/</code> (es decir, <code>emiliocobos/pepe/</code> en vez
+de <code>emiliocobos/pepe</code>).</p>
+</section>
+
+<section id="client-config-changes" class="slide level2">
+<h2 id="cambio-de-configuración-del-cliente">Cambio de configuración del cliente</h2>
+<p>Tendremos que cambiarlo a <code>me@emiliocobos.me</code>, ya que ahora
+podemos potencialmente hostear correo para más dominios.</p>
+<p>Lo mismo pasará con <code>msmpt</code>.</p>
+</section>
+
+<section id="virtual-user-access" class="slide level2">
+<h2 id="prevenir-acceso-ssh-al-usuario-virtual">Prevenir acceso ssh al usuario <code>virtual</code></h2>
+<p>Para evitar sustos, sobre todo si has escogido una contraseña fácil como la
+mía (<code>virtual</code>), puedes cambiar <code>/etc/ssh/sshd_config</code> y
+añadir:</p>
+<pre><code>Match User virtual
+  PasswordAuthentication no</code></pre>
+<pre><code># service ssh restart</code></pre>
+</section>
+</section>
+<section class="slide level1">
+  <h1>Más cosas que puedes encontrar en el manual:</h1>
+  <ul>
+    <li>Cómo configurar DKIM.
+    <li>Todos los comandos al detalle.
+    <li>...
+  </ul>
+</section>
+<section class="slide level1">
+  <h1>Fin</h1>
+  <img src="http://www.reactiongifs.com/wp-content/uploads/2013/09/rock.gif"/>
+</section>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/headjs/1.0.3/head.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.2.0/js/reveal.min.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Vertical centering of slides
+        center: true,
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>

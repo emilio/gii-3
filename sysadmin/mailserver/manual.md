@@ -282,7 +282,7 @@ password "xxx"
 
 **Ahora podemos enviar y recibir mails desde nuestro propio correo!**
 
-# Forzando TLS y SASL
+# Forzando TLS con SASL
 
 Uno de los problemas que tenemos actualmente es que puede que nuestros datos
 vayan **en texto plano** directamente al servidor.
@@ -306,17 +306,18 @@ Estas opciones deberían estar ya configuradas en postfix, pero si no lo
 estuvieran, o quisieras cambiar el certificado, podrías poner las opciones:
 
 ```
-smtpd_tls_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
-smtpd_tls_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
+# postconf -e "smtpd_tls_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem"
+# postconf -e "smtpd_tls_key_file=/etc/ssl/private/ssl-cert-snakeoil.key"
 ```
 
-## Forzando TLS cons SASL en postfix
+## Forzando TLS con SASL en postfix
 
 Para permitir mandar correo via TLS usaremos:
 
 ```
 # postconf -e "smtpd_tls_auth_only=yes"
 # postconf -e "smtpd_tls_security_level=encrypt"
+# postconf -e "smtp_tls_security_level=may"
 ```
 
 Pero ahora nuestro servidor no soporta ningún modo de autenticación, así
@@ -434,8 +435,8 @@ Tras eso reiniciaremos `courier-imap`:
 
 ## Aliases
 
-Especificar direcciones virtuales es extremadamente simple, sólo hay que alterar
-el archivo de aliases: `/etc/aliases`.
+Especificar aliases es extremadamente simple, sólo hay que alterar el archivo:
+`/etc/aliases`.
 
 Puedes camiarlo a uno específico de postfix de todas formas con las claves de
 configuración `alias_maps` y `alias_database`.
@@ -544,12 +545,8 @@ v=spf1 a mx -all
 o (más estricto):
 
 ```
-v=spf1 a mx ip4:188.166.145.122 -all
+v=spf1 a mx ip4:188.166.145.122/32 -all
 ```
-
-Otras técnicas más sofisticadas (como `DMARK`, que combina `DKIM` y `SPF`),
-existen, pero el autor no se siente con la suficiente confianza como para hablar
-de ellas.
 
 # Cambiando el puerto por defecto de SMTP
 
@@ -599,9 +596,14 @@ spamassassin unix -     n       n       -       -       pipe
 ```
 
 Lo siguiente es poner el filtro en todas las líneas que reciban correos (todas
-las líneas que acaben en `smtpd`).
+las líneas que acaben en `smtpd`):
 
-Reiniciamos postfix otra vez:
+```
+submission inet n       -       -       -       -       smtpd
+   -o content_filter=spamassassin
+```
+
+Y posteriormente reiniciar postfix:
 
 ```
 # service postfix restart
@@ -817,3 +819,130 @@ Asegurándose de usar después:
 ```
 # service ssh restart
 ```
+
+# DKIM
+
+Comentábamos antes, en la sección del SPF, que otras opciones existían, como
+`DKIM`.
+
+Configuraremos `DKIM` en el dominio para evitar que nuestros correos vayan
+a bandejas de spam de algunos servicios como GMail.
+
+```
+# apt-get install opendkim opendkim-tools
+# sudo opendkim-genkey -s mail -d mail.emiliocobos.me
+# postconf -e "milter_protocol = 2"
+# postconf -e "milter_default_action = accept"
+# postconf -e "smtpd_milters = inet:localhost:12301"
+# postconf -e "non_smtpd_milters = inet:localhost:12301"
+# mkdir /etc/opendkim
+# cat /etc/opendkim.conf
+AutoRestart             Yes
+AutoRestartRate         10/1h
+UMask                   002
+Syslog                  yes
+
+OversignHeaders         From
+
+InternalHosts           refile:/etc/opendkim/TrustedHosts
+ExternalIgnoreList      refile:/etc/opendkim/TrustedHosts
+KeyTable                refile:/etc/opendkim/KeyTable
+SigningTable            refile:/etc/opendkim/SigningTable
+
+Mode                    sv
+PidFile                 /var/run/opendkim/opendkim.pid
+
+Socket                  inet:12301@localhost
+```
+
+Cada dominio que use DKIM necesitará una clave y un *selector*. El selector se
+puede escoger, así que nosotros usaremos `mail` (por lo que nuestro record
+acabará siendo `mail._domainkey.emiliocobos.me`).
+
+Como queremos permitir dominios virtuales, en vez de las opciones `Domain`,
+`KeyFile` y `Selector`, puedes ver que hemos utilizado `TrustedHosts`,
+`KeyTable` y `SigningTable`, que tienen una línea por dominio.
+
+El puerto en el que opendkim está funcionando es el `12301`, pero podría ser
+cualquier otro, siempre que adecuemos la configuración de postfix.
+
+### TrustedHosts (`/etc/opendkim/TrustedHosts`)
+
+Nuestro archivo `TrustedHosts` contendrá la lista de hostnames que de la que nos
+fiamos, y cuyos emails firmamos. Serán los host locales y `emiliocobos.me`, en
+este caso:
+
+```
+127.0.0.1
+localhost
+192.168.0.1/24
+
+emiliocobos.me
+```
+
+### KeyTable (`/etc/opendkim/KeyTable`)
+
+La KeyTable nos dirá con qué clave tendrá que firmar para según qué dominio
+y que selector.
+
+En este caso sólo tendrá la línea correspondiente a `emiliocobos.me` con el
+selector `mail` (nótese que no hemos creado aún esa clave):
+
+```
+mail._domainkey.emiliocobos.me emiliocobos.me:mail:/etc/opendkim/keys/emiliocobos.me/mail.private
+```
+
+### SigningTable (`/etc/opendkim/SigningTable`)
+
+En este archivo especificaremos con qué selector se firmará para qué dirección.
+Como vamos a firmar todas con el mismo selector, podemos usar un wildcard (`*`):
+
+```
+*@emiliocobos.me mail._domainkey.emiliocobos.me
+```
+
+## Creando una key para un dominio y un selector
+
+Hemos visto antes que apuntábamos en el `KeyTable` al archivo
+`/etc/opendkim/keys/emiliocobos.me/mail.private`. Veremos cómo generar ese
+archivo ahora mismo.
+
+Para generar una clave DKIM usaremos la utilidad `opendkim-genkey`.
+
+```
+# mkdir -p /etc/opendkim/keys/emiliocobos.me
+# cd $_
+# opendkim-genkey -r -s mail -d emiliocobos.me
+```
+
+La opción `-r` restringe el uso al firmado de correo, `mail` es el selector,
+y `emiliocobos.me` el dominio.
+
+Esto habrá creado en el directorio **dos archivos**: `mail.private`
+y `mail.txt`. El primero es la clave privada referenciada en el `SigningKey`, el
+segundo es la clave pública que tendremos que poner en nuestro registro TXT.
+
+### El registro TXT
+
+Con nuestro archivo `mail.txt`, tendremos que ir al manejo de nuestras DNS
+y crear el registro `TXT` correspondiente (es copiar y pegar). En este caso
+sería al subdominio `mail._domainkey`.
+
+### Finalizando la configuración
+
+Para finalizar la configuración tendremos que dar los permisos adecuados
+a `/etc/opendkim`, y reiniciar postfix y opendkim:
+
+```
+# chown opendkim:mail -R /etc/opendkim
+# service opendkim restart
+# service postfix restart
+```
+
+# Testeando la configuración de correo
+
+Para comprobar que todo está correcto existen una gran variedad de recursos.
+Personalmente he utilizado:
+
+ * http://www.allaboutspam.com/email-server-test/
+ * https://mxtoolbox.com

@@ -939,6 +939,23 @@ a `/etc/opendkim`, y reiniciar postfix y opendkim:
 # service postfix restart
 ```
 
+# Eliminar datos sensibles de las cabeceras de correo
+
+Las cabeceras de correo por defecto contienen determinados datos que podrían ser
+sensibles, como el hostname y la IP del ordenador que lo envía.
+
+Postfix permite filtrar cabeceras de correo para evitar que se envíen esas
+cabeceras `Received` y `X-Origin-IP`:
+
+```
+# cat /etc/postfix/header_checks
+/^Received:.*with ESMTPSA/              IGNORE
+/^X-Originating-IP:/    IGNORE
+# postconf -e "header_checks=regexp:/etc/postfix/header_checks"
+# postmap /etc/postfix/header_checks
+# service postfix restart
+```
+
 # Testeando la configuración de correo
 
 Para comprobar que todo está correcto existen una gran variedad de recursos.

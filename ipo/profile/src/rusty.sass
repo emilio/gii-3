@@ -1,0 +1,60 @@
+html
+  font-family: monospace
+  font-size: 18px
+  color: #657b83
+  background: #fdf6e3
+
+h1
+  font-size: 1rem
+  font-weight: normal
+  margin: 0
+  &::before
+    content: "let mut me = Guy::new(\""
+  &::after
+    content: "\");"
+
+img
+  display: none
+
+.profile-content
+  // &::before
+  //   display: block
+  //   content: "{"
+  // &::after
+  //   display: block
+  //   content: "}"
+  p
+    font-size: 0
+
+  span, a[class]
+    white-space: nowrap
+    font-size: 1rem
+    display: block
+    margin-left: 9rem
+    &::before
+      content: ".with_" attr(class) "(\""
+    &::after
+      content: "\")"
+
+  a[class]
+    color: #b58900
+    &:hover
+      background-color: #eee8d5
+    text-decoration: none
+    font-size: 0
+    &::before,
+    &::after
+      font-size: 1rem
+      content: ".with_" attr(class) "(\"" attr(href)
+
+    &::after
+      content: "\")"
+      font-size: 1rem
+
+  a.email::after
+    content: "\");"
+
+.style-chooser
+  position: fixed
+  bottom: 0
+  left: 0

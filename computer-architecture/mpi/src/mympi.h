@@ -2,6 +2,7 @@
 #define MYMPI_H
 
 #include <vector>
+#include <mpi.h>
 #include "mympi_traits.h"
 
 namespace mympi {
@@ -27,7 +28,7 @@ class Channel {
     void send(const T* data, size_t len, int tag) {
         mympi_traits<T> traits_instance;
         MPI_Send(const_cast<T*>(data),
-                 len * mympi_traits<T>::lenght_multiplier,
+                 len,
                  traits_instance.mpi_data_type,
                  m_to, tag, m_comm);
     }
@@ -70,7 +71,7 @@ class Channel {
         mympi_traits<T> traits_instance;
 
         MPI_Recv(ret.data(),
-                 count * mympi_traits<T>::length_multiplier,
+                 count,
                  traits_instance.mpi_data_type,
                  m_to,
                  tag,
@@ -97,7 +98,7 @@ class Channel {
         mympi_traits<T> traits_instance;
 
         MPI_Recv(&ret,
-                 mympi_traits<T>::length_multiplier,
+                 1,
                  traits_instance.mpi_data_type,
                  m_to, tag,
                  m_comm,

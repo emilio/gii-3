@@ -2,12 +2,19 @@
 #define JOB_H
 
 #include <cstring>
-#include "mympi_traits.h"
+#include <mutex>
+#include "mympi.h"
 #include "permutations.h"
 
 typedef char crypt_password_t[13];
 
-enum class JobType { DECRYPT, END, };
+enum class JobType: uint8_t {
+    DECRYPT,
+    END,
+};
+
+class DecryptJob;
+class EndJob;
 
 class Job {
     JobType m_type;
@@ -16,8 +23,23 @@ protected:
     explicit constexpr Job(JobType type): m_type(type) {}
 
 public:
+    typedef uint8_t encoded_type;
+    static constexpr const size_t DECRYPTION_JOB_ENCODED_SIZE = sizeof(uint8_t) +
+                                                                sizeof(uint32_t) +
+                                                                sizeof(size_t) * 2 +
+                                                                sizeof(crypt_password_t);
+    static constexpr const size_t ENCODED_SIZE = DECRYPTION_JOB_ENCODED_SIZE;
+    static void encode_and_send_decrypt_job(const DecryptJob& job,
+                                            mympi::Channel<encoded_type>& chan);
+    static DecryptJob receive_and_decode_decrypt_job(const std::vector<uint8_t>& elements);
+
+    static void encode_and_send(const Job& job, mympi::Channel<encoded_type>& chan);
+
+    static Job receive_and_decode(mympi::Channel<encoded_type>& chan);
+
     explicit constexpr Job(): Job(JobType::END) {}
-    JobType type() { return m_type; } };
+    JobType type() const { return m_type; }
+};
 
 class DecryptJob: public Job {
     uint32_t m_len;
@@ -44,6 +66,11 @@ public:
         salt[0] = m_encrypted[0];
         salt[1] = m_encrypted[1];
     }
+
+    void fill_password(char* out) const {
+        ::memcpy(out, m_encrypted, sizeof(crypt_password_t));
+    }
+
     bool password_is(const char* pass) const { return strcmp(pass, m_encrypted) == 0; }
 
     static bool check_password(const char* encrypted) {
@@ -52,15 +79,8 @@ public:
 };
 
 class EndJob: public Job {
+public:
     explicit constexpr EndJob(): Job(JobType::END) {}
 };
-
-namespace mympi {
-template<>
-struct mympi_traits<Job> {
-    enum { length_multiplier = sizeof(Job) };
-    const MPI_Datatype mpi_data_type = MPI_INT8_T;
-};
-} // namespace mympi
 
 #endif

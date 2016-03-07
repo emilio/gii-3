@@ -28,9 +28,14 @@ void distribute_jobs(int argc, char** argv, int process_count) {
             size_t perms_per_worker = perms / workers;
             size_t current = 0;
             for (int j = 1; j < process_count; ++j) {
-                mympi::Channel<Job> chan(j);
-                chan.send_one(DecryptJob(len, current, perms_per_worker, argv[i]));
+                mympi::Channel<Job::encoded_type> chan(j);
+                Job::encode_and_send(DecryptJob(len, current, perms_per_worker, argv[i]), chan);
                 current += perms_per_worker;
+            }
+
+            for (int j = 1; j < process_count; ++j) {
+                mympi::Channel<Job::encoded_type> chan(j);
+                auto job = Job::receive_and_decode(chan);
             }
         }
     }
@@ -104,18 +109,18 @@ int main(int argc, char** argv) {
         break;
     default:
         // {
-        //         int i = 0;
-        //         char hostname[256];
-        //         gethostname(hostname, sizeof(hostname));
-        //         printf("PID %d on %s ready for attach\n", getpid(), hostname);
-        //         fflush(stdout);
-        //         while (0 == i)
-        //             sleep(5);
+        // int i = 0;
+        // char hostname[256];
+        // gethostname(hostname, sizeof(hostname));
+        // printf("PID %d on %s ready for attach\n", getpid(), hostname);
+        // fflush(stdout);
+        // while (0 == i)
+        // sleep(5);
         // }
-        mympi::Channel<Job> job_chan(0);
+        mympi::Channel<Job::encoded_type> job_chan(0);
         mympi::Channel<Reply> reply_chan(0);
         while (true) {
-            Job job_ = job_chan.recv_one();
+            Job job_ = Job::receive_and_decode(job_chan);
             if (job_.type() == JobType::END)
                 break;
 
@@ -123,7 +128,7 @@ int main(int argc, char** argv) {
 
             DecryptJob& job = static_cast<DecryptJob&>(job_);
 
-            std::cout << "DecryptJob len: " << job.length() << "perm: " << job.initial_permutation() << std::endl;
+            std::cout << "DecryptJob len: " << job.length() << ", perm: " << job.initial_permutation() << std::endl;
 
             std::vector<char> result;
             size_t len = job.length();

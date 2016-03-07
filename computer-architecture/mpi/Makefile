@@ -10,7 +10,7 @@ TEST_PASSWORDS := aal9/sIHZQyhA
 COMMON_FLAGS := -Wall -pedantic -g
 
 CFLAGS := $(COMMON_FLAGS) -std=c99 -pedantic
-CXXFLAGS := $(COMMON_FLAGS) -std=c++11
+CXXFLAGS := $(COMMON_FLAGS) -std=c++14
 CXXLINKFLAGS := -lcrypt
 
 NP ?= 4
@@ -36,6 +36,10 @@ run: $(TARGET)
 	mpirun -np $(NP) $(TARGET) $(TEST_PASSWORDS)
 
 obj/%.o: src/%.cpp src/%.hpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+obj/%.o: src/%.cpp src/%.h
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 

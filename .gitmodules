@@ -13,3 +13,6 @@
 [submodule "advanced-programming/ada-final"]
 	path = advanced-programming/ada-final
 	url = git@github.com:ecoal95/ada-final-2015
+[submodule "computer-architecture/mpi"]
+	path = computer-architecture/mpi
+	url = git@github.com:ecoal95/mpi.git

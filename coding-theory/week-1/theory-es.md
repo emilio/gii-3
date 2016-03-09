@@ -143,7 +143,7 @@ $$p(k, n) = \binom{n}{k} \cdot p^k \cdot (1 - p)^{n-k}$$
 Recuerda que $\binom{n}{k}$ significa: "¿Cuántas posibles formas existen de
 escoger $k$ elementos de un total de $n$?", es decir:
 
-$$\binom{n}{k} = \frac{n!}{k! - (n - k)!}$$
+$$\binom{n}{k} = \frac{n!}{k! \cdot (n - k)!}$$
 
 # Teorema de Shannon
 

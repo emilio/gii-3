@@ -114,7 +114,7 @@ $$p(k, n) = \binom{n}{k} \cdot p^k \cdot (1 - p)^{n-k}$$
 Remember that $\binom{n}{k}$ means "how many ways of choosing $k$ elements out
 of $n$ are possible?", that is:
 
-$$\binom{n}{k} = \frac{n!}{k! - (n - k)!}$$
+$$\binom{n}{k} = \frac{n!}{k! \cdot (n - k)!}$$
 
 # Shannon theorem
 

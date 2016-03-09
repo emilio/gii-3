@@ -164,11 +164,19 @@ We call perfect code a code that reaches the Hamming bound.
 > $A_q(n, d) \leq q^{n - d + 1}$.
 
 Here $A_q(n, d)$ means the maximum number of words in a $q$-ary code of length
-$n$ anm minimum distance $d$.
+$n$ and minimum distance $d$.
 
-This, for linear codes, implies that:
+This is easy to see, since we can remove $d - 1$ elements of a code of distance
+$d$, and they will still be different words (by the definition of distance).
+Thus, we've obtained a code with as many words as the previous, and this code
+has at most $n - (d - 1)$ symbols, which means that it has at most $q^{n
+- d + 1} words.
 
-$$dim(C) \leq n - d + 1$$
+For linear codes, $A_q(n, d)$, the number of codewords can't be more than the
+number of words of the original alphabet $q^k$ (where $k$ is the dimension).
+That implies that:
+
+$$q^k \leq q^{n - d + 1} \implies k \leq n - d + 1$$
 
 # Gilbert-Varshamod bound
 

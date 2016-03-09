@@ -155,18 +155,7 @@ Esa capacidad puede ser definida (en canales binarios) como:
 
 $$C(p) = 1 + log_2(p) + (1 - p) \cdot log_2(1 - p)$$
 
-# Cota de Hamming
-
-> Si $C$ es un código binario de longitud $n$ y distancia mínima $2r + 1$,
-> entonces $C$ tiene como mucho $\frac{2^n}{\sum\limits^{r}_{i=0} \binom{n}{i}}$
-> palabras.
-
-Esto se puede generalizar fácimente a códigos de bloques cuyo alfabeto es
-$q$-arios, donde la cota se convertiría en:
-
-$$\frac{q^n}{\sum\limits^{r}_{i=0} \binom{n}{i} \cdot (q - 1)^i}$$
-
-Tambien se llama teorema del empaquetado esférico por su representación gráfica.
+# Hamming
 
 ## Bola/esfera de Hamming
 
@@ -182,8 +171,55 @@ $$|B(c, r)| = 1 + n + n \cdot (n - 1) + ... + \binom{n}{r}
 
 Como antes, puedes generalizarlo a un código $q$-ario:
 
-$$|B(c, r)| = 1 + (q - 1) \cdot n + (q - 1)^2 \cdot n \cdot (n - 1) + ... + (q
-- 1)^r \cdot \binom{n}{r} = \sum\limits^{r}_{i=0} \binom{n}{i} \cdot (q - 1)^i$$
+$$|B(c, r)| = 1 + n \cdot (q - 1) + \binom{n}{2} \cdot (q - 1)^2 + ...
++ \binom{n}{r} (q - 1)^r  = \sum\limits^{r}_{i=0} \binom{n}{i} \cdot (q - 1)^i$$
+
+Es decir:
+
+ * El número de palabras a distancia $0$ (sólo ella misma), más...
+ * El número de palabras a distancia $1$ ($n \cdot (q - 1)$ palabras) más...
+ * ...
+ * El número de palabras a distancia $r$ ($\binom{n}{r} \cdot (q - 1)^r$).
+
+Si el $(q - 1)$ no te resulta intuitivo, piensa que el número de
+palabras a distancia $d$ de una palabra en un código $q$-ario es $\binom{n}{d}
+\cdot (q - 1)$, es decir: habrá $\binom{n}{d}$ combinaciones de $d$ caracteres
+cambiando a la vez, pero cada uno podrá variar de $(q - 1)$ formas distintas, es
+decir, $(q - 1)^d$.
+
+Así, las palabras a distancia $2$ de la palabra $000$ de un código ternario
+serán $3 \cdot 2^2 = 12$, es decir, habrá tres formas de que dos caracteres a la
+vez varíen ($\binom{3}{2}$), cada uno de ellos tendrá dos maneras distintas de
+cambiar (todas las combinaciones menos la actual), es decir, $3 - 1$, todo ello
+una vez por cada número ($(3 - 1)^2$).
+
+# Cota de hamming
+
+> Si $C$ es un código binario de longitud $n$ y distancia mínima $2r + 1$,
+> entonces $C$ tiene como mucho $\frac{2^n}{\sum\limits^{r}_{i=0} \binom{n}{i}}$
+> palabras.
+
+Esto se puede generalizar fácimente a códigos de bloques cuyo alfabeto es
+$q$-arios, donde la cota se convertiría en:
+
+$$\frac{q^n}{\sum\limits^{r}_{i=0} \binom{n}{i} \cdot (q - 1)^i}$$
+
+Esto se puede probar imaginando un espacio circular llenado por las palabras de
+$C$. Cada palabra tiene una bola de radio $r$ "a su alrededor". Todas las
+palabras del alfabeto que estén dentro de esa bola las podremos corregir, por lo
+que **las bolas no se solaparán**.
+
+Con esto, podemos decir que **el número de palabras del código es como mucho
+igual al número de palabras del alfabeto dividido entre el número de palabras
+que contiene cada bola**.
+
+Ya hemos visto que el número de palabras de una bola de radio $r$ es:
+
+$$\sum\limits^{r}_{i=0} \binom{n}{i} \cdot (q - 1)^i$$
+
+Así que la fórmula sale directamente.
+
+Tambien se llama teorema del empaquetado esférico por su representación gráfica.
 
 ## Código perfecto
 

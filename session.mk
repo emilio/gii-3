@@ -20,7 +20,8 @@ DOT_TARGETS := $(DOT_TARGETS:.dot=.dot.png) \
 							 $(DOT_TARGETS:.dot=.dot.pdf)
 
 TARGETS := $(TEX_TARGETS:.tex=.pdf) \
-           $(MD_TARGETS:.md=.pdf)
+           $(MD_TARGETS:.md=.pdf) \
+           $(DOT_TARGETS)
 
 ifeq ($(PANDOC_FLAGS),)
 PANDOC_FLAGS := --toc --filter pandoc-crossref

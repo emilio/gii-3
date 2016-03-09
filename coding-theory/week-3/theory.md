@@ -92,7 +92,7 @@ method to obtain one of them easily.
 If we have a code $C: A^m \rightarrow A^n$, and it has a generator matrix $G$,
 if $G$ is in standard form, then the control matrix will have the form:
 
-$$G = (Id_m | M) \implies H = (M^T | Id_{n \cdot m})$$
+$$G = (Id_m | M) \implies H = (-M^T | Id_{n - m})$$
 
 ### Proof
 
@@ -158,7 +158,7 @@ words whose difference is that word.
 ## Control matrix
 
 We can also prove that if $H$ is a control matrix of $C$, then $d(C) > d \iff
-\exists d linearly independent columns in H$.
+\exists d \text{ linearly independent columns in H}$.
 
 # Syndrome of a word $m$
 

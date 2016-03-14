@@ -1,0 +1,204 @@
+\documentclass[a4paper]{article}
+
+\usepackage{fontspec}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{titlesec}
+\usepackage{titling}
+\usepackage{minted}
+\usepackage{natbib}
+\usepackage{xcolor}
+
+\usepackage[shorthands=off,main=spanish]{babel}
+
+\def\listingautorefname~#1\null{(Listing #1)\null}
+%\def\figureautorefname~#1\null{(Figura #1)\null}
+\def\figureautorefname~#1\null{(#1)\null}
+
+\newcommand{\sectionbreak}{\clearpage}
+
+\pretitle{\begin{center} \includegraphics[width=200pt]{usal.png} \\ \vspace{3em} \LARGE}
+\title{Práctica 1 con Arduino \\ \large Periféricos}
+\author{Emilio Cobos Álvarez, Christian Bonal Martín y Alejandro Bodego Tomé}
+\date{14 de marzo de 2016}
+
+
+\begin{document}
+
+\maketitle
+
+\clearpage
+\tableofcontents
+\setlength{\parskip}{1em}
+\setlength{\parindent}{0pt}
+\newpage
+
+\section{Led parpadeando digitalmente}
+
+Éste es el ejercicio más simple de la programación con Arduino, y como tal no
+nos llevó demasiado tiempo. El circuito es directo de montar, y el código es
+también simple:
+
+\begin{listing}[h]
+\begin{minted}[frame=single, framesep=.5em, linenos, rulecolor=\color{gray}]{java}
+void setup() {
+  pinMode(13, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(13, HIGH);
+  delay(1000);
+
+  digitalWrite(13, LOW);
+  delay(1000);
+}
+\end{minted}
+\end{listing}
+
+Se obvian los detalles de las fotos mostrando que el circuito funciona, porque
+se considera trivial.
+
+\section{Circuito detector de luz y oscuridad}
+
+\subsection{Descripción del trabajo realizado}
+
+Este circuito fue mucho más interesante y el principal de la práctica.
+Aprendimos a usar la entrada y salida analógica.
+
+\subsubsection{Montaje del circuito}
+
+Nuestro montaje tenía el aspecto de la figura \autoref{fig:light-off} cuando había
+luz, dado que la resistencia es menor, y la intensidad que nos llega a la
+entrada analógica \texttt{A0} es menor.
+
+\begin{figure}[H]
+  \includegraphics[width=\linewidth]{../img/light-dark-off.jpg}
+  \caption{Circuito detector de luz funcionando con luz (led apagado).}
+  \label{fig:light-off}
+\end{figure}
+
+Se puede comprobar en la figura \autoref{fig:light-on} que cuando hay sombra, y
+por lo tanto la resistencia fotosensible es mayor, nos llega un valor mayor en
+la
+entrada \texttt{A0}.
+
+\begin{figure}[H]
+  \includegraphics[width=\linewidth]{../img/light-dark-on.jpg}
+  \caption{Circuito detector de luz funcionando sin luz (led encendido).}
+  \label{fig:light-on}
+\end{figure}
+
+\subsubsection{Programación de la placa}
+
+La programación de la placa fue bastante directa. Nos fijamos en varios ejemplos
+de la documentación acerca de entrada y salida analógica
+(\cite{web:arduino-doc-analog-io}, \cite{web:arduino-doc-pwm}), y lo completamos
+\autoref{light-detector-code} sin mayor complicación.
+
+Como se indica en los comentarios, experimentalmente sólo éramos capaces de
+obtener valores de entre $350$ y $600$, por eso hubo que hacer ese condicional
+para dejar la salida a $0$ si el valor era menor o igual que $400$.
+
+\begin{listing}[H]
+\begin{minted}[frame=single, framesep=.5em, linenos, rulecolor=\color{gray}]{java}
+// Light-detector circuit and conversion between
+// analog and digital signals
+//
+// Reference:  https://www.arduino.cc/en/Tutorial/PWM
+
+// The input pin where the current passing by
+// the ressistance is going to enter
+const int ANALOG_INPUT = A0;
+
+// The output pin
+const int ANALOG_OUTPUT = 9;
+
+void setup() {
+  pinMode(ANALOG_OUTPUT, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  int input_value = analogRead(ANALOG_INPUT);
+  int digital = 0;
+  // Experimentally we only received values between 300 and ~600.
+  // If not this will be the correct code:
+  // int digital = map(input_value, 0, 1023, 0, 255);
+  if (input_value > 400)
+    digital = map(input_value, 300, 650, 0, 255);
+
+  Serial.print("in: ");
+  Serial.println(input_value);
+
+  analogWrite(ANALOG_OUTPUT, digital);
+}
+\end{minted}
+\caption{Código usado para el circuito}
+\label{light-detector-code}
+\end{listing}
+
+\subsection{Funcionamiento del circuito}
+
+El circuito se basa en el funcionamiento del fotorresistor o LDR
+(\cite{web:wikipedia-ldr}), una componente cuya resistencia disminuye según
+aumenta el nivel de luz sobre ella, ya que al ser los fotones absorbidos por el
+semiconductor, los electrones adquieren la energía suficiente para saltar a la
+banda de conducción.
+
+Gracias a esta resistencia se consigue variar la caída de voltaje de cada parte
+del circuito dependiendo de su valor.
+
+\subsection{Balance de costes}
+
+El hecho de tener una placa programable hace que el montaje del circuito sea
+mucho más simple que el montaje previo que hicimos en el laboratorio, que
+requería, entre otras cosas, varios amplificadores operacionales
+retroalimentados y resistencias.
+
+Este montaje sin embargo sólo necesitaba dos resistencias (aparte del LDR).
+
+No sobra decir que el coste de una placa de estas características es mucho menor
+que el de un laboratorio de electrónica, y que además pueden ser adquiridas por
+cualquier persona, facilitando a los alumnos el proceso de investigar por su
+cuenta.
+
+Por lo tanto, parece que este tipo de placas son, cuanto menos, un alternativa
+razonable a los experimentos en el laboratorio.
+
+\section{Referencias comentadas}
+
+Se han usado una buena cantidad de referencias. Aunque enumeradas abajo, se
+comentan aquí ya que estaba solicitado explícitamente.
+
+\paragraph{Entrada analógica --- Arduino}
+
+La documentación acerca de la entrada analógica en Arduino
+(\cite{web:arduino-doc-analog-io}) ha sido de mucha utilidad para construir el
+código de ejemplo, ya que explica con detalle el significado del valor de
+retorno de \texttt{analogRead}, y sirve de directorio a otra gran cantidad de
+documentación.
+
+\paragraph{Pulse Width Modulation --- Arduino}
+
+La documentación de arduino acerca de PWD (\cite{web:arduino-doc-pwm}) nos ha
+servido para entender qué hacíamos realmente al usar la función
+\texttt{analogWrite}, que no es otra cosa que modular la amplitud del pulso que
+se manda por ese pin.
+
+\paragraph{Ejemplos de Arduino}
+
+Los ejemplos de Arduino que vienen con el IDE han servido de ayuda a la hora de
+encontrar determinados patrones, como el uso de la función \texttt{map}.
+
+\section{Ficheros adjuntos}
+
+Todo el código relevante, y las fotos tomadas, están en este informe. De todos
+modos, dado lo complicado que se puede hacer copiar código desde un PDF, y la
+menor resolución a la que están las imágenes, se adjuntarán junto con este
+informe también.
+
+\bibliographystyle{plainnat}
+\bibliography{bibliography}
+
+\end{document}

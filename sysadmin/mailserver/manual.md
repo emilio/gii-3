@@ -830,7 +830,7 @@ a bandejas de spam de algunos servicios como GMail.
 
 ```
 # apt-get install opendkim opendkim-tools
-# sudo opendkim-genkey -s mail -d mail.emiliocobos.me
+# opendkim-genkey -s mail -d mail.emiliocobos.me
 # postconf -e "milter_protocol = 2"
 # postconf -e "milter_default_action = accept"
 # postconf -e "smtpd_milters = inet:localhost:12301"
@@ -939,6 +939,37 @@ a `/etc/opendkim`, y reiniciar postfix y opendkim:
 # service postfix restart
 ```
 
+# DMARC
+
+Lo primero es instalar OpenDMARC:
+
+```
+# apt-get install opendmarc
+# cat /etc/opendmarc.conf
+AuthservID mail.emiliocobos.me
+PidFile /var/run/opendmarc.pid #Debian default
+RejectFailures false
+Syslog true
+TrustedAuthservIDs mail.emiliocobos.me
+UMask 0002
+UserID opendmarc:opendmarc
+IgnoreHosts /etc/opendmarc/ignore.hosts
+HistoryFile /var/run/opendmarc/opendmarc.dat
+Socket inet:54321@localhost
+# cp /etc/opendkim/TrustedHosts /etc/opendmarc/ignore.hosts
+# chown opendmarc:mail -R /etc/opendmarc
+```
+
+Ahora habrá que añadir los nuevos filtros a postfix, nótese que sólo añadimos al
+anterior (opendkim).
+
+```
+# postconf -e "smtpd_milters = inet:localhost:12301,inet:localhost:54321"
+# postconf -e "non_smtpd_milters = inet:localhost:12301,inet:localhost:54321"
+# service opendmark restart
+# service postfix restart
+```
+
 # Eliminar datos sensibles de las cabeceras de correo
 
 Las cabeceras de correo por defecto contienen determinados datos que podrían ser
@@ -963,3 +994,4 @@ Personalmente he utilizado:
 
  * http://www.allaboutspam.com/email-server-test/
  * https://mxtoolbox.com
+ * https://www.skelleton.net/2015/03/21/how-to-eliminate-spam-and-protect-your-name-with-dmarc/

@@ -638,7 +638,7 @@ alias).
 Lo primero es tener el paquete correspondiente instalado:
 
 ```
-# apt-get install postfix-mysql courier-authlib-postgresql libsasl2-modules-sql
+# apt-get install postfix-pgsql courier-authlib-postgresql libsasl2-modules-sql
 ```
 
 Con cuentas virtuales un sólo servidor de correo puede hostear cuentas para

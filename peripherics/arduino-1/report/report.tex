@@ -12,7 +12,8 @@
 
 \usepackage[shorthands=off,main=spanish]{babel}
 
-\def\listingautorefname~#1\null{(Listing #1)\null}
+\renewcommand{\listingscaption}{Programa}
+\def\listingautorefname~#1\null{(Programa #1)\null}
 %\def\figureautorefname~#1\null{(Figura #1)\null}
 \def\figureautorefname~#1\null{(#1)\null}
 
@@ -94,7 +95,7 @@ entrada \texttt{A0}.
 La programación de la placa fue bastante directa. Nos fijamos en varios ejemplos
 de la documentación acerca de entrada y salida analógica
 (\cite{web:arduino-doc-analog-io}, \cite{web:arduino-doc-pwm}), y lo completamos
-\autoref{light-detector-code} sin mayor complicación.
+\autoref{code:light-detector-code} sin mayor complicación.
 
 Como se indica en los comentarios, experimentalmente sólo éramos capaces de
 obtener valores de entre $350$ y $600$, por eso hubo que hacer ese condicional
@@ -135,7 +136,7 @@ void loop() {
 }
 \end{minted}
 \caption{Código usado para el circuito}
-\label{light-detector-code}
+\label{code:light-detector-code}
 \end{listing}
 
 \subsection{Funcionamiento del circuito}
@@ -166,10 +167,88 @@ cuenta.
 Por lo tanto, parece que este tipo de placas son, cuanto menos, un alternativa
 razonable a los experimentos en el laboratorio.
 
+\section{Circuito detector de la temperatura}
+
+Dio tiempo a hacer el circuito detector de la temperatura usando el sensor
+\texttt{TMP 36}.
+
+
+\subsection{Funcionamiento del circuito}
+
+El circuito es directo, y sólo necesita el sensor. El sensor es un componente
+curioso. Es un RTD o \textit{Resistance Temperature Detector}
+(\cite{web:wikipedia-rtd}).
+
+Algunos de los RTD pueden usar termistores, pero a diferencia de estos, la
+relación que tiene el voltaje de salida ($V_{out}$) con la temperatura es
+lineal, en vez de exponencial. Esto no sólo simplifica el tratamiento de sus
+datos, y también suelen tener mucho más rango de temperaturas que los
+termistores.
+
+Si se quiere más rango aún de temperaturas, otra opción podría ser un
+\href{https://es.wikipedia.org/wiki/Termopar}{termopar}.
+
+La fórmula que relaciona la temperatura en este modelo, según
+\href{http://www.analog.com/media/en/technical-documentation/data-sheets/TMP35_36_37.pdf}
+{la hoja de datos del sensor} (\cite{web:tmp36-data-sheet}) es:
+
+$$T = \frac{V_{out} - 500}{10}$$
+
+Donde $T$ está en grados centígrados, y $V_{out}$ en milivoltios.
+
+Se puede ver debajo el montaje del circuito \autoref{fig:temperature-circuit},
+así como una salida de la terminal serie \autoref{fig:temperature-output}.
+
+\begin{figure}[h]
+  \includegraphics[width=\linewidth]{../img/temperature.jpg}
+  \caption{Circuito detector de la temperatura}
+  \label{fig:temperature-circuit}
+\end{figure}
+
+\begin{figure}[h]
+  \includegraphics[width=\linewidth]{../img/temperature-out.png}
+  \caption{Salida de la terminal indicando la temperatura}
+  \label{fig:temperature-output}
+\end{figure}
+
+\clearpage
+\subsection{Programación de la placa}
+
+El circuito fue directo de implementar. La conversión de entrada analógica a
+temperatura está en la función \texttt{temperature}.
+
+\begin{listing}[h]
+\begin{minted}[frame=single, framesep=.5em, linenos, rulecolor=\color{gray}]{java}
+const int SENSOR = A0;
+
+// Arduino gives us the voltage between 0 and 5v,
+// being it a number between 0 and 1023.
+float temperature() {
+  int arduino_value = analogRead(SENSOR);
+  float voltage_mv = arduino_value * 5.0 / 1023.0 * 1000.0;
+  return (voltage_mv - 500) / 10;
+}
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  float current = temperature();
+  Serial.print("temp (deg):");
+  Serial.println(current);
+
+  delay(100);
+}
+\end{minted}
+\caption{Código usado para detectar la temperatura}
+\label{code:temperature-detection}
+\end{listing}
+
 \section{Referencias comentadas}
 
-Se han usado una buena cantidad de referencias. Aunque enumeradas abajo, se
-comentan aquí ya que estaba solicitado explícitamente.
+Se han usado una buena cantidad de referencias. Debajo se comentan las que han
+resultado más útiles.
 
 \paragraph{Entrada analógica --- Arduino}
 

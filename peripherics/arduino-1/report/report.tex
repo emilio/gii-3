@@ -169,49 +169,29 @@ razonable a los experimentos en el laboratorio.
 
 \section{Circuito detector de la temperatura}
 
-Dio tiempo a hacer el circuito detector de la temperatura usando el sensor
-\texttt{TMP 36}.
+\subsection{Descripción del trabajo realizado}
 
+La tercera parte de esta práctica consistía en realizar un circuito detector de
+temperatura utilizando el sensor \texttt{TMP 36}.
 
-\subsection{Funcionamiento del circuito}
-
-El circuito es directo, y sólo necesita el sensor. El sensor es un componente
-curioso. Es un RTD o \textit{Resistance Temperature Detector}
-(\cite{web:wikipedia-rtd}).
-
-Algunos de los RTD pueden usar termistores, pero a diferencia de estos, la
-relación que tiene el voltaje de salida ($V_{out}$) con la temperatura es
-lineal, en vez de exponencial. Esto no sólo simplifica el tratamiento de sus
-datos, y también suelen tener mucho más rango de temperaturas que los
-termistores.
-
-Si se quiere más rango aún de temperaturas, otra opción podría ser un
-\href{https://es.wikipedia.org/wiki/Termopar}{termopar}.
-
-La fórmula que relaciona la temperatura en este modelo, según
-\href{http://www.analog.com/media/en/technical-documentation/data-sheets/TMP35_36_37.pdf}
-{la hoja de datos del sensor} (\cite{web:tmp36-data-sheet}) es:
-
-$$T = \frac{V_{out} - 500}{10}$$
-
-Donde $T$ está en grados centígrados, y $V_{out}$ en milivoltios.
+\subsubsection{Montaje del circuito}
 
 Se puede ver debajo el montaje del circuito \autoref{fig:temperature-circuit},
 así como una salida de la terminal serie \autoref{fig:temperature-output}.
 
-\begin{figure}[h]
+\begin{figure}[H]
   \includegraphics[width=\linewidth]{../img/temperature.jpg}
   \caption{Circuito detector de la temperatura}
   \label{fig:temperature-circuit}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
   \includegraphics[width=\linewidth]{../img/temperature-out.png}
   \caption{Salida de la terminal indicando la temperatura}
   \label{fig:temperature-output}
 \end{figure}
 
-\subsection{Programación de la placa}
+\subsubsection{Programación de la placa}
 
 El circuito fue directo de implementar\autoref{code:temperature-detection}. La
 conversión de entrada analógica a temperatura está en la función
@@ -244,6 +224,28 @@ void loop() {
 \caption{Código usado para detectar la temperatura}
 \label{code:temperature-detection}
 \end{listing}
+
+\subsection{Funcionamiento del circuito}
+
+El circuito es directo, y sólo necesita el sensor. Es un RTD o
+\textit{Resistance Temperature Detector} (\cite{web:wikipedia-rtd}).
+
+Algunos de los RTD pueden usar termistores, pero a diferencia de estos, la
+relación que tiene el voltaje de salida ($V_{out}$) con la temperatura es
+lineal, en vez de exponencial. Esto no sólo simplifica el tratamiento de sus
+datos, y también suelen tener mucho más rango de temperaturas que los
+termistores.
+
+Si se quiere más rango aún de temperaturas, otra opción podría ser un
+\href{https://es.wikipedia.org/wiki/Termopar}{termopar}.
+
+La fórmula que relaciona la temperatura en este modelo, según
+\href{http://www.analog.com/media/en/technical-documentation/data-sheets/TMP35_36_37.pdf}
+{la hoja de datos del sensor} (\cite{web:tmp36-data-sheet}) es:
+
+$$T = \frac{V_{out} - 500}{10}$$
+
+Donde $T$ está en grados centígrados, y $V_{out}$ en milivoltios.
 
 \section{Referencias comentadas}
 

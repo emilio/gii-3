@@ -1,4 +1,11 @@
-$link_color: #0485b0
+@import url(https://fonts.googleapis.com/css?family=PT+Serif:400,700,400italic)
+// convert back.png  +dither -colors 4 -unique-colors txt:-
+// # ImageMagick pixel enumeration: 4,1,65535,srgb
+// 0,0: (19803.8,20734.4,18464.9)  #4D5148  srgb(77,81,72)
+// 1,0: (34348,35165.4,30044.6)  #868975  srgb(134,137,117)
+// 2,0: (43148.9,43410,38879.2)  #A8A997  srgb(168,169,151)
+// 3,0: (63705.3,64817.9,64831.8)  #F8FCFC  srgb(248,252,252)
+$link_color: #4C8921
 
 *, *::before, *::after
   box-sizing: border-box
@@ -22,17 +29,25 @@ a
   text-decoration: none
   &:hover
     text-decoration: underline
-    color: darken($link_color, 5%)
+    color: darken($link_color, 10%)
 
 .wrapper
   padding: 0 1em
 
+$phi: 1.61803398875
+$width: 58rem
+$max-width: 100vw / $phi
+
+
 .profile
-  max-width: 35em
+  width: $width
+  max-width: $max-width
   margin: 3em auto
   padding: 0
-  padding-bottom: .1em
+  padding-bottom: 1em
   background: white
+  font-size: 1.3em
+  font-family: "PT Serif", serif
   box-shadow: .1em .5em 1em rgba(black, .5)
 
   h1
@@ -45,9 +60,11 @@ a
     display: block
     width: 100%
     box-shadow: 0 -5px 5px inset rgba(black, .8)
+    object-fit: cover
+    max-height: $width / 2 / $phi
 
   p
-    padding: 0 1em
+    padding: 0 2em
 
 .style-chooser
   position: fixed

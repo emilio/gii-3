@@ -239,16 +239,3 @@ $(1, 1)$      1\textsuperscript{st} bit erroneous
 
 In practice, **you can modify the matrix so error correction is easier or more
 efficient as you wish**.
-
-# Hamming codes
-
-A $k$-Hamming code ($Ham(k)$) is a code whose control matrix is the binary
-representation of every non-null word of $k$ bits.
-
-$$H = \begin{pmatrix}
-0 & 0 & 0 & \dots & 1 \\
-0 & 0 & 0 & \dots & 1 \\
-\vdots & \vdots & \vdots &   & \vdots \\
-0 & 1 & 1 & \dots & 1 \\
-1 & 0 & 1 & \dots & 1 \\
-\end{pmatrix}$$

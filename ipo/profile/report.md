@@ -134,6 +134,14 @@ He querido usar un color oscuro de fondo, para que fuera más fácil hacer legib
 el texto frontal. Como color para resaltar los links he utilizado el color más
 presente en la imagen superior ligeramente modificado.
 
+## Tipografía
+
+He usado una fuente serif[^the-circle], concretamente la **PT Serif**, que es
+una de las fuentes gratuitas de Google Fonts que más balanceadas encuentro para
+poder poner tanto en texto como en títulos.
+
+[^the-circle]: Había que cerrar el círculo, un tipo de fuente por diseño...
+
 ## Imagen
 
 La imagen de fondo está hecha con una panorámica encontrada en internet,

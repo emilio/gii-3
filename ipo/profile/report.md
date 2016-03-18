@@ -19,6 +19,15 @@ En esta práctica hemos hecho una página personal usando tecnologías web, con 
 intención de variar el contenido lo mínimo, obteniendo tres diseños diferentes,
 con características diferentes.
 
+## Organización de la entrega
+
+La entrega debería de ser un fichero comprimido, en el cual hay al menos dos
+carpetas, `src/` y `dist/`.
+
+La carpeta `src/` contiene el código fuente, imágenes, ..., mientras que la
+carpeta `dist/` contiene el código CSS procesado, y por lo tanto será la carpeta
+en la que podrás ver el resultado.
+
 # Modo de desarrollo y herramientas
 
 El código fuente debería ir adjunto con este informe. Para escribir todo el

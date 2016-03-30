@@ -278,7 +278,7 @@ vez varíen ($\binom{3}{2}$), cada uno de ellos tendrá dos maneras distintas de
 cambiar (todas las combinaciones menos la actual), es decir, $3 - 1$, todo ello
 una vez por cada número ($(3 - 1)^2$).
 
-# Cota de hamming
+# Cota de Hamming
 
 > Si $C$ es un código binario de longitud $n$ y distancia mínima $2r + 1$,
 > entonces $C$ tiene como mucho $\frac{2^n}{\sum\limits^{r}_{i=0} \binom{n}{i}}$

@@ -1,10 +1,10 @@
 digraph TS {
   rankdir = "LR"
   node [shape=box, style="rounded"];
-  information [label = "Información"];
+  information [label = "Fuente de Información"];
   transmissor [label = "Transmisor"];
   receiver [label = "Receptor"];
-  received_information [label="Información recibida"];
+  received_information [label="Destino"];
 
   information -> transmissor [label="codificación"];
   transmissor -> receiver [style="dashed", label="canal"];

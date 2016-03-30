@@ -1,13 +1,16 @@
 ---
 title: Introducción
 subtitle: Teoría de Códigos y Teoría de la Información
-lang: spanish
+lang: es-ES
+csl: acm-sig-proceedings.csl
 babel-lang: spanish
+numbersections: true
 polyglossia-lang:
   options: []
   name: spanish
 author:
   - Emilio Cobos Álvarez (70912324N)
+bibliography: intro.bib
 ---
 
 # Esquema de una transmisión
@@ -21,25 +24,62 @@ El esquema general de una transmision es el siguiente:
  * La información debe ser **decodificada** fácilmente por el receptor.
 
 Para codificar la información, usaremos una serie de códigos llamados **códigos de
-bloques**. Veremos las definiciones más adelante, preo este es el esquema
-general de una transmisión:
+bloques**.
 
-![Esquema de una transmisión](img/transmission-scheme-es.dot.png)
+Veremos las definiciones más adelante, preo este es el esquema general de una
+transmisión tal y como está definida en [@Shannon:2001:MTC:584091.584093].
+
+![Esquema de una transmisión](img/transmission-scheme.dot.png)
+
+Una transmisión consistirá, por lo tanto, en:
+
+1. Una *fuente de información* que produce un mensaje o secuencia de mensajes
+para ser transmitidos al terminal receptor. El mensaje podrá ser de varios
+tipos:
+
+    a) Una secuencia de letras, como en un telégrafo o sistema similar.
+
+    b) Una función dependiente del tiempo $f(t)$, como en la radio o el
+    teléfono.
+
+    c) Una función dependiente del tiempo y otras variables como en la
+    televisión en blanco y negro, donde el mensaje puede ser visto como una
+    función $f(x, y, t)$ de dos coordenadas y el tiempo, donde la salida de la
+    función es la intensidad de la luz para la coordenada $(x, y)$ en el
+    instante $t$.
+
+2. Un *transmisor*, que modifica el mensaje de alguna manera para producir una
+señal que pueda ser transmitida por el canal. En telefonía esta operación
+consiste únicamente en convertir la presión del sonido en una corriente
+eléctrica proporcional. En telegrafía tenemos una *codificación*, que produce
+una señal de puntos, líneas y espacios en el canal que se corresponden con el
+mensaje.
+
+3. El *canal* es símplemente el medio usado para transmitir la señal del
+transmisor al receptor. Puede ser un cable, una banda de frecuencias de radio,
+etc. Durante la transmisión, o en uno de los terminales, la señal puede ser
+perturbada por el ruido. Este ruido está representado por la línea discontinua
+de la figura 1.
+
+4. El *receptor* realiza la operación inversa a la que hizo el transmisor,
+reconstruyendo el mensaje desde la señal.
+
+5. El *destino* es la persona (o cosa) a la que el mensaje está dirigido.
 
 ## Ejemplo de un código de bloques y una transmisión: bit de paridad
 
 El bit de paridad ya ha sido tratado extensivamente en otras asignaturas, así
 que se usará como ejemplo por su simplicidad.
 
-Recordemos que el código de paridad consiste en 2 bits de información, y un bit
-de paridad.
+Usaremos el bit de paridad de tres bits de longitud, es decir, un bit de paridad
+por cada dos bits de paridad.
 
-Asumiremos que hay una probabilidad de fallo en la transmisión de un bit de $p
-= \frac{1}{1000}$.
+Como ejemplo, supondremos que hay una probabilidad de fallo en la transmisión de
+un bit de $p = \frac{1}{1000}$.
 
 ### Codificación
 
-La función de codificación se puede definir:
+La función de codificación en este caso se puede definir:
 
 $$CODIFICADA(INFO) \equiv INFO + XOR(INFO)$$
 
@@ -52,6 +92,10 @@ Info    Codificada
 
 ### Probabilidad de error transmitiendo una palabra (3 bits)
 
+Podemos calcular fácilmente la posibilidad de que ocurra un error al transmitir
+una palabra de tres bits sabiendo la posiblidad de transmisión de un bit erróneo
+en el canal ($p$):
+
 Número de errores  Probabilidad
 -----------------  ----------------------------------------------
 0                  $(1 - p)^3$
@@ -59,11 +103,18 @@ Número de errores  Probabilidad
 2                  $(1 - p) \cdot p^2 \cdot 3$
 3                  $p^3$
 
-Nótese que la multiplicación "extra" significa: "¿Cuántas combinaciones
-diferentes de bits con un error podría haber?", es decir: $\binom{3}{0}$ en el
-caso sin errores, $\binom{3}{1}$ en el caso con un error, etc...
+Nótese que la multiplicación que puede parecer "extra" significa: "¿Cuántas
+combinaciones diferentes de bits con un error podría haber?", es decir:
+$\binom{3}{0}$ en el caso sin errores, $\binom{3}{1}$ en el caso con un error,
+etc...
+
+Tras esta pequeña re-introducción a la teoría de códigos, pasaremos a ver una
+serie de definiciones que nos servirán como base para todo el bloque.
 
 # Definiciones básicas
+
+Usaremos los siguientes términos de forma continuada durante la asignatura, por
+lo que se recomienda estar familiarizado con ellos.
 
 ## Alfabeto ($\Sigma$)
 
@@ -94,10 +145,14 @@ Por ejemplo, $d(001, 101) = 1$, porque sólo difieren en el primer símbolo.
 
 ## Código de bloques de alfabeto $\Sigma$, longitud $k$ y dimensión $n$
 
-Aplicación que convierte palabras de longitud $k$ pertenecientes a $\Sigma$ en
-palabras de longitud $n$, también pertenecientes a $\Sigma$.
+Llamaremos código de bloques a una aplicación que convierte palabras de longitud
+$k$ pertenecientes un alfabeto a $\Sigma$ en palabras de longitud $n$, también
+pertenecientes a dicho alfabeto.
 
 $$C: \Sigma^k \rightarrow \Sigma^n$$
+
+Usaremos diferentes métodos que nos servirán, entre otras cosas, para estimar la
+"calidad" de un código de bloques, la **razón**, y la **distancia mínima**.
 
 ### Razón ($R$)
 
@@ -109,10 +164,14 @@ Se puede ver como una **forma de estimar el aprovechamiento del canal**.
 
 ### Distancia ($d$)
 
-La distancia o **distancia mínima** de un código de bloques $C$ es el número
-mínimo de posiciones en las que dos palabras distintas de $C$ difieren.
+Definiremos la distancia o **distancia mínima** de un código de bloques $C$ como
+el número mínimo de posiciones en las que dos palabras distintas de $C$
+difieren.
 
 $$d(C) = \{ min(d(w_1, w_2)) \forall w_1, w_2 \in \Sigma | w_1 \neq w_2 \}$$
+
+La distancia mínima será de gran utilidad para **calcular la capacidad
+correctora de un código**, como veremos más adelante.
 
 ## Canal
 
@@ -121,6 +180,9 @@ Este es un concepto bastante amplio, pero nosotros asumiermos canales binarios
 probabilidad de error es la misma independientemente del símbolo transmitido.
 
 # Propiedades de los códigos de bloques
+
+Veremos a continuación una serie de propiedades básicas de los códigos de
+bloques.
 
 ## Distancia, detección y corrección de errores
 
@@ -134,11 +196,15 @@ serían puntos y dibujarías aristas de longitud uno entre palabras de distancia
 uno), y viendo que no puedes corregir palabras a la misma distancia de otras
 dos.
 
+Podéis ver un ejemplo gráfico en [@britz:math3411-problems-22-23:unsw].
+
 ## Probabilidad de $k$ errores transmitiendo $n$ bits
 
 Dado $p$, la probabilidad de error al transmitir 1 bit en un determinado canal:
 
 $$p(k, n) = \binom{n}{k} \cdot p^k \cdot (1 - p)^{n-k}$$
+
+Ésto se puede comprobar por inducción sobre $k$.
 
 Recuerda que $\binom{n}{k}$ significa: "¿Cuántas posibles formas existen de
 escoger $k$ elementos de un total de $n$?", es decir:
@@ -147,11 +213,30 @@ $$\binom{n}{k} = \frac{n!}{k! \cdot (n - k)!}$$
 
 # Teorema de Shannon
 
+En [@Shannon:2001:MTC:584091.584093], se define el concepto de *capacidad*, que
+es la máxima cantidad de información capaz de ser transmitida por un canal
+discreto en una cantidad finita de tiempo.
+
+Así, un canal de $32$ símbolos distintos puede transmitir un total de $log_2(32)
+= 5$ bits por símbolo, por lo que si transmite $n$ símbolos por segundo, su
+capacidad será de $5n$ bits por segundo.
+
+De forma genérica, para un canal binario simétrico y e infalible,  la capacidad
+del canal $C$ es:
+
+$$C = \lim\limits_{T\rightarrow\inf}\frac{log_2 N(T)}{T}$$
+
+Donde $N(T)$ es el número de señales de duración $T$ permitidas.
+
+Podríamos enunciar el teorema de Shannon como:
+
 > Para cada canal simétrico existe una constante $C$ (la *capacidad*), de tal
 > manera que existen códigos de bloques con una razón arbitrariamente cercana
 > a $C$, y con una probabilidad de errores de transmisión prácticamente nula.
 
-Esa capacidad puede ser definida (en canales binarios) como:
+De laas conclusiones de ese paper de Shannon se puede extraer que esa capacidad
+para un canal $C$ con una probabilidad de error $p$ en canales binarios
+y simétricos es:
 
 $$C(p) = 1 + log_2(p) + (1 - p) \cdot log_2(1 - p)$$
 
@@ -241,3 +326,5 @@ $$dim(C) \leq n - d + 1$$
 
 $$|C| = A_q(n, d) \geq \frac{q^n}{\sum\limits^{d - 1}_{i = 0} \binom{n}{i} \cdot
 (q - 1)^i}$$
+
+# Referencias

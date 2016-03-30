@@ -960,8 +960,8 @@ Socket inet:54321@localhost
 # chown opendmarc:mail -R /etc/opendmarc
 ```
 
-Ahora habrá que añadir los nuevos filtros a postfix, nótese que sólo añadimos al
-anterior (opendkim).
+Ahora habrá que añadir los nuevos filtros a postfix, nótese que se lo añadimos
+al anterior (opendkim).
 
 ```
 # postconf -e "smtpd_milters = inet:localhost:12301,inet:localhost:54321"

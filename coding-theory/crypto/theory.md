@@ -135,3 +135,172 @@ We can always factorise $n$, and then:
 $$n = p_1^{r_1} + p_2^{r_2} + \dots + p_h^{r_h}$$
 $$\varphi(n) = \varphi(p_1^{r_1}) + \varphi(p_2^{r_2}) + \dots
 + \varphi(p_h^{r_h})$$
+
+### Implications for cryptography
+
+If $n = p \cdot q$, with $p$ and $q$ being prime, and $p \neq q$, then:
+
+$$\varphi(n) = \varphi(p) \cdot \varphi(q) = (p - 1) \cdot (q - 1)
+= n - p - q + 1$$
+
+We can see that ***if $n = p \cdot q$, computing $\varphi(n)$ is equivalent
+(in complexity) to computing $p$ and $q$***. This has strong implications for
+cryptography, since a lot of codes (like *RSA*) are strong based on the fact
+that factorising large numbers is really hard computationally.
+
+We can prove this rather easily.
+
+#### General case
+
+Given $\alpha$ and $\beta$, and knowing $a$ and $b$, which are two constants,
+and given:
+
+$$\left\{\begin{aligned}
+a &= \alpha + \beta \\
+b &= \alpha \cdot \beta
+\end{aligned}\right.$$
+
+We can construct a polynomial such that:
+
+$$(x - \alpha) \cdot (x - \beta) = x^2 - (\alpha + \beta) x + \alpha \cdot
+\beta = x^2 - ax + b$$
+
+We can see that $\alpha$ and $\beta$ are the roots of that polynomial, and as
+such we can compute it easily using:
+
+$$\alpha, \beta = \frac{a \pm \sqrt{a^2 - 4b}}{2}$$
+
+
+#### Particular case
+
+Applying the above knowledge to what we know, if we get two constants that are
+equal to $p + q$ and $p \cdot q$, we can easily find both $p$ and $q$.
+
+We already have one of that constants ($n = p \cdot q$), so we just have to
+find an expresion which is $p + q$, and we have that with $\varphi(n)$.
+
+$$\varphi(n) = n - p - q + 1 \implies n - \varphi(n) + 1 = p + q$$
+
+That is:
+
+$$\left\{
+\begin{aligned}
+n - \varphi(n) + 1 &= p + q \\
+n &= p \cdot q
+\end{aligned}
+\right.$$
+
+That makes finding $p$ and $q$ knowing the totient function a matter of
+solving:
+
+$$p, q = \frac{n - \varphi(n) + 1 \pm \sqrt{(n - \varphi(n) + 1)^2 - 4n}}{2}$$
+
+Which is computationally easy knowing that $p$ and $q$ are integers, so the
+problem ends up being knowing a square root of an integer which also yields
+another integer.
+
+# $k[x]$
+
+If $k$ is a body, we call $k[x]$ to the set of polynomials in a single variable
+with coefficients belonging to $k$:
+
+$$P(x) = a_nx^n + a_{n - 1}x^{n - 1} + \dots + a_0, a_i \in k$$
+$$Q(x) = b_mx^m + b_{m - 1}x^{m - 1} + \dots + b_0, b_i \in k$$
+
+## $k[x]$ is a ring
+
+We can see that $k[x]$ is a **ring**, defining the product and sum
+as follows:
+
+$$P(x) + Q(x) = (a_0 + b_0) + (a_1 + b_1) x + \dots$$
+$$P(x) \cdot Q(x) = (a_0 \cdot b_0) + (a_0b_1 + b_0a_1) x + \dots$$
+
+## Division in $k[x]$
+
+We can also see that **the algorithm for division holds**, that is:
+
+Given $A(x), B(x) \in k[x]$, there exists $Q(x), R(x) \in k[x]$ such that:
+
+$$A(x) = B(x) \cdot Q(x) + R(x), deg(R(x)) < deg(B(x))$$
+
+## Congruency in $k[x]$
+
+Given $P(x) \in k[x]$, $deg(P(x)) = n$, we say that $A(x)$ and $B(x)$ are
+congruent modulo $P(x)$ if and only if $A(x) - B(x)$ is a multiple of $P(x)$.
+
+We'll call $k[x]/P(x)$ to the set of classes of congruency mod. $P(x)$.
+
+We can prove as we did with integers that this set is finite using the
+algorithm of division:
+
+$$A(x) = Q(x)P(x) + R(x)$$
+$$deg(R(x)) < deg(P(x))$$
+
+All of the above implies that:
+
+$$A(x) \equiv R(x) (mod~P(x))$$
+
+So we arrive to the conclusion that:
+
+> $k[x]/P(x)$ is the set of polinomials $A(x) \in k[x]$ such that
+> $deg(A(x)) < deg(P(x))$.
+
+## Properties of $k[x]/P(x)$
+
+We'll use $n = deg(P(x))$.
+
+ * It's a $k$-vector space of base $\{1, x, x^2, \dots, x^{n - 1}\}$ and
+     dimension $n$.
+ * It's a **ring**:
+     $$\bar{A} + \bar{B} = \overline{A + B}$$
+     $$\bar{A} \cdot \bar{B} = \overline{A \cdot B}$$
+ * It's a **field if and only if $P(x)$ is irreducible**. The proof is similar
+     to that used for $\mathbb{Z}/p$, that is, we'll prove that in order to be
+     a field, there must be a $B(x)$ for every $A(x)$ such that $A(x) \cdot B(x)
+     = 1$. That ends up implying that for every $A(x)$, $mcd(A(x), P(x)) = 1$,
+     and that can only happen if $P(x)$ is irreducible:
+
+     $$\begin{array}{ll}
+     \overline{A(x)} \cdot \overline{B(x)} = \bar{1} \iff \\
+     A(x) \cdot B(x) \equiv 1 (mod~P(x)) \iff \\
+     A(x) \cdot B(x) \equiv 1 + Q(x) \cdot P(x) \iff \\
+     mcd(A(x), P(x)) = 1
+     \end{array}$$
+
+We won't prove this, at least yet, but **every finite field can be
+expressed as $\mathbb{F}_p[x]/Q(x)$, being $p$ a prime**.
+
+Remember that, if $p$ is prime, then $\mathbb{F}_p \equiv \mathbb{Z}/p$.
+
+# Definition of *group*
+
+We'll define a *group* as a set of elements and one product operation $(G,
+\cdot)$, such that:
+
+$$G \times G \xrightarrow{\cdot} G$$
+$$a, b \xrightarrow{\cdot} c; a, b, c \in G$$
+
+A group must verify that:
+
+ * There must exist a *neutral factor* $e$:
+     $a \cdot e = e \cdot a = a~\forall a \in G$
+ * $a \cdot (b \cdot c) = (a \cdot b) \cdot c~\forall a, b, c \in G$
+ * $\forall a \in G, \exists a^{-1}$, such that $a \cdot a^{-1} = e$
+
+We'll call $G$ a *conmutative group* if and only if
+$a \cdot b = b \cdot a \forall a, b \in G$.
+
+We'll only see conmutative groups in this subject.
+
+Being $k$ a field, you can verify that:
+
+ * $(k, \cdot)$ is **not** a field (since 0 has no inverse).
+ * $(k^*, \cdot)$, is a field.
+ * $(k, +)$ is a field.
+
+Remember that $k^* = k - \{0\}$
+
+## Lagrange's theorem
+
+> Being $G$ a finite group, with $n = |G|$, it's verified that
+> $a^n = e~\forall a \in G$, being $e$ the *neutral factor* of the group.

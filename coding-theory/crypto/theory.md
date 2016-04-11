@@ -373,10 +373,7 @@ We'll distinguish two types of cryptography:
 
 $$\begin{aligned}
 f_E: \mathbb{Z}/n &\rightarrow \mathbb{Z}/n \\
-p &\rightarrow a \cdot p + b
-\end{aligned}$$
-
-$$\begin{aligned}
+p &\rightarrow a \cdot p + b \\
 f_D: \mathbb{Z}/n &\rightarrow \mathbb{Z}/n \\
 c &\rightarrow (c - b) \cdot a^{-1}
 \end{aligned}$$
@@ -415,6 +412,7 @@ $$f_E: \mathbb{Z}/n \times \mathbb{Z}/n \rightarrow \mathbb{Z}/n \times
 
 Defined as:
 
-$$f_E \rightarrow \gamma \cdot f \cdot \gamma$$
-$$f_D \rightarrow \gamma \cdot f^{-1} \cdot \gamma^{-1}$$
-k
+$$\begin{aligned}
+f_E &\rightarrow \gamma \cdot f \cdot \gamma \\
+f_D &\rightarrow \gamma \cdot f^{-1} \cdot \gamma^{-1}
+\end{aligned}$$

@@ -304,3 +304,117 @@ Remember that $k^* = k - \{0\}$
 
 > Being $G$ a finite group, with $n = |G|$, it's verified that
 > $a^n = e~\forall a \in G$, being $e$ the *neutral factor* of the group.
+
+### Only one field with $q$ elements of the form $\mathbb{F}_p[x]/p(x)$
+
+Let's call $K$ a finite field with $q$ elements.
+
+We have already proved that $K$ can be expressed as $\mathbb{F}_p[x]/p(x)$,
+with $q = p^{deg(p(x)) - 1}$ for some $r$, $p$ being a prime number and $p(x)$
+being irreducible.
+
+Given Lagrange's theorem, we can say that $a^{q - 1} = 1$ for every element of
+$K^*$.
+
+We can see that that implies that all the elements of $K^*$ are roots of
+$x^{q -1} - 1$, an thus all the elements of $K$ (including $0$) are roots of
+$x^q - x$.
+
+That means that there only exists one field of $q$ elements, corresponding to
+the roots of the polynomial $x^q - x$. All the different ways to express that
+are isomorphisms.
+
+That also means that the polynomials which are generators of cyclic codes of
+longitude $q - 1$ are either a divisor of $x^{q - 1} - 1$, or a combination of
+such divisors.
+
+### Fermat's little theorem
+
+For every integer $n$, and any prime $p$:
+
+$$n^{p - 1} \equiv 1 (mod p)$$
+
+Proof: Lagrange's theorem applied to $(\mathbb{F}_p - \{0\}, \cdot)$.
+
+#### Generalisation
+
+If $n$ and $m$ are coprimes, then:
+
+$$n^{\varphi{m}} \equiv 1 (mod m)$$
+
+Proof: Lagrange's theorem applied to $((\mathbb{Z}/m)^*, \cdot)$
+
+Remember that $((\mathbb{Z}/m)^*, \cdot)$ is formed by all the coprimes of $m$.
+
+# General cryptography definitions
+
+We'll consider a **plaintext** $P$, being a finite set of symbols to encrypt,
+and a **cyphertext** $C$, which is the encrypted symbols.
+
+We'll call an **encryption application** to a **bijective** application of the
+form:
+
+$$f_E: P \rightarrow C$$
+
+And a **decryption application** to the inverse of it:
+
+$$f_D = f_E^{-1}: C \rightarrow P$$
+
+We'll call $K_E$ to the **encryption key** and $K_D$ to the **decryption key**.
+
+We'll distinguish two types of cryptography:
+
+ * **Private key cryptography**: The encryption key is kept private.
+ * **Public key cryptography**: More complex, since it exposes the key used in
+     the encryption function. For it to work, it's required that $f_D$ is
+     difficult to obtain.
+
+## Cypher by affine transformations
+
+$$\begin{aligned}
+f_E: \mathbb{Z}/n &\rightarrow \mathbb{Z}/n \\
+p &\rightarrow a \cdot p + b
+\end{aligned}$$
+
+$$\begin{aligned}
+f_D: \mathbb{Z}/n &\rightarrow \mathbb{Z}/n \\
+c &\rightarrow (c - b) \cdot a^{-1}
+\end{aligned}$$
+
+Being $a$ and $b$ constants in $\mathbb{Z}/n$, and $a$ being invertible in
+$\mathbb{Z}/n$, that is, $a \in (\mathbb{Z}/n)^*$.
+
+Note that $a$ has to be invertible in order for $f_E$ to be invertible.
+
+### Example: Caesar cipher
+
+$$\begin{aligned}
+f_E: \mathbb{Z}/26 &\rightarrow \mathbb{Z}/26 \\
+p &\rightarrow p + 3
+\end{aligned}$$
+
+## Digraph cyphering
+
+Let's define a bijective application $\gamma$:
+
+$$\begin{aligned}
+\gamma: \mathbb{Z}/n \times \mathbb{Z}/n &\rightarrow \mathbb{Z}/n^2 \\
+(x, y) &\rightarrow (x \cdot n + y)
+\end{aligned}$$
+
+$$\begin{aligned}
+\gamma^{-1}: \mathbb{Z}/n^2 &\rightarrow \mathbb{Z}/n \times \mathbb{Z}/n \\
+(a) &\rightarrow \left(\left\lfloor\frac{a}{n}\right\rfloor, a \% n\right)
+\end{aligned}$$
+
+Digraph ciphering consists in using that $\sigma$ function, with an affine
+transformation, in order to make a ciphering function like:
+
+$$f_E: \mathbb{Z}/n \times \mathbb{Z}/n \rightarrow \mathbb{Z}/n \times
+\mathbb{Z}/n$$
+
+Defined as:
+
+$$f_E \rightarrow \gamma \cdot f \cdot \gamma$$
+$$f_D \rightarrow \gamma \cdot f^{-1} \cdot \gamma^{-1}$$
+k

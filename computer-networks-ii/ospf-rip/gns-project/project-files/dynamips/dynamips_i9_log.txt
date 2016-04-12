@@ -1,0 +1,19 @@
+Mar 15 18:49:21.386 HYPERVISOR: Release 0.2.14-x86/Windows (tag 2014092320)
+Mar 15 18:49:21.397 HYPERVISOR: Started on TCP port = 59538.
+Mar 15 18:49:21.433 HYPERVISOR: exec_cmd: hypervisor version 
+Mar 15 18:49:21.455 HYPERVISOR: exec_cmd: hypervisor uuid 
+Mar 15 18:49:21.477 HYPERVISOR: exec_cmd: hypervisor working_dir C:\Users\Nines\Documents\GNS3\projects\RIP\project-files\dynamips 
+Mar 15 18:49:21.478 GENERAL: working_dir=C:\Users\Nines\Documents\GNS3\projects\RIP\project-files\dynamips
+Mar 15 18:49:21.501 HYPERVISOR: exec_cmd: nio_bridge create HUB2 
+Mar 15 18:49:27.565 HYPERVISOR: exec_cmd: nio create_udp udp-047dbc0a-98fe-4661-9b14-f51998838275 10010 127.0.0.1 10011 
+Mar 15 18:49:27.664 HYPERVISOR: exec_cmd: nio_bridge add_nio HUB2 udp-047dbc0a-98fe-4661-9b14-f51998838275 
+Mar 15 18:49:33.636 HYPERVISOR: exec_cmd: nio create_udp udp-5baa3daf-94dc-49ca-ab06-096e64c60a17 10012 127.0.0.1 10013 
+Mar 15 18:49:33.784 HYPERVISOR: exec_cmd: nio_bridge add_nio HUB2 udp-5baa3daf-94dc-49ca-ab06-096e64c60a17 
+Mar 15 19:01:25.870 HYPERVISOR: exec_cmd: nio_bridge remove_nio HUB2 udp-047dbc0a-98fe-4661-9b14-f51998838275 
+Mar 15 19:01:25.970 HYPERVISOR: exec_cmd: nio delete udp-047dbc0a-98fe-4661-9b14-f51998838275 
+Mar 15 19:01:26.120 HYPERVISOR: exec_cmd: nio_bridge remove_nio HUB2 udp-5baa3daf-94dc-49ca-ab06-096e64c60a17 
+Mar 15 19:01:26.236 HYPERVISOR: exec_cmd: nio delete udp-5baa3daf-94dc-49ca-ab06-096e64c60a17 
+Mar 15 19:01:26.406 HYPERVISOR: exec_cmd: nio_bridge delete HUB2 
+Mar 15 19:01:26.498 HYPERVISOR: exec_cmd: hypervisor stop 
+Mar 15 19:01:26.894 HYPERVISOR: Stopped.
+Mar 15 19:01:26.894 GENERAL: reset done.

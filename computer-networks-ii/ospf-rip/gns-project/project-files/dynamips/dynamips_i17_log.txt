@@ -1,0 +1,74 @@
+Mar 15 19:05:35.710 HYPERVISOR: Release 0.2.14-x86/Windows (tag 2014092320)
+Mar 15 19:05:35.716 HYPERVISOR: Started on TCP port = 60719.
+Mar 15 19:05:35.731 HYPERVISOR: exec_cmd: hypervisor version 
+Mar 15 19:05:35.742 HYPERVISOR: exec_cmd: hypervisor uuid 
+Mar 15 19:05:35.752 HYPERVISOR: exec_cmd: hypervisor working_dir C:\Users\Nines\Documents\GNS3\projects\RIP\project-files\dynamips 
+Mar 15 19:05:35.753 GENERAL: working_dir=C:\Users\Nines\Documents\GNS3\projects\RIP\project-files\dynamips
+Mar 15 19:05:35.762 HYPERVISOR: exec_cmd: vm create R5 5 c7200 
+Mar 15 19:05:35.776 VM: VM R5 created.
+Mar 15 19:05:35.781 HYPERVISOR: exec_cmd: vm set_con_tcp_port R5 2004 
+Mar 15 19:05:35.791 HYPERVISOR: exec_cmd: c7200 get_mac_addr R5 
+Mar 15 19:05:35.799 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 15 19:05:35.810 HYPERVISOR: exec_cmd: vm slot_add_binding R5 0 0 C7200-IO-FE 
+Mar 15 19:05:35.819 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 15 19:05:35.829 HYPERVISOR: exec_cmd: vm slot_add_binding R5 1 0 PA-2FE-TX 
+Mar 15 19:05:35.840 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 15 19:05:35.849 HYPERVISOR: exec_cmd: vm slot_add_binding R5 4 0 PA-GE 
+Mar 15 19:05:35.859 HYPERVISOR: exec_cmd: vm set_ios R5 C:/Users/Nines/GNS3/images/IOS/c7200-jk9s-mz.124-13b.image 
+Mar 15 19:05:35.868 HYPERVISOR: exec_cmd: vm set_ram R5 512 
+Mar 15 19:05:35.877 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 15 19:05:35.886 HYPERVISOR: exec_cmd: vm slot_add_binding R5 3 0 PA-GE 
+Mar 15 19:05:35.896 HYPERVISOR: exec_cmd: vm set_exec_area R5 64 
+Mar 15 19:05:35.906 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 15 19:05:35.917 HYPERVISOR: exec_cmd: vm set_idle_pc R5 0x608724c0 
+Mar 15 19:05:35.928 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 15 19:05:35.937 HYPERVISOR: exec_cmd: vm slot_add_binding R5 2 0 PA-2FE-TX 
+Mar 15 19:05:35.947 HYPERVISOR: exec_cmd: vm set_disk0 R5 0 
+Mar 15 19:05:35.956 HYPERVISOR: exec_cmd: vm set_nvram R5 512 
+Mar 15 19:05:35.968 HYPERVISOR: exec_cmd: vm set_config R5 configs/i5_startup-config.cfg 
+Mar 15 19:07:18.520 HYPERVISOR: exec_cmd: nio create_udp udp-f9a62210-c46a-4cc0-b27d-907983db12f2 10011 127.0.0.1 10010 
+Mar 15 19:07:18.539 HYPERVISOR: exec_cmd: vm slot_add_nio_binding R5 3 0 udp-f9a62210-c46a-4cc0-b27d-907983db12f2 
+Mar 15 19:07:18.559 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 15 19:07:30.083 HYPERVISOR: exec_cmd: nio create_udp udp-87c8c0e4-64b9-486d-9839-be82cbc31523 10012 127.0.0.1 10013 
+Mar 15 19:07:30.104 HYPERVISOR: exec_cmd: vm slot_add_nio_binding R5 4 0 udp-87c8c0e4-64b9-486d-9839-be82cbc31523 
+Mar 15 19:07:30.127 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 15 19:13:03.447 HYPERVISOR: exec_cmd: vm extract_config R5 
+Mar 15 19:15:18.947 HYPERVISOR: exec_cmd: vm extract_config R5 
+Mar 15 19:16:24.255 HYPERVISOR: exec_cmd: vm extract_config R5 
+Mar 15 19:20:00.794 HYPERVISOR: exec_cmd: vm extract_config R5 
+Mar 15 19:21:03.437 HYPERVISOR: exec_cmd: vm extract_config R5 
+Mar 15 19:30:36.111 HYPERVISOR: exec_cmd: vm create Ghost 0 c7200 
+Mar 15 19:30:36.127 VM: VM Ghost created.
+Mar 15 19:30:36.252 HYPERVISOR: exec_cmd: vm set_ios Ghost C:/Users/Nines/GNS3/images/IOS/c7200-jk9s-mz.124-13b.image 
+Mar 15 19:30:36.267 HYPERVISOR: exec_cmd: vm set_ghost_status Ghost 1 
+Mar 15 19:30:36.283 HYPERVISOR: exec_cmd: vm set_ghost_file Ghost c7200-jk9s-mz.124-13b.image-512.ghost 
+Mar 15 19:30:36.283 HYPERVISOR: exec_cmd: vm set_ram Ghost 512 
+Mar 15 19:30:36.299 HYPERVISOR: exec_cmd: vm get_status Ghost 
+Mar 15 19:30:36.377 HYPERVISOR: exec_cmd: vm start Ghost 
+Mar 15 19:30:38.248 HYPERVISOR: exec_cmd: vm get_status Ghost 
+Mar 15 19:30:38.291 HYPERVISOR: exec_cmd: vm stop Ghost 
+Mar 15 19:30:38.503 VM: VM Ghost shutdown.
+Mar 15 19:30:38.510 HYPERVISOR: exec_cmd: vm clean_delete Ghost 
+Mar 15 19:30:38.510 VM: VM Ghost destroyed.
+Mar 15 19:30:38.594 HYPERVISOR: exec_cmd: vm set_ghost_status R5 2 
+Mar 15 19:30:38.604 HYPERVISOR: exec_cmd: vm set_ghost_file R5 c7200-jk9s-mz.124-13b.image-512.ghost 
+Mar 15 19:30:38.616 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 15 19:30:38.633 HYPERVISOR: exec_cmd: vm start R5 
+Mar 15 19:34:33.438 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 15 19:34:33.481 HYPERVISOR: exec_cmd: vm stop R5 
+Mar 15 19:34:33.668 VM: VM R5 shutdown.
+Mar 15 19:34:33.725 HYPERVISOR: exec_cmd: vm extract_config R5 
+Mar 15 19:35:00.813 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 15 19:35:00.880 HYPERVISOR: exec_cmd: vm start R5 
+Mar 15 19:45:45.084 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 15 19:45:45.128 HYPERVISOR: exec_cmd: vm stop R5 
+Mar 15 19:45:45.395 VM: VM R5 shutdown.
+Mar 15 19:45:45.478 HYPERVISOR: exec_cmd: vm extract_config R5 
+Mar 15 19:46:49.572 HYPERVISOR: exec_cmd: vm extract_config R5 
+Mar 15 19:47:19.668 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 15 19:47:19.728 HYPERVISOR: exec_cmd: vm extract_config R5 
+Mar 15 19:47:19.808 HYPERVISOR: exec_cmd: vm delete R5 
+Mar 15 19:47:19.808 VM: VM R5 destroyed.
+Mar 15 19:47:19.865 HYPERVISOR: exec_cmd: hypervisor stop 
+Mar 15 19:47:20.019 HYPERVISOR: Stopped.
+Mar 15 19:47:20.019 GENERAL: reset done.

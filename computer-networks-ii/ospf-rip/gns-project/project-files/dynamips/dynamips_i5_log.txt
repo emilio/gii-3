@@ -1,0 +1,43 @@
+Mar 29 00:44:00.156 HYPERVISOR: Release 0.2.14-x86/Windows (tag 2014092320)
+Mar 29 00:44:00.162 HYPERVISOR: Started on TCP port = 64287.
+Mar 29 00:44:00.219 HYPERVISOR: exec_cmd: hypervisor version 
+Mar 29 00:44:00.235 HYPERVISOR: exec_cmd: hypervisor uuid 
+Mar 29 00:44:00.252 HYPERVISOR: exec_cmd: hypervisor working_dir C:\Users\Nines\Documents\GNS3\projects\RIPOSPF\project-files\dynamips 
+Mar 29 00:44:00.331 GENERAL: working_dir=C:\Users\Nines\Documents\GNS3\projects\RIPOSPF\project-files\dynamips
+Mar 29 00:44:00.338 HYPERVISOR: exec_cmd: vm create R5 5 c7200 
+Mar 29 00:44:00.349 VM: VM R5 created.
+Mar 29 00:44:00.355 HYPERVISOR: exec_cmd: vm set_con_tcp_port R5 2004 
+Mar 29 00:44:00.365 HYPERVISOR: exec_cmd: c7200 get_mac_addr R5 
+Mar 29 00:44:00.376 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 29 00:44:00.386 HYPERVISOR: exec_cmd: vm slot_add_binding R5 0 0 C7200-IO-FE 
+Mar 29 00:44:00.397 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 29 00:44:00.408 HYPERVISOR: exec_cmd: vm slot_add_binding R5 1 0 PA-2FE-TX 
+Mar 29 00:44:00.418 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 29 00:44:00.430 HYPERVISOR: exec_cmd: vm slot_add_binding R5 4 0 PA-GE 
+Mar 29 00:44:00.442 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 29 00:44:00.453 HYPERVISOR: exec_cmd: vm slot_add_binding R5 3 0 PA-GE 
+Mar 29 00:44:00.464 HYPERVISOR: exec_cmd: c7200 set_mac_addr R5 ca05.25d0.0000 
+Mar 29 00:44:00.475 HYPERVISOR: exec_cmd: vm set_ios R5 C:/Users/Nines/Documents/GNS3/images/IOS/c7200-jk9s-mz.124-13b.image 
+Mar 29 00:44:00.485 HYPERVISOR: exec_cmd: vm set_disk0 R5 0 
+Mar 29 00:44:00.496 HYPERVISOR: exec_cmd: vm set_ram R5 512 
+Mar 29 00:44:00.507 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 29 00:44:00.518 HYPERVISOR: exec_cmd: vm set_idle_pc R5 0x608724c0 
+Mar 29 00:44:00.528 HYPERVISOR: exec_cmd: vm set_exec_area R5 64 
+Mar 29 00:44:00.547 HYPERVISOR: exec_cmd: vm set_nvram R5 512 
+Mar 29 00:44:00.565 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 29 00:44:00.585 HYPERVISOR: exec_cmd: vm slot_add_binding R5 2 0 PA-2FE-TX 
+Mar 29 00:44:00.609 HYPERVISOR: exec_cmd: vm set_config R5 configs/i5_startup-config.cfg 
+Mar 29 00:44:03.238 HYPERVISOR: exec_cmd: nio create_udp udp-9443473a-fa74-4700-bc5c-e6eac04d99bb 10009 127.0.0.1 10008 
+Mar 29 00:44:03.287 HYPERVISOR: exec_cmd: vm slot_add_nio_binding R5 3 0 udp-9443473a-fa74-4700-bc5c-e6eac04d99bb 
+Mar 29 00:44:03.349 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 29 00:44:04.038 HYPERVISOR: exec_cmd: nio create_udp udp-a76dda8b-bd73-4d1f-8a7f-817f780d4d98 10016 127.0.0.1 10017 
+Mar 29 00:44:04.082 HYPERVISOR: exec_cmd: vm slot_add_nio_binding R5 4 0 udp-a76dda8b-bd73-4d1f-8a7f-817f780d4d98 
+Mar 29 00:44:04.200 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 29 00:44:23.258 HYPERVISOR: exec_cmd: vm extract_config R5 
+Mar 29 00:44:27.359 HYPERVISOR: exec_cmd: vm get_status R5 
+Mar 29 00:44:27.412 HYPERVISOR: exec_cmd: vm extract_config R5 
+Mar 29 00:44:27.471 HYPERVISOR: exec_cmd: vm delete R5 
+Mar 29 00:44:27.471 VM: VM R5 destroyed.
+Mar 29 00:44:27.528 HYPERVISOR: exec_cmd: hypervisor stop 
+Mar 29 00:44:27.711 HYPERVISOR: Stopped.
+Mar 29 00:44:27.711 GENERAL: reset done.

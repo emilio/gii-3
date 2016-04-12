@@ -1,0 +1,33 @@
+Mar 15 19:02:17.173 HYPERVISOR: Release 0.2.14-x86/Windows (tag 2014092320)
+Mar 15 19:02:17.173 HYPERVISOR: Started on TCP port = 60449.
+Mar 15 19:02:17.642 HYPERVISOR: exec_cmd: hypervisor version 
+Mar 15 19:02:17.666 HYPERVISOR: exec_cmd: hypervisor uuid 
+Mar 15 19:02:17.687 HYPERVISOR: exec_cmd: hypervisor working_dir C:\Users\Nines\Documents\GNS3\projects\RIP\project-files\dynamips 
+Mar 15 19:02:17.796 GENERAL: working_dir=C:\Users\Nines\Documents\GNS3\projects\RIP\project-files\dynamips
+Mar 15 19:02:17.812 HYPERVISOR: exec_cmd: vm create R1 8 c7200 
+Mar 15 19:02:17.827 VM: VM R1 created.
+Mar 15 19:02:17.843 HYPERVISOR: exec_cmd: vm set_con_tcp_port R1 2000 
+Mar 15 19:02:17.858 HYPERVISOR: exec_cmd: c7200 get_mac_addr R1 
+Mar 15 19:02:17.874 HYPERVISOR: exec_cmd: vm get_status R1 
+Mar 15 19:02:17.905 HYPERVISOR: exec_cmd: vm slot_add_binding R1 0 0 C7200-IO-FE 
+Mar 15 19:02:17.921 HYPERVISOR: exec_cmd: vm get_status R1 
+Mar 15 19:02:17.952 HYPERVISOR: exec_cmd: vm slot_add_binding R1 1 0 PA-2FE-TX 
+Mar 15 19:02:17.968 HYPERVISOR: exec_cmd: vm set_ios R1 C:/Users/Nines/GNS3/images/IOS/c7200-jk9s-mz.124-13b.image 
+Mar 15 19:02:17.999 HYPERVISOR: exec_cmd: vm set_ram R1 512 
+Mar 15 19:02:18.015 HYPERVISOR: exec_cmd: vm get_status R1 
+Mar 15 19:02:18.046 HYPERVISOR: exec_cmd: vm slot_add_binding R1 3 0 PA-GE 
+Mar 15 19:02:18.062 HYPERVISOR: exec_cmd: vm set_exec_area R1 64 
+Mar 15 19:02:18.077 HYPERVISOR: exec_cmd: vm get_status R1 
+Mar 15 19:02:18.108 HYPERVISOR: exec_cmd: vm set_idle_pc R1 0x608724c0 
+Mar 15 19:02:18.124 HYPERVISOR: exec_cmd: vm get_status R1 
+Mar 15 19:02:18.155 HYPERVISOR: exec_cmd: vm slot_add_binding R1 2 0 PA-2FE-TX 
+Mar 15 19:02:18.171 HYPERVISOR: exec_cmd: vm set_disk0 R1 0 
+Mar 15 19:02:18.202 HYPERVISOR: exec_cmd: vm set_nvram R1 512 
+Mar 15 19:02:18.218 HYPERVISOR: exec_cmd: vm set_config R1 configs/i8_startup-config.cfg 
+Mar 15 19:02:38.782 HYPERVISOR: exec_cmd: vm get_status R1 
+Mar 15 19:02:38.814 HYPERVISOR: exec_cmd: vm extract_config R1 
+Mar 15 19:02:38.829 HYPERVISOR: exec_cmd: vm delete R1 
+Mar 15 19:02:38.829 VM: VM R1 destroyed.
+Mar 15 19:02:38.861 HYPERVISOR: exec_cmd: hypervisor stop 
+Mar 15 19:02:39.361 HYPERVISOR: Stopped.
+Mar 15 19:02:39.361 GENERAL: reset done.

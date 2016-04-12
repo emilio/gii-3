@@ -1,0 +1,87 @@
+\documentclass[a4paper]{article}
+
+\usepackage{fontspec}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{titlesec}
+\usepackage{titling}
+\usepackage{minted}
+\usepackage{natbib}
+\usepackage{xcolor}
+\usepackage{subcaption}
+
+\usepackage[shorthands=off,main=spanish]{babel}
+
+\renewcommand{\listingscaption}{Programa}
+\def\listingautorefname~#1\null{(Programa #1)\null}
+%\def\figureautorefname~#1\null{(Figura #1)\null}
+\def\figureautorefname~#1\null{(#1)\null}
+
+\newcommand{\sectionbreak}{\clearpage}
+
+\pretitle{\begin{center} \includegraphics[width=200pt]{usal.png} \\ \vspace{3em} \LARGE}
+\title{Práctica 2 con Arduino \\ \large Periféricos}
+\author{Emilio Cobos Álvarez y Christian Bonal Martín}
+\date{11 de Abril de 2016}
+
+\begin{document}
+
+\maketitle
+
+\clearpage
+\tableofcontents
+\setlength{\parskip}{1em}
+\setlength{\parindent}{0pt}
+\newpage
+
+\section{Sensor flexor}
+
+\subsection{Sin LEDs}
+
+Lo primero que hicimos fue mirar el
+\href{https://cdn.sparkfun.com/datasheets/Sensors/ForceFlex/FLEX\%20SENSOR\%20DATA\%20SHEET\%202014.pdf}{datasheet}
+del sensor, y ver la salida que nos daba, sin ningún tipo de LED como salida:
+
+\begin{listing}[h]
+\inputminted[frame=single, framesep=.5em, linenos, rulecolor=\color{gray}]{java}{../flex-sensor/flex-sensor-1.ino}
+\end{listing}
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{../img/flex-basic-circuit.jpg}
+  \caption{Circuito flexor básico}
+  \label{fig:flex-basic-circuit}
+  \centering
+  \begin{subfigure}{.4\linewidth}
+    \includegraphics[width=.9\linewidth]{../img/flex-middle.png}
+    \caption{Salida en reposo}
+    \label{fig:flex-middle-out}
+  \end{subfigure}
+  \begin{subfigure}{.4\linewidth}
+    \includegraphics[width=.9\linewidth]{../img/flex-left.png}
+    \caption{Salida doblado hacia la izda.}
+    \label{fig:flex-left-out}
+  \end{subfigure}
+  \begin{subfigure}{\linewidth}
+    \includegraphics[width=.9\linewidth]{../img/flex-right.png}
+    \caption{Salida doblado hacia la dcha.}
+    \label{fig:flex-right-out}
+  \end{subfigure}
+\end{figure}
+
+\subsection{Con LEDs}
+
+La versión con leds del programa lo que hace es encender uno de los LEDs de
+salida u otro dependiendo de en qué dirección esté flexionado. El código es
+relativamente sencillo, ya que mapeamos los valores entre 0 y 1, y dependiendo
+de si es mayor que 0.5 o no encendemos uno de los dos LEDs.
+
+\begin{listing}[h]
+\inputminted[frame=single, framesep=.5em, linenos, rulecolor=\color{gray}]{java}{../flex-sensor/flex-sensor.ino}
+\end{listing}
+
+
+\bibliographystyle{plainnat}
+\bibliography{bibliography}
+
+\end{document}

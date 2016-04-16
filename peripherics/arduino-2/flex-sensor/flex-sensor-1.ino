@@ -2,7 +2,9 @@
 //
 // https://www.sparkfun.com/products/10264
 //
-// Datasheet: https://cdn.sparkfun.com/datasheets/Sensors/ForceFlex/FLEX%20SENSOR%20DATA%20SHEET%202014.pdf
+// Datasheet:
+// https://cdn.sparkfun.com/datasheets/
+// Sensors/ForceFlex/FLEX%20SENSOR%20DATA%20SHEET%202014.pdf
 
 const int SENSOR = A0;
 

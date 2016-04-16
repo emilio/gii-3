@@ -1,4 +1,4 @@
-\documentclass[a4paper]{article}
+\documentclass{article}
 
 \usepackage{fontspec}
 \usepackage{graphicx}
@@ -10,6 +10,7 @@
 \usepackage{natbib}
 \usepackage{xcolor}
 \usepackage{subcaption}
+\usepackage[a4paper, top=1in, bottom=1in]{geometry}
 
 \usepackage[shorthands=off,main=spanish]{babel}
 
@@ -18,7 +19,7 @@
 %\def\figureautorefname~#1\null{(Figura #1)\null}
 \def\figureautorefname~#1\null{(#1)\null}
 
-\newcommand{\sectionbreak}{\clearpage}
+% \newcommand{\sectionbreak}{\clearpage}
 
 \pretitle{\begin{center} \includegraphics[width=200pt]{usal.png} \\ \vspace{3em} \LARGE}
 \title{Práctica 2 con Arduino \\ \large Periféricos}
@@ -35,19 +36,36 @@
 \setlength{\parindent}{0pt}
 \newpage
 
-\section{Sensor flexor}
+\section{Sensor de flexión}
 
-\subsection{Sin LEDs}
+La segunda prueba que realizamos en esta sesión consistía en el montaje y
+prueba de un sensor de flexión.
+
+El sensor funciona de forma muy parecida al sensor de temperatura usado en la
+sesión anterior, variando la resistencia entre los pines del sensor dependiendo
+de la flexión a la que esté sometido.
+
+El ejercicio consistía en lo siguiente:
+
+\begin{itemize}
+  \item{Escribir en el monitor serie el voltaje resultante del divisor de
+    tensión y encender secuencialmente dos LEDs cuando el sensor vaya estando
+    significativamente flexionado.}
+\end{itemize}
+
+\subsection{Montaje del circuito}
 
 Lo primero que hicimos fue mirar el
 \href{https://cdn.sparkfun.com/datasheets/Sensors/ForceFlex/FLEX\%20SENSOR\%20DATA\%20SHEET\%202014.pdf}{datasheet}
-del sensor, y ver la salida que nos daba, sin ningún tipo de LED como salida:
+del sensor, y ver la salida que nos daba, sin ningún tipo de LED como salida.
 
-\begin{listing}[h]
-\inputminted[frame=single, framesep=.5em, linenos, rulecolor=\color{gray}]{java}{../flex-sensor/flex-sensor-1.ino}
-\end{listing}
+El sensor funciona de forma muy parecida al sensor de temperatura usado en la
+sesión anterior, variando la resistencia entre los pines del sensor dependiendo
+de la flexión a la que esté sometido.
 
-\begin{figure}
+Posteriormente procedimos a añadir ambos leds de salida.
+
+\begin{figure}[H]
   \includegraphics[width=\linewidth]{../img/flex-basic-circuit.jpg}
   \caption{Circuito flexor básico}
   \label{fig:flex-basic-circuit}
@@ -69,17 +87,157 @@ del sensor, y ver la salida que nos daba, sin ningún tipo de LED como salida:
   \end{subfigure}
 \end{figure}
 
-\subsection{Con LEDs}
+\subsection{Programación de la placa}
 
-La versión con leds del programa lo que hace es encender uno de los LEDs de
-salida u otro dependiendo de en qué dirección esté flexionado. El código es
-relativamente sencillo, ya que mapeamos los valores entre 0 y 1, y dependiendo
-de si es mayor que 0.5 o no encendemos uno de los dos LEDs.
+\subsubsection{Sin LEDs}
 
-\begin{listing}[h]
-\inputminted[frame=single, framesep=.5em, linenos, rulecolor=\color{gray}]{java}{../flex-sensor/flex-sensor.ino}
+La versión sin leds del programa es muy sencilla, símplemente hay que convertir
+el valor que te da Arduino entre 0 y 1023 a voltios (o milivoltios en este
+caso).
+
+\begin{listing}[H]
+\inputminted[frame=single, framesep=.5em, linenos, rulecolor=\color{gray}]{java}{../flex-sensor/flex-sensor-1.ino}
+\caption{Código del programa con salida via puerto serie}
 \end{listing}
 
+\subsubsection{Con LEDs}
+
+La versión con leds del programa lo que hace es encender uno de los LEDs de
+salida u otro dependiendo de en qué dirección esté flexionado.
+
+Basándonos en los datos de la parte sin LEDs, programar algo en base a ello fue
+muy sencillo.
+
+\begin{listing}[H]
+\inputminted[frame=single, framesep=.5em, linenos, rulecolor=\color{gray}]{java}{../flex-sensor/flex-sensor.ino}
+\caption{Código del programa con las salidas via LED}
+\end{listing}
+
+\subsection{Funcionamiento del circuito}
+
+En el ejercicio realizado, cuanto más se flexiona el sensor dejando las
+pastillas en el interior de la curva, más grande es la resistencia que genera el
+sensor.
+
+En cambio, si se flexiona de forma que las pastillas de metal estén en el
+exterior de la curva, la resistencia de sensor de flexión será menor.
+
+Para controlar el encendido de los LEDs, al realizar la flexión, Arduino nos da
+un voltaje (que experimentalmente estaba 300mV y 1500 mV), que transformaremos
+para tener un valor entre 0 y 1, para así poder encender un LED u otro en
+función del lado hacia el que esté flexionado.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{.4\linewidth}
+    \includegraphics[width=\linewidth]{../img/flex-circuit-left.jpg}
+    \caption{Circuito final con leds (izda.)}
+    \label{fig:flex-led-circuit-left}
+  \end{subfigure}
+  \begin{subfigure}{.4\linewidth}
+    \includegraphics[width=\linewidth]{../img/flex-circuit-right.jpg}
+    \caption{Circuito final con leds (dcha.)}
+    \label{fig:flex-led-circuit-right}
+  \end{subfigure}
+\end{figure}
+
+\section{Sensor de distancia mediante ultrasonidos HC‐SR04}
+
+La otra prueba que realizamos en esta sesión consistía en el montaje y prueba de
+un sensor de distancia mediante ultrasonidos HC-SR04. Estaba compuesto de tres
+ejercicios:
+
+\begin{itemize}
+  \item{Controlar la señal de salida que envía el sensor hacia un objeto y la
+    señal que se recupera tras el reflejo en el objeto a través del pin de
+    entrada. Se trata de mostrar en el puerto serie la distancia a la que está
+    situado el objeto en cm.}
+  \item{Adaptar el programa para controlar eventos, por ejemplo, el paso de un
+    vehículo a través de un carril. Se puede comprobar que si la distancia de
+    referencia es demasiado grande se pueden perder eventos, ya que la señal
+    tarda un tiempo determinado entre emisión y recepción.}
+  \item{Encender secuencialmente dos LEDs a medida que el objeto se vaya
+    aproximando al sensor.}
+\end{itemize}
+
+\subsection{Montaje del circuito}
+
+Primero realizamos el montaje del sensor de ultrasonidos tal y como se nos había
+indicado en el guión, con el fin de no crear un daño irreparable al sensor. Los
+circuitos que realizamos para los ejercicios con este sensor fueron los
+siguientes:
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{../img/sound-basic-circuit.jpg}
+  \caption{Circuito de detección de distancia sin leds}
+  \label{fig:sound-circuit-basic}
+\end{figure}
+
+Se adjunta un vídeo del circuito final con los leds en funcionamiento.
+
+\subsection{Programación de la placa}
+
+Hay dos versiones del circuito, una para cada cada uno de las dos
+funcionalidades diferentes.
+
+El primero detecta las distancias y enciende la luz dependiendo de si es mayor o
+menor de unos límites, y el segundo detecta eventos en base a la primera
+lectura.
+
+\begin{listing}[H]
+\inputminted[frame=single, framesep=.5em, linenos, rulecolor=\color{gray}]{java}{../sound/sound.ino}
+\caption{Código del programa que enciende los LEDs progresivamente}
+\end{listing}
+
+\begin{listing}[H]
+\inputminted[frame=single, framesep=.5em, linenos, rulecolor=\color{gray}]{java}{../sound/sound-detector-reference.ino}
+\caption{Código del programa que detecta eventos}
+\end{listing}
+
+\subsection{Funcionamiento del circuito}
+
+En cuanto al ejercicio a, el sensor de ultrasonidos ofrece una medición de $2cm$
+a $400cm$, con una precisión que puede alcanzar los $3mm$. El principio básico
+de funcionamiento es:
+
+\begin{enumerate}
+  \item{Se usa el trigger IO para enviar un pico en una señal (esas son las
+    escrituras \texttt{LOW}, \texttt{HIGH}, \texttt{LOW}).
+
+    Nótese que en el ejemplo que vimos del uso de la placa
+    (\cite{web:arduino-sound-example})se forzaba un periodo (vía
+    \texttt{sleepMicroseconds}) para que fuera detectable, pero resultó no ser
+    necesario.}
+
+  \item{El módulo envía automáticamente ocho ciclos de ráfagas de ultrasonidos a
+    40 KHz y detecta si existe una señal de vuelta.}
+
+  \item{Esperamos a la señal de vuelta, con la función \texttt{duration}, y el
+    tiempo que hemos estado esperando nos sirve para calcular la distancia.}
+\end{enumerate}
+
+La fórmula para calcular la distancia ($d$) dada la duración ($t$) es la
+siguiente:
+
+$$d = \frac{t}{2} \cdot \frac{10}{291}$$
+
+Una vez tenemos la distancia, podemos hacer lo que queramos con ella.
+
+\section{Referencias comentadas}
+
+La única referencia que hemos utilizado, aparte de la documentación que ya está
+comentada en el anterior informe es el ejemplo del detector de distancia
+(\cite{web:arduino-sound-example}).
+
+No hay demasiado que comentar, nos salvó un buen rato de mirar el datasheet para
+deducir los valores que teníamos que utilizar.
+
+\section{Otros adjuntos}
+
+Aparte del código como es habitual, y todo el contenido del informe, se adjuntan
+dos vídeos del funcionamiento del circuito de detección de distancia, en la
+carpeta \texttt{video}, uno mostrando el funcionamiento del detector de paso de
+objetos, y otro mostrando el segundo programa.
 
 \bibliographystyle{plainnat}
 \bibliography{bibliography}

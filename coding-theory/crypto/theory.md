@@ -132,9 +132,9 @@ theorem*](https://en.wikipedia.org/wiki/Chinese_remainder_theorem).
 ### Otherwise
 
 We can always factorise $n$, and then:
-$$n = p_1^{r_1} + p_2^{r_2} + \dots + p_h^{r_h}$$
-$$\varphi(n) = \varphi(p_1^{r_1}) + \varphi(p_2^{r_2}) + \dots
-+ \varphi(p_h^{r_h})$$
+$$n = p_1^{r_1} \cdot p_2^{r_2} \cdot \dots \cdot p_h^{r_h}$$
+$$\varphi(n) = \varphi(p_1^{r_1}) \cdot \varphi(p_2^{r_2}) \cdot \dots \cdot
+\varphi(p_h^{r_h})$$
 
 ### Implications for cryptography
 
@@ -410,9 +410,63 @@ transformation, in order to make a ciphering function like:
 $$f_E: \mathbb{Z}/n \times \mathbb{Z}/n \rightarrow \mathbb{Z}/n \times
 \mathbb{Z}/n$$
 
-Defined as:
+So:
 
 $$\begin{aligned}
 f_E &\rightarrow \gamma \cdot f \cdot \gamma \\
 f_D &\rightarrow \gamma \cdot f^{-1} \cdot \gamma^{-1}
 \end{aligned}$$
+
+### Generalisation
+
+Digraph ciphering can be generalised easily to allow going from
+$(\mathbb{Z}/n)^{\eta}$ to $\mathbb{Z}/(n^{\eta})$, in the same way.
+
+## Encryption via matrices
+
+Let's define an application as follows:
+
+$$\begin{aligned}
+f_E: \mathbb{Z}/n \times \mathbb{Z}/n &\rightarrow \mathbb{Z}/n \times
+\mathbb{Z}/n \\
+(x_1, x_2) &\rightarrow A \cdot X + B
+\end{aligned}$$
+
+
+Where:
+
+$$A = \begin{pmatrix}a & b \\ c & d \end{pmatrix}$$
+
+$$B = (b_1, b_2)$$
+
+$$a, b, c, d, b_1, b_2 \in \mathbb{Z}/n \times \mathbb{Z}/n$$
+
+Then, encryption for $X = (x_1, x_2)$ would work like:
+
+$$A \cdot \begin{pmatrix}x_1 \\ x_2 \end{pmatrix} = (ax_1 + bx_2, cx_1 + dx_2)$$
+
+It's clear that it's only useful if $A$ is invertible in $\mathbb{Z}/n$. For
+example, in a 2x2 matrix, we know that:
+
+$$A^{-1} = \frac{1}{|A|} \begin{pmatrix}d & -b \\ -c & a\end{pmatrix}$$
+
+So, for $A^{-1}$ to exist, $|A|$ must be invertible in $\mathbb{Z}/n$, and we've
+already proved that can only be true if and only if $mcd(|A|, n) = 1$.
+
+## DES (*Data Encryption Standard*)
+
+This part is completely non-mandatory, and only mentioned here for completeness.
+
+TODO: I actually have some notes about it in the notebook, but the important
+bits are that **it performs non-linear transformations**, based on table
+lookups, and also that it achieves **confusion and diffusion** (a concept coined
+by Shannon):
+
+Confusion
+: This means that the relation between input and output is hard to predict. This
+is achieved in *DES* due to non-linear transformations between the input and the
+output that depend on the key.
+
+Diffusion
+: This means that radical changes to the output happen when minimal changes are
+made to the input.

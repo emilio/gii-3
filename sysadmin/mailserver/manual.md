@@ -3,6 +3,7 @@ title: Instalación y configuración de Postfix
 subtitle: Seminario - Administración de sistemas
 lang: spanish
 babel-lang: spanish
+numbersections: true
 polyglossia-lang:
   options: []
   name: spanish

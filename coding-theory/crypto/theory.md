@@ -369,6 +369,8 @@ We'll distinguish two types of cryptography:
      the encryption function. For it to work, it's required that $f_D$ is
      difficult to obtain.
 
+# Encryption types
+
 ## Cypher by affine transformations
 
 $$\begin{aligned}

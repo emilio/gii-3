@@ -44,11 +44,10 @@ $chart->set_size( width => 720, height => 480 );
 $worksheet->insert_chart('C1', $chart);
 $workbook->close();
 
-exit 1;
-
 my $mail = Email::Send::SMTP::Gmail->new(
-  -smtp => 'gmail.com',
+  -smtp => 'smtp.gmail.com',
   -login => $ENV{'GMAIL_USER'},
+  -port => 587,
   -pass => $ENV{'GMAIL_PASS'});
 
 my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
@@ -59,6 +58,6 @@ $mail->send(
   -subject => $subject,
   -verbose => '1',
   -body => 'Just testing it',
-  -attachments => 'full_path_to_file');
+  -attachments => 'out.xlsx');
 
 $mail->bye;

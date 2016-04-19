@@ -1,0 +1,67 @@
+#!/bin/sh
+
+# This is the only file that doesn't run Perl
+# This files scan the build directory (in $1),
+# looking for perl files, gets its dependencies
+# with perl -d:ModList, and either puts them on
+# $2
+
+pretty_echo() {
+  echo -e "\e[34m$0:\e[0m $@"
+}
+
+error() {
+  pretty_echo "\e[91merror: $@\e[0m"
+}
+
+LOG_FILE=$(mktemp)
+checked_command() {
+  pretty_echo "$@"
+  $@ > $LOG_FILE 2>&1
+  if [ $? -ne 0 ]; then
+    error "command failed: $@"
+    error "output"
+    echo -e "\e[31m"
+    cat $LOG_FILE
+    echo -e "\e[0m"
+    rm $LOG_FILE
+    exit 1
+  fi
+}
+
+BASE_DIR="$1"
+
+if [ ! -d "$BASE_DIR" ]; then
+  error "$BASE_DIR is not a directory"
+  exit 1
+fi
+
+TARGET="$2"
+if [ "x$TARGET" == "x" ]; then
+  error "target file not specified"
+  exit 1
+fi
+
+
+if [ "$(which cpan)x" == "x" ]; then
+  error "cpan is not installed"
+  exit 1
+fi
+
+cd "$BASE_DIR"
+
+
+TMP_TARGET=$(mktemp)
+echo > $TMP_TARGET
+echo > $TMP_TARGET.tmp
+for file in $(find . -type f -name '*.pl'); do
+  perl -d:Modlist "$file" 2> "$TMP_TARGET.tmp"
+  if [ $? -ne 0 ]; then
+    error "Some module for $file (or Devel::Modlist) seems not to be installed"
+    exit 1
+  fi
+  cat "$TMP_TARGET.tmp" > "$TMP_TARGET"
+done
+
+pretty_echo "Finishing collecting dependencies, dumping to $TARGET"
+cat "$TMP_TARGET" | grep -v 'usage:' | cut -d " " -f 1 | sort | uniq > "$TARGET"

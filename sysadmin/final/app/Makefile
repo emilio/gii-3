@@ -4,7 +4,7 @@ REQ := requirements.perl.txt
 
 # Need to be kept in the correct order to
 # satisfy dependency chains
-MODULES := apache2 mail moodle cgi
+MODULES := apache2 moodle cgi mail
 INSTALLED_MODULES := $(patsubst %, modules/%, $(MODULES:=.installed))
 
 .PHONY: cpan-install

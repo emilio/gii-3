@@ -1,6 +1,6 @@
 MOODLE_DOWNLOAD_URL := https://download.moodle.org/download.php/direct/stable30/moodle-latest-30.tgz
 MOODLE_TARGET_DIR ?= /var/www/html/moodle
-MOODLE_DATA_DIR ?= /var/moodle
+MOODLE_DATA_DIR ?= /var/moodle/data
 MOODLE_DB_USER ?= moodle
 MOODLE_DB_NAME ?= moodle
 MOODLE_ADMIN_USER ?= admin
@@ -13,10 +13,6 @@ install:
 	curl $(MOODLE_DOWNLOAD_URL) | tar -xzvf -
 	rm -rf $(MOODLE_TARGET_DIR)
 	mv moodle $(MOODLE_TARGET_DIR)
-	chown -R root $(MOODLE_TARGET_DIR)
-	chmod -R 0755 $(MOODLE_TARGET_DIR)
-	find $(MOODLE_TARGET_DIR) -type f -exec chmod 0644 {} \;
-	chown www-data $(MOODLE_TARGET_DIR)
 	# Setup data dir
 	mkdir -p $(MOODLE_DATA_DIR)
 	chmod 0777 $(MOODLE_DATA_DIR)
@@ -34,3 +30,8 @@ install:
 	  --dataroot=$(MOODLE_DATA_DIR) \
 	  --adminuser=$(MOODLE_ADMIN_PASS) \
 	  --adminpass=$(MOODLE_ADMIN_PASS)
+	# Fix permissions
+	chown -R root $(MOODLE_TARGET_DIR)
+	chmod -R 0755 $(MOODLE_TARGET_DIR)
+	find $(MOODLE_TARGET_DIR) -type f -exec chmod 0644 {} \;
+	chown www-data $(MOODLE_TARGET_DIR)

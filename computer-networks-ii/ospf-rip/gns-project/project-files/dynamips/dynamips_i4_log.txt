@@ -1,15 +1,51 @@
-Mar 29 00:44:00.335 HYPERVISOR: Release 0.2.14-x86/Windows (tag 2014092320)
-Mar 29 00:44:00.340 HYPERVISOR: Started on TCP port = 64286.
-Mar 29 00:44:00.838 HYPERVISOR: exec_cmd: hypervisor version 
-Mar 29 00:44:00.896 HYPERVISOR: exec_cmd: hypervisor uuid 
-Mar 29 00:44:00.967 HYPERVISOR: exec_cmd: hypervisor working_dir C:\Users\Nines\Documents\GNS3\projects\RIPOSPF\project-files\dynamips 
-Mar 29 00:44:00.968 GENERAL: working_dir=C:\Users\Nines\Documents\GNS3\projects\RIPOSPF\project-files\dynamips
-Mar 29 00:44:01.024 HYPERVISOR: exec_cmd: nio_bridge create HUB1 
-Mar 29 00:44:02.062 HYPERVISOR: exec_cmd: nio create_udp udp-c30a629a-e957-47dc-a901-9689b7c5d9ad 10001 127.0.0.1 10000 
-Mar 29 00:44:02.113 HYPERVISOR: exec_cmd: nio_bridge add_nio HUB1 udp-c30a629a-e957-47dc-a901-9689b7c5d9ad 
-Mar 29 00:44:03.878 HYPERVISOR: exec_cmd: nio create_udp udp-28b2277c-f1f6-4a52-b952-b3a8458c6b4a 10012 127.0.0.1 10013 
-Mar 29 00:44:03.988 HYPERVISOR: exec_cmd: nio_bridge add_nio HUB1 udp-28b2277c-f1f6-4a52-b952-b3a8458c6b4a 
-Mar 29 00:44:26.917 HYPERVISOR: exec_cmd: nio_bridge delete HUB1 
-Mar 29 00:44:26.949 HYPERVISOR: exec_cmd: hypervisor stop 
-Mar 29 00:44:27.199 HYPERVISOR: Stopped.
-Mar 29 00:44:27.199 GENERAL: reset done.
+Apr 21 19:40:20.010 HYPERVISOR: Release 0.2.15-amd64/Linux (tag 2015060118)
+Apr 21 19:40:20.010 HYPERVISOR: Started on IP = 127.0.0.1, TCP port = 49802.
+Apr 21 19:40:20.251 HYPERVISOR: exec_cmd: hypervisor version 
+Apr 21 19:40:20.252 HYPERVISOR: exec_cmd: hypervisor working_dir /home/emilio/projects/gii-3/computer-networks-ii/ospf-rip/gns-project/project-files/dynamips 
+Apr 21 19:40:20.252 GENERAL: working_dir=/home/emilio/projects/gii-3/computer-networks-ii/ospf-rip/gns-project/project-files/dynamips
+Apr 21 19:40:20.253 HYPERVISOR: exec_cmd: vm create R5 5 c7200 
+Apr 21 19:40:20.253 VM: VM R5 created.
+Apr 21 19:40:20.254 HYPERVISOR: exec_cmd: vm set_con_tcp_port R5 2004 
+Apr 21 19:40:20.256 HYPERVISOR: exec_cmd: c7200 get_mac_addr R5 
+Apr 21 19:40:20.261 HYPERVISOR: exec_cmd: vm get_status R5 
+Apr 21 19:40:20.263 HYPERVISOR: exec_cmd: vm slot_add_binding R5 0 0 C7200-IO-FE 
+Apr 21 19:40:20.263 HYPERVISOR: exec_cmd: vm get_status R5 
+Apr 21 19:40:20.264 HYPERVISOR: exec_cmd: vm slot_add_binding R5 2 0 PA-2FE-TX 
+Apr 21 19:40:20.265 HYPERVISOR: exec_cmd: vm set_disk0 R5 0 
+Apr 21 19:40:20.266 HYPERVISOR: exec_cmd: vm set_ios R5 /home/emilio/GNS3/images/IOS/c7200-jk9s-mz.124-13b.image 
+Apr 21 19:40:20.267 HYPERVISOR: exec_cmd: vm get_status R5 
+Apr 21 19:40:20.268 HYPERVISOR: exec_cmd: vm slot_add_binding R5 3 0 PA-GE 
+Apr 21 19:40:20.268 HYPERVISOR: exec_cmd: vm get_status R5 
+Apr 21 19:40:20.271 HYPERVISOR: exec_cmd: vm slot_add_binding R5 4 0 PA-GE 
+Apr 21 19:40:20.272 HYPERVISOR: exec_cmd: vm get_status R5 
+Apr 21 19:40:20.273 HYPERVISOR: exec_cmd: vm slot_add_binding R5 1 0 PA-2FE-TX 
+Apr 21 19:40:20.273 HYPERVISOR: exec_cmd: vm set_ram R5 512 
+Apr 21 19:40:20.274 HYPERVISOR: exec_cmd: c7200 set_mac_addr R5 ca05.25d0.0000 
+Apr 21 19:40:20.274 HYPERVISOR: exec_cmd: vm get_status R5 
+Apr 21 19:40:20.275 HYPERVISOR: exec_cmd: vm set_idle_pc R5 0x608724c0 
+Apr 21 19:40:20.275 HYPERVISOR: exec_cmd: vm set_nvram R5 512 
+Apr 21 19:40:20.276 HYPERVISOR: exec_cmd: vm set_config R5 configs/i5_startup-config.cfg 
+Apr 21 19:40:20.631 HYPERVISOR: exec_cmd: nio create_udp udp-a48643b8-994e-4beb-a8db-60e550eeb870 10001 127.0.0.1 10003 
+Apr 21 19:40:20.632 HYPERVISOR: exec_cmd: vm slot_add_nio_binding R5 3 0 udp-a48643b8-994e-4beb-a8db-60e550eeb870 
+Apr 21 19:40:20.632 HYPERVISOR: exec_cmd: vm get_status R5 
+Apr 21 19:40:20.883 HYPERVISOR: exec_cmd: nio create_udp udp-beb18317-33b5-4c01-8d41-7c3e8b86aa95 10016 127.0.0.1 10017 
+Apr 21 19:40:20.884 HYPERVISOR: exec_cmd: vm slot_add_nio_binding R5 4 0 udp-beb18317-33b5-4c01-8d41-7c3e8b86aa95 
+Apr 21 19:40:20.884 HYPERVISOR: exec_cmd: vm get_status R5 
+Apr 21 19:40:27.891 HYPERVISOR: exec_cmd: vm set_ghost_status R5 2 
+Apr 21 19:40:27.892 HYPERVISOR: exec_cmd: vm set_ghost_file R5 c7200-jk9s-mz.124-13b.image-512.ghost 
+Apr 21 19:40:27.892 HYPERVISOR: exec_cmd: vm get_status R5 
+Apr 21 19:40:27.893 HYPERVISOR: exec_cmd: vm start R5 
+Apr 21 19:47:29.149 HYPERVISOR: exec_cmd: nio bind_filter udp-beb18317-33b5-4c01-8d41-7c3e8b86aa95 2 capture 
+Apr 21 19:47:29.150 HYPERVISOR: exec_cmd: nio setup_filter udp-beb18317-33b5-4c01-8d41-7c3e8b86aa95 2 en10mb /home/emilio/projects/gii-3/computer-networks-ii/ospf-rip/gns-project/project-files/captures/R5_GigabitEthernet4-0_to_R1_GigabitEthernet4-0.pcap 
+Apr 21 20:37:50.169 HYPERVISOR: exec_cmd: vm get_status R5 
+Apr 21 20:37:50.170 HYPERVISOR: exec_cmd: vm stop R5 
+Apr 21 20:37:50.268 VM: VM R5 shutdown.
+Apr 21 20:37:50.270 HYPERVISOR: exec_cmd: vm extract_config R5 
+Apr 21 20:37:58.265 HYPERVISOR: exec_cmd: vm extract_config R5 
+Apr 21 20:38:00.603 HYPERVISOR: exec_cmd: vm get_status R5 
+Apr 21 20:38:00.605 HYPERVISOR: exec_cmd: vm extract_config R5 
+Apr 21 20:38:00.607 HYPERVISOR: exec_cmd: vm delete R5 
+Apr 21 20:38:00.607 VM: VM R5 destroyed.
+Apr 21 20:38:00.608 HYPERVISOR: exec_cmd: hypervisor stop 
+Apr 21 20:38:01.036 HYPERVISOR: Stopped.
+Apr 21 20:38:01.036 GENERAL: reset done.

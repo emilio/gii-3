@@ -6,72 +6,6 @@
     "topology": {
         "links": [
             {
-                "description": "Link from PC1 port Ethernet0 to HUB1 port 1",
-                "destination_node_id": 20,
-                "destination_port_id": 136,
-                "destination_port_label": {
-                    "color": "#ff000000",
-                    "font": "TypeWriter,10,-1,5,75,0,0,0,0,0",
-                    "text": "1",
-                    "x": 45.84257543610596,
-                    "y": -19.6320873902076
-                },
-                "id": 1,
-                "source_node_id": 22,
-                "source_port_id": 152,
-                "source_port_label": {
-                    "color": "#ff000000",
-                    "font": "TypeWriter,10,-1,5,75,0,0,0,0,0",
-                    "text": "e0",
-                    "x": -24.553219295132436,
-                    "y": 37.790109237759495
-                }
-            },
-            {
-                "description": "Link from HUB2 port 2 to PC2 port Ethernet0",
-                "destination_node_id": 23,
-                "destination_port_id": 153,
-                "destination_port_label": {
-                    "color": "#ff000000",
-                    "font": "TypeWriter,10,-1,5,75,0,0,0,0,0",
-                    "text": "e0",
-                    "x": 68.64437294583584,
-                    "y": 38.36093236458963
-                },
-                "id": 2,
-                "source_node_id": 21,
-                "source_port_id": 145,
-                "source_port_label": {
-                    "color": "#ff000000",
-                    "font": "TypeWriter,10,-1,5,75,0,0,0,0,0",
-                    "text": "2",
-                    "x": 33.85562705416416,
-                    "y": 27.13906763541037
-                }
-            },
-            {
-                "description": "Link from R2 port GigabitEthernet4/0 to R3 port GigabitEthernet3/0",
-                "destination_node_id": 17,
-                "destination_port_id": 117,
-                "destination_port_label": {
-                    "color": "#ff000000",
-                    "font": "TypeWriter,10,-1,5,75,0,0,0,0,0",
-                    "text": "g3/0",
-                    "x": -55.9547255089775,
-                    "y": -19.097394023382023
-                },
-                "id": 3,
-                "source_node_id": 16,
-                "source_port_id": 111,
-                "source_port_label": {
-                    "color": "#ff000000",
-                    "font": "TypeWriter,10,-1,5,75,0,0,0,0,0",
-                    "text": "g4/0",
-                    "x": 72.9547255089775,
-                    "y": 20.097394023382023
-                }
-            },
-            {
                 "description": "Link from R3 port GigabitEthernet4/0 to R4 port GigabitEthernet3/0",
                 "destination_node_id": 18,
                 "destination_port_id": 124,
@@ -82,7 +16,7 @@
                     "x": 0.9157904249905471,
                     "y": 37.98951522458725
                 },
-                "id": 4,
+                "id": 1,
                 "source_node_id": 17,
                 "source_port_id": 118,
                 "source_port_label": {
@@ -104,7 +38,7 @@
                     "x": 83.22107757299707,
                     "y": 10.315355122584208
                 },
-                "id": 5,
+                "id": 2,
                 "source_node_id": 18,
                 "source_port_id": 125,
                 "source_port_label": {
@@ -113,6 +47,72 @@
                     "text": "g4/0",
                     "x": -74.22107757299707,
                     "y": -20.315355122584208
+                }
+            },
+            {
+                "description": "Link from PC1 port Ethernet0 to HUB1 port 1",
+                "destination_node_id": 20,
+                "destination_port_id": 136,
+                "destination_port_label": {
+                    "color": "#ff000000",
+                    "font": "TypeWriter,10,-1,5,75,0,0,0,0,0",
+                    "text": "1",
+                    "x": 45.84257543610596,
+                    "y": -19.6320873902076
+                },
+                "id": 3,
+                "source_node_id": 22,
+                "source_port_id": 152,
+                "source_port_label": {
+                    "color": "#ff000000",
+                    "font": "TypeWriter,10,-1,5,75,0,0,0,0,0",
+                    "text": "e0",
+                    "x": -24.553219295132436,
+                    "y": 37.790109237759495
+                }
+            },
+            {
+                "description": "Link from R2 port GigabitEthernet4/0 to R3 port GigabitEthernet3/0",
+                "destination_node_id": 17,
+                "destination_port_id": 117,
+                "destination_port_label": {
+                    "color": "#ff000000",
+                    "font": "TypeWriter,10,-1,5,75,0,0,0,0,0",
+                    "text": "g3/0",
+                    "x": -55.9547255089775,
+                    "y": -19.097394023382023
+                },
+                "id": 4,
+                "source_node_id": 16,
+                "source_port_id": 111,
+                "source_port_label": {
+                    "color": "#ff000000",
+                    "font": "TypeWriter,10,-1,5,75,0,0,0,0,0",
+                    "text": "g4/0",
+                    "x": 72.9547255089775,
+                    "y": 20.097394023382023
+                }
+            },
+            {
+                "description": "Link from HUB2 port 2 to PC2 port Ethernet0",
+                "destination_node_id": 23,
+                "destination_port_id": 153,
+                "destination_port_label": {
+                    "color": "#ff000000",
+                    "font": "TypeWriter,10,-1,5,75,0,0,0,0,0",
+                    "text": "e0",
+                    "x": 68.64437294583584,
+                    "y": 38.36093236458963
+                },
+                "id": 5,
+                "source_node_id": 21,
+                "source_port_id": 145,
+                "source_port_label": {
+                    "color": "#ff000000",
+                    "font": "TypeWriter,10,-1,5,75,0,0,0,0,0",
+                    "text": "2",
+                    "x": 33.85562705416416,
+                    "y": 27.13906763541037
                 }
             },
             {
@@ -218,9 +218,12 @@
                 },
                 "ports": [
                     {
-                        "adapter_number": 0,
-                        "id": 112,
-                        "name": "FastEthernet0/0",
+                        "adapter_number": 3,
+                        "description": "connected to R1 on port GigabitEthernet3/0",
+                        "id": 110,
+                        "link_id": 8,
+                        "name": "GigabitEthernet3/0",
+                        "nio": "NIO_UDP",
                         "port_number": 0
                     },
                     {
@@ -236,19 +239,10 @@
                         "port_number": 1
                     },
                     {
-                        "adapter_number": 3,
-                        "description": "connected to R1 on port GigabitEthernet3/0",
-                        "id": 110,
-                        "link_id": 8,
-                        "name": "GigabitEthernet3/0",
-                        "nio": "NIO_UDP",
-                        "port_number": 0
-                    },
-                    {
                         "adapter_number": 4,
                         "description": "connected to R3 on port GigabitEthernet3/0",
                         "id": 111,
-                        "link_id": 3,
+                        "link_id": 4,
                         "name": "GigabitEthernet4/0",
                         "nio": "NIO_UDP",
                         "port_number": 0
@@ -264,6 +258,12 @@
                         "id": 114,
                         "name": "FastEthernet1/1",
                         "port_number": 1
+                    },
+                    {
+                        "adapter_number": 0,
+                        "id": 112,
+                        "name": "FastEthernet0/0",
+                        "port_number": 0
                     }
                 ],
                 "properties": {
@@ -324,9 +324,12 @@
                 },
                 "ports": [
                     {
-                        "adapter_number": 0,
-                        "id": 119,
-                        "name": "FastEthernet0/0",
+                        "adapter_number": 3,
+                        "description": "connected to R2 on port GigabitEthernet4/0",
+                        "id": 117,
+                        "link_id": 4,
+                        "name": "GigabitEthernet3/0",
+                        "nio": "NIO_UDP",
                         "port_number": 0
                     },
                     {
@@ -342,19 +345,10 @@
                         "port_number": 1
                     },
                     {
-                        "adapter_number": 3,
-                        "description": "connected to R2 on port GigabitEthernet4/0",
-                        "id": 117,
-                        "link_id": 3,
-                        "name": "GigabitEthernet3/0",
-                        "nio": "NIO_UDP",
-                        "port_number": 0
-                    },
-                    {
                         "adapter_number": 4,
                         "description": "connected to R4 on port GigabitEthernet3/0",
                         "id": 118,
-                        "link_id": 4,
+                        "link_id": 1,
                         "name": "GigabitEthernet4/0",
                         "nio": "NIO_UDP",
                         "port_number": 0
@@ -370,6 +364,12 @@
                         "id": 121,
                         "name": "FastEthernet1/1",
                         "port_number": 1
+                    },
+                    {
+                        "adapter_number": 0,
+                        "id": 119,
+                        "name": "FastEthernet0/0",
+                        "port_number": 0
                     }
                 ],
                 "properties": {
@@ -430,11 +430,11 @@
                 },
                 "ports": [
                     {
-                        "adapter_number": 0,
-                        "description": "connected to HUB2 on port 1",
-                        "id": 126,
-                        "link_id": 6,
-                        "name": "FastEthernet0/0",
+                        "adapter_number": 3,
+                        "description": "connected to R3 on port GigabitEthernet4/0",
+                        "id": 124,
+                        "link_id": 1,
+                        "name": "GigabitEthernet3/0",
                         "nio": "NIO_UDP",
                         "port_number": 0
                     },
@@ -451,19 +451,10 @@
                         "port_number": 1
                     },
                     {
-                        "adapter_number": 3,
-                        "description": "connected to R3 on port GigabitEthernet4/0",
-                        "id": 124,
-                        "link_id": 4,
-                        "name": "GigabitEthernet3/0",
-                        "nio": "NIO_UDP",
-                        "port_number": 0
-                    },
-                    {
                         "adapter_number": 4,
                         "description": "connected to R5 on port GigabitEthernet3/0",
                         "id": 125,
-                        "link_id": 5,
+                        "link_id": 2,
                         "name": "GigabitEthernet4/0",
                         "nio": "NIO_UDP",
                         "port_number": 0
@@ -479,6 +470,15 @@
                         "id": 128,
                         "name": "FastEthernet1/1",
                         "port_number": 1
+                    },
+                    {
+                        "adapter_number": 0,
+                        "description": "connected to HUB2 on port 1",
+                        "id": 126,
+                        "link_id": 6,
+                        "name": "FastEthernet0/0",
+                        "nio": "NIO_UDP",
+                        "port_number": 0
                     }
                 ],
                 "properties": {
@@ -539,9 +539,12 @@
                 },
                 "ports": [
                     {
-                        "adapter_number": 0,
-                        "id": 133,
-                        "name": "FastEthernet0/0",
+                        "adapter_number": 3,
+                        "description": "connected to R4 on port GigabitEthernet4/0",
+                        "id": 131,
+                        "link_id": 2,
+                        "name": "GigabitEthernet3/0",
+                        "nio": "NIO_UDP",
                         "port_number": 0
                     },
                     {
@@ -555,15 +558,6 @@
                         "id": 130,
                         "name": "FastEthernet2/1",
                         "port_number": 1
-                    },
-                    {
-                        "adapter_number": 3,
-                        "description": "connected to R4 on port GigabitEthernet4/0",
-                        "id": 131,
-                        "link_id": 5,
-                        "name": "GigabitEthernet3/0",
-                        "nio": "NIO_UDP",
-                        "port_number": 0
                     },
                     {
                         "adapter_number": 4,
@@ -585,6 +579,12 @@
                         "id": 135,
                         "name": "FastEthernet1/1",
                         "port_number": 1
+                    },
+                    {
+                        "adapter_number": 0,
+                        "id": 133,
+                        "name": "FastEthernet0/0",
+                        "port_number": 0
                     }
                 ],
                 "properties": {
@@ -647,7 +647,7 @@
                     {
                         "description": "connected to PC1 on port Ethernet0",
                         "id": 136,
-                        "link_id": 1,
+                        "link_id": 3,
                         "name": "1",
                         "nio": "NIO_UDP",
                         "port_number": 1
@@ -722,7 +722,7 @@
                     {
                         "description": "connected to PC2 on port Ethernet0",
                         "id": 145,
-                        "link_id": 2,
+                        "link_id": 5,
                         "name": "2",
                         "nio": "NIO_UDP",
                         "port_number": 2
@@ -781,7 +781,7 @@
                         "adapter_number": 0,
                         "description": "connected to HUB1 on port 1",
                         "id": 152,
-                        "link_id": 1,
+                        "link_id": 3,
                         "name": "Ethernet0",
                         "nio": "NIO_UDP",
                         "port_number": 0
@@ -814,7 +814,7 @@
                         "adapter_number": 0,
                         "description": "connected to HUB2 on port 2",
                         "id": 153,
-                        "link_id": 2,
+                        "link_id": 5,
                         "name": "Ethernet0",
                         "nio": "NIO_UDP",
                         "port_number": 0
@@ -845,11 +845,11 @@
                 },
                 "ports": [
                     {
-                        "adapter_number": 0,
-                        "description": "connected to HUB1 on port 2",
-                        "id": 105,
-                        "link_id": 7,
-                        "name": "FastEthernet0/0",
+                        "adapter_number": 3,
+                        "description": "connected to R2 on port GigabitEthernet3/0",
+                        "id": 103,
+                        "link_id": 8,
+                        "name": "GigabitEthernet3/0",
                         "nio": "NIO_UDP",
                         "port_number": 0
                     },
@@ -864,15 +864,6 @@
                         "id": 102,
                         "name": "FastEthernet2/1",
                         "port_number": 1
-                    },
-                    {
-                        "adapter_number": 3,
-                        "description": "connected to R2 on port GigabitEthernet3/0",
-                        "id": 103,
-                        "link_id": 8,
-                        "name": "GigabitEthernet3/0",
-                        "nio": "NIO_UDP",
-                        "port_number": 0
                     },
                     {
                         "adapter_number": 4,
@@ -894,6 +885,15 @@
                         "id": 107,
                         "name": "FastEthernet1/1",
                         "port_number": 1
+                    },
+                    {
+                        "adapter_number": 0,
+                        "description": "connected to HUB1 on port 2",
+                        "id": 105,
+                        "link_id": 7,
+                        "name": "FastEthernet0/0",
+                        "nio": "NIO_UDP",
+                        "port_number": 0
                     }
                 ],
                 "properties": {
@@ -1055,5 +1055,5 @@
         ]
     },
     "type": "topology",
-    "version": "1.4.1"
+    "version": "1.4.5"
 }

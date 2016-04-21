@@ -1,1 +1,2 @@
 *.installed
+modules/mail/config/ssmtp.conf

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # This is the only file that doesn't run Perl
 # This files scan the build directory (in $1),
@@ -37,13 +37,13 @@ if [ ! -d "$BASE_DIR" ]; then
 fi
 
 TARGET="$2"
-if [ "x$TARGET" == "x" ]; then
+if [ "x$TARGET" = "x" ]; then
   error "target file not specified"
   exit 1
 fi
 
 
-if [ "$(which cpan)x" == "x" ]; then
+if [ "x$(which cpan)" = "x" ]; then
   error "cpan is not installed"
   exit 1
 fi
@@ -58,6 +58,7 @@ for file in $(find . -type f -name '*.pl'); do
   perl -d:Modlist "$file" 2> "$TMP_TARGET.tmp"
   if [ $? -ne 0 ]; then
     error "Some module for $file (or Devel::Modlist) seems not to be installed"
+    cat "$TMP_TARGET.tmp"
     exit 1
   fi
   cat "$TMP_TARGET.tmp" > "$TMP_TARGET"

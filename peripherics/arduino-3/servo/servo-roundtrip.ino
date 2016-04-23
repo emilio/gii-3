@@ -1,4 +1,4 @@
-// Ultrasonic Ranging Module HC - SR04
+// Simple Servomotor
 //
 // https://www.sparkfun.com/products/9065
 //
@@ -11,7 +11,7 @@ const int SERVO_OUT = 9;
 const int MAX_ROTATION = 160;
 
 void setup() {
-  Serial.begin (9600);
+  Serial.begin(9600);
   servo.attach(SERVO_OUT);
 }
 

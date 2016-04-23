@@ -1,0 +1,135 @@
+\documentclass{article}
+
+\usepackage{fontspec}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{titlesec}
+\usepackage{titling}
+\usepackage{minted}
+\usepackage{natbib}
+\usepackage{xcolor}
+\usepackage{subcaption}
+\usepackage[a4paper, top=1in, bottom=1in]{geometry}
+
+\usepackage[shorthands=off,main=spanish]{babel}
+
+\renewcommand{\listingscaption}{Programa}
+\def\listingautorefname~#1\null{(Programa #1)\null}
+%\def\figureautorefname~#1\null{(Figura #1)\null}
+\def\figureautorefname~#1\null{(#1)\null}
+
+% \newcommand{\sectionbreak}{\clearpage}
+
+\pretitle{\begin{center} \includegraphics[width=200pt]{usal.png} \\ \vspace{3em} \LARGE}
+\title{Práctica 3 con Arduino \\ \large Periféricos}
+\author{Emilio Cobos Álvarez, Christian Bonal Martín, Alejandro Bodego}
+\date{18 de Abril de 2016}
+
+\begin{document}
+
+\maketitle
+
+\clearpage
+\tableofcontents
+\setlength{\parskip}{1em}
+\setlength{\parindent}{0pt}
+\newpage
+
+\section{Servomotor}
+
+En esta práctica de actuadores no pudimos realizar pruebas con el motor DC, pero
+lo que sí pudimos hacer es usar el servomotor.
+
+El servomotor es relativamente sencillo, y no digamos ya de utilizar gracias a
+las bibliotecas de Arduino.
+
+El ejercicio consistía en lo siguiente:
+
+\begin{itemize}
+  \item{Se controlará el funcionamiento de un servo como elemento de salida de
+      la siguiente manera: se simulará la apertura de una puerta (giro entre 0 y
+      90grados) de tal forma que la puerta se va abriendo a medida que el LDR
+      detecta más oscuridad.}
+\end{itemize}
+
+\subsection{Montaje del circuito}
+
+Lo primero que hicimos fue montar el circuito esquematizado en el guión de la
+práctica para poder experimentar y calibrar el servomotor.
+
+Una vez lo tuvimos montado y calibrado, comprobamos (inicialmente
+experimentalmente, y luego mirando
+\href{https://www.sparkfun.com/products/9065}{la página del
+producto}\footnote{Sí, ya sabemos que el orden debería de haber sido el
+inverso, pero...}) que sólo soportaba rotación hasta $160\deg$.
+
+Eso nos llevó a hacer un programa de prueba de tal manera que lo único que hacía
+era rotar de $0$ a $160\deg$ y viceversa.
+
+El circuito resultante de nuestro primer intento es el montaje básico:
+
+\begin{figure}[H]
+  \includegraphics[width=\linewidth]{../img/servo-basic.jpg}
+  \caption{Circuito servo básico}
+  \label{fig:servo-basic}
+\end{figure}
+
+Posteriormente, ya con el LDR integrado (y con las resistencias apropiadas,
+basándonos en las primeras prácticas), el resultado es el siguiente:
+
+\begin{figure}[H]
+  \includegraphics[width=\linewidth]{../img/servo-ldr.jpg}
+  \caption{Circuito servo con LDR}
+  \label{fig:servo-ldr}
+\end{figure}
+
+\subsection{Programación de la placa}
+
+\subsubsection{Circuito básico}
+
+La versión básica del programa nos sirvió para comprobar cómo funcionaba el
+servo, y no va mucho más allá de probar cómo funcionaba la biblioteca que
+proporcionaba Arduino:
+
+\begin{listing}[H]
+\inputminted[frame=single, framesep=.5em, linenos,
+rulecolor=\color{gray}]{cpp}{../servo/servo-roundtrip.ino}
+\caption{Programa básico}
+\end{listing}
+
+\subsubsection{Col el LDR}
+
+La versión con el LDR tiene algo más de complejidad, ya que no tomamos sólo los
+valores máximos y mínimos que obteníamos en esa habitación, sino que se adapta
+con el tiempo, cogiendo un valor en la primera lectura, y hayando el máximo y el
+mínimo a partir de ahí, pasando de $0$ a $160\deg$ entre ellos.
+
+\begin{listing}[H]
+\inputminted[frame=single, framesep=.5em, linenos,
+rulecolor=\color{gray}]{cpp}{../servo/servo.ino}
+\caption{Código del programa con el LDR}
+\end{listing}
+
+\section{Pantalla LCD}
+
+
+\section{Referencias comentadas}
+
+La única referencia que hemos utilizado para este informe, aparte de las ya
+referenciadas datasheets, es el tutorial de arduino para el servomotor
+(\cite{web:arduino-servo}).
+
+No hay tampoco demasiado que comentar, fue muy útil para ponerlo a funcionar
+rápido.
+
+\section{Otros adjuntos}
+
+Aparte del código como es habitual, y todo el contenido del informe, se adjunta
+un vídeo del funcionamiento del servomotor, en la carpeta \texttt{video}.
+
+\bibliographystyle{plainnat}
+\bibliography{bibliography}
+
+
+\end{document}

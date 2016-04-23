@@ -117,226 +117,412 @@ TODO: TOS 0 metrics
 
 ![show ip ospf database router](img/1-ospf-show-ip-ospf-database-router-r1.png)
 
-1.  Consulta la información de la base de datos de *Network Link States*
-    de R1 con: *show ip ospf database network.* Incluye y comenta la
-    salida obtenida*.*
+> 1.  Consulta la información de la base de datos de *Network Link States*
+>     de R1 con: *show ip ospf database network*. Incluye y comenta la
+>     salida obtenida.
+
+Esta es la base de datos de los routers que conocen OSPF. Como era de esperar
+el único router que aparece es él mismo.
+
+![show ip ospf database network](img/1-ospf-show-ip-ospf-database-network-r1.png)
+
+# Activación de R2
+
+> Para observar los mensajes que envíe R2 cuando se active OSPF, y los que
+> envíe R1 a consecuencia de la activación de R2, arranca *wireshark* en
+> los enlaces de R2 con R1 y R3 y en el enlace de R1 con R5.
+
+> A continuación, configura OSPF en el encaminador R2 para que su
+> identificador de *router* sea la mayor de sus direcciones IP y para que
+> exporte las rutas hacia las dos redes a las que está conectado. Incluye
+> aquí las órdenes:
+
+```
+config t
+router ospf 1
+network 10.0.0.0 255.0.0.0 area 1
+network 20.0.0.0 255.0.0.0 area 1
+router-id 20.0.0.1
+exit
+exit
+wr
+```
+
+
+> Activa los mensajes de depuración. Incluye aquí la orden
+
+```
+debug ip ospf events
+```
+
+![config and debug](img/1-ospf-enable-r2.png)
+
+> Espera dos minutos aproximadamente e interrumpe las capturas.
+> Analiza el comportamiento de R1 y R2 estudiando las capturas de tráfico,
+> los mensajes de depuración, consultando el estado de OSPF y de la orden
+> *show ip route ospf* en cada encaminador:
+
+> 1.  Observa la captura realizada entre R1 y R2 y responde a las
+>     siguientes cuestiones:
+>
+>     a.  ¿Qué tipo de mensajes aparecen cuando R1 detecta la presencia de
+>         R2 y viceversa? ¿Cuál es su propósito? ¿Qué IP de destino llevan
+>         esos mensajes?
+
+Tras el primer mensaje `Hello` de `R2` al grupo multicast, y tras haber recibido
+un Hello de `R1` por la misma vía, `R1` y `R2` sincronizan sus bases de datos
+usando mensajes `DB Description`.
+
+Estos mensajes van vía unicast al router interesado. Tras esos mensajes se
+realizan también `LS requests` (*Link State Requests*) mutuas vía unicast, que
+son respondidas con los correspondientes `LS updates` (también vía unicast).
+
+Cuando los routers individuales reciben las updates y cambia la información que
+almacenan, informan **al grupo multicast** de que la información ha cambiado con
+un `LS Update`, y cuando reciben la información vía multicast, envían la
+confirmación también vía multicast (`LS Acknowledge`).
+
+Si la información de su LSDB cambia por los datos contenidos en el `LS Update`,
+otro `LS Update` se enviará al grupo multicast.
 
-RESPUESTA
+![captura relevante](img/2-ospf-r1-connect-r2.png)
 
-Activación de R2
-----------------
+> 1.  a.  Observa los mensajes *LS Request* que envían R1 y R2. ¿Qué *LSA*
+>         pide cada uno al otro? ¿Qué IP de destino llevan estos mensajes?
 
-Para observar los mensajes que envíe R2 cuando se active OSPF, y los que
-envíe R1 a consecuencia de la activación de R2, arranca *wireshark* en
-los enlaces de R2 con R1 y R3 y en el enlace de R1 con R5.
+La IP de destino es la IP de la interfaz del router conectada directamente,
+pero el *Link State ID* es la ID del router, es decir la IP mayor del router en
+este caso.
 
-A continuación, configura OSPF en el encaminador R2 para que su
-identificador de *route*r sea la mayor de sus direcciones IP y para que
-exporte las rutas hacia las dos redes a las que está conectado. Incluye
-aquí las órdenes:
+Por ejemplo, en el primer *LS Request* de R1 a R2, tenemos un mensaje unicast de
+la dirección `10.0.0.1` a la dirección `10.0.0.2`, pero como el router OSPF de
+origen tenemos `50.0.0.2`, y como *Link State ID* tenemos la `20.0.0.1`, es
+decir, las IDs de R1 y R2 respectivamente.
 
-RESPUESTA
+De hecho, el paquete tiene `TTL=1`, por lo que no llegaría si la IP de destino
+estuviera en otra subred.
 
-Activa los mensajes de depuración. Incluye aquí la orden
+>1.  a.  Observa el primer mensaje *LS Update* que envía R1. Comprueba
+>        que se corresponde con el *LS Request* enviado por R2. Comprueba
+>        cómo se corresponde su contenido con lo almacenado en la base de
+>        datos de R1 analizada en el apartado anterior. Observa sus
+>        campos para ver si este mensaje incluye la información de que R1
+>        ha descubierto a R2 como vecino. ¿Crees que la información
+>        contenida en este mensaje deberá cambiar próximamente? ¿Por qué?
+>        Observa el campo *LS Age* del anuncio que viaja en el mensaje, y
+>        explica su valor.
 
-RESPUESTA
+Podemos comprobar cómo se corresponde con el de la Request de R2 porque podemos
+ver cómo tiene los campos `Link State ID` y `Advertising Router` iguales a la
+correspondiente Request (`50.0.0.2`).
 
-Espera dos minutos aproximadamente e interrumpe las capturas.
+No aparece la información de que R1 ha descubierto a R2, aparecen las tres
+conexiones directas de R1.
 
-Analiza el comportamiento de R1 y R2 estudiando las capturas de tráfico,
-los mensajes de depuración, consultando el estado de OSPF y de la orden
-*show ip route ospf* en cada encaminador:
+El contenido de este mensaje no tendrá que cambiar, porque es un mensaje
+LSA del router, es decir, sólo anuncia las interfaces configuradas, no qué
+routers son vecinos o similar[^had-to-drop-this-here], y en R1 ya constaba la
+conexión directa con esas tres redes.
 
-1.  Observa la captura realizada entre R1 y R2 y responde a las
-    siguientes cuestiones:
+Sobre el campo *LS Age*, es cuánto tiempo ha pasado desde que el LSA
+correspondiente fue generado. En este caso eran 400 segundos, que era
+aproximadamente el tiempo que había pasado desde que encendí el escenario.
 
-    a.  ¿Qué tipo de mensajes aparecen cuando R1 detecta la presencia de
-        R2 y viceversa? ¿Cuál es su propósito? ¿Qué IP de destino llevan
-        esos mensajes?
+![ls update R1 to R2](img/2-ospf-ls-update-r1-r2.png)
 
-> RESPUESTA
+[^had-to-drop-this-here]: Lo siento, tenía que dejar esto aquí:
+https://www.youtube.com/watch?v=aPtr43KHBGk
 
-1.  a.  Observa los mensajes *LS Request* que envían R1 y R2. ¿Qué *LSA*
-        pide cada uno al otro? ¿Qué IP de destino llevan estos mensajes?
+> 1.  a.  Observa el primer mensaje *LS Update* que envía R2. Comprueba
+>         que se corresponde con el *LS Request* enviado por R1. Observa
+>         sus campos para ver si este mensaje incluye la información de
+>         que R2 ha descubierto a R1 como vecino. ¿Crees que la
+>         información contenida en este mensaje deberá cambiar
+>         próximamente? ¿Por qué? Observa el campo *LS Age* del anuncio
+>         que viaja en el mensaje, y explica su valor.
 
-RESPUESTA
+Se puede comprobar de manera análoga, el Link State ID es `20.0.0.1`, que es el
+correspondiente al request de R1.
 
-1.  a.  Observa el primer mensaje *LS Update* que envía R1. Comprueba
-        que se corresponde con el *LS Request* enviado por R2. Comprueba
-        cómo se corresponde su contenido con lo almacenado en la base de
-        datos de R1 analizada en el apartado anterior. Observa sus
-        campos para ver si este mensaje incluye la información de que R1
-        ha descubierto a R2 como vecino. ¿Crees que la información
-        contenida en este mensaje deberá cambiar próximamente? ¿Por qué?
-        Observa el campo *LS Age* del anuncio que viaja en el mensaje, y
-        explica su valor.
+Igualmente, al ser un mensaje Router-LSA no tiene que contener los datos de que
+es vecino de R1, sino las interfaces configuradas. En estas no se incluye la
+red `20.0.0.0` todavía (supongo que por no tener un DR?), así que tendrá que
+cambiar e incluirlo.
 
-RESPUESTA
+El campo LS Age en este caso es de 9 segundos, que entra dentro de lo esperado.
 
-1.  a.  Observa el primer mensaje *LS Update* que envía R2. Comprueba
-        que se corresponde con el *LS Request* enviado por R1. Observa
-        sus campos para ver si este mensaje incluye la información de
-        que R2 ha descubierto a R1 como vecino. ¿Crees que la
-        información contenida en este mensaje deberá cambiar
-        próximamente? ¿Por qué? Observa el campo *LS Age* del anuncio
-        que viaja en el mensaje, y explica su valor.
+> 1.  a.  Observa el segundo y tercer mensajes *LS Update* que envía R1.
+>         ¿Responden a algún *LS Request* previo? ¿Por qué se envían? ¿Qué
+>         información contienen? Observa el campo *LS Age* de los anuncios
+>         que viajan en los mensajes, y explica su valor.
 
-RESPUESTA
+No, no responden a un LS Request previo, sino que se son enviados al grupo
+multicast.
 
-1.  a.  Observa el segundo y tercer mensajes *LS Update* que envía R1.
-        ¿Responden a algún *LS Request* previo? ¿Por qué se envían? ¿Qué
-        información contienen? Observa el campo *LS Age* de los anuncios
-        que viajan en los mensajes, y explica su valor.
+El segundo contiene las interfaces de R1 (router-LSA), con la interfaz
+`10.0.0.1` marcada como *transit* en vez de como *stub* (lo que quiere decir que
+mi respuesta a la penúltima pregunta era incorrecta). Esto quiere decir que
+ahora el tráfico entre routers OSPF puede pasar por esa red. Es enviado porque
+la información de la LSDB de R1 ha cambiado.
 
-RESPUESTA
+El tercero es un network-LSA, que contiene los dos routers OSPF conectados a la
+red e información sobre ellos (`50.0.0.2` y `20.0.0.1`). Es enviado porque la
+información de la topología de la red ha cambiado y R1 es el DR.
 
-1.  a.  Observa el segundo mensaje *LS Update* que envía R2. ¿Responde a
-        algún *LS Request* previo? ¿Por qué se envía? ¿Qué información
-        contiene? Observa el campo *LS Age* del anuncio que viaja en el
-        mensaje, y explica su valor.
+El campo LS Age es 1, porque la información acaba de ser incorporada a la LSDB.
 
-RESPUESTA
+> 1.  a.  Observa el segundo mensaje *LS Update* que envía R2. ¿Responde a
+>         algún *LS Request* previo? ¿Por qué se envía? ¿Qué información
+>         contiene? Observa el campo *LS Age* del anuncio que viaja en el
+>         mensaje, y explica su valor.
 
-1.  a.  ¿Por qué razón R2 no envía ningún mensaje *Network-LSA*?
+No, ese segundo mensaje no responde a ningún request, sino que se envía porque
+la LSDB de R2 ha cambiado dado que ahora se ha dado cuenta de que estaba
+conectado a la red `20.0.0.0`.
 
-RESPUESTA
+El LS Age es 1 por esa misma razón, es información recién añadida a la LSDB.
 
-1.  a.  Observa los mensajes *LS Acknowledge*. Mira su contenido para
-        comprobar a qué LSAs asienten.
+> 1.  a.  ¿Por qué razón R2 no envía ningún mensaje *Network-LSA*?
 
-RESPUESTA
+Porque no es el DR de la subred.
 
-1.  a.  Pasados 40 segundos del arranque de R2, ¿qué ocurre con los
-        campos *DR* y *BDR* de los mensajes *HELLO* que intercambian?
+> 1.  a.  Observa los mensajes *LS Acknowledge*. Mira su contenido para
+>        comprobar a qué LSAs asienten.
 
-RESPUESTA
+Podemos comprobar tanto el número de secuencia como el Link State ID (ojo,
+**dentro del LSA Header**) para asegurarnos a qué LSA están asintiendo. Estarán
+asintiendo a todos los mensajes provenientes del Link State ID y con menor
+número de secuencia que los especificados en el paquete.
 
-1.  Observa la captura realizada en R5:
+> 1.  a.  Pasados 40 segundos del arranque de R2, ¿qué ocurre con los
+>         campos *DR* y *BDR* de los mensajes *HELLO* que intercambian?
 
-    a.  Explica por qué no aparecen los mensajes *LS Update* que crea R1
-        y envía a R2.
+Que R2 se convierte en el BDR de la subred.
 
-RESPUESTA
+> 1.  Observa la captura realizada en R5:
+>
+>     a.  Explica por qué no aparecen los mensajes *LS Update* que crea R1
+>         y envía a R2.
 
-1.  a.  Explica por qué no aparecen los mensajes *LS Update* que crea R2
-        y envía a R1, y R1 debería propagar por inundación.
+Porque R1 está directamente conectado con R2, y son mensajes unicast.
 
-RESPUESTA
+> 1.  a.  Explica por qué no aparecen los mensajes *LS Update* que crea R2
+>         y envía a R1, y R1 debería propagar por inundación.
 
-1.  Observa la captura realizada en R3:
+Porque son mensajes con TTL=1, y por lo tanto son deshechados cuando van a ser
+enviados.
 
-    a.  Explica por qué no aparecen los mensajes *LS Update* que crea R2
-        y envía a R1.
+> 1.  Observa la captura realizada en R3:
+>
+>     a.  Explica por qué no aparecen los mensajes *LS Update* que crea R2
+>         y envía a R1.
 
-RESPUESTA
+Por la misma razón, R2 sabe que está conectado directamente a R1.
 
-1.  a.  Explica por qué no aparecen los mensajes *LS Update* que crea R1
-        y envía a R2, y R2 debería propagar por inundación.
+> 1.  a.  Explica por qué no aparecen los mensajes *LS Update* que crea R1
+>         y envía a R2, y R2 debería propagar por inundación.
 
-RESPUESTA
+Porque R2 no es el DR, y además los mensajes tienen TTL=1
 
-1.  ¿Deberían haber aprendido alguna ruta R2 y R1? Compruébalo
-    consultando la tabla de encaminamiento en ambos encaminadores
-    mediante la orden *show ip route ospf*. Incluye aquí la salida.
-    Comprueba la métrica de cada ruta y a través de qué *route*r
-    se alcanza.
+> 1.  ¿Deberían haber aprendido alguna ruta R2 y R1? Compruébalo
+>     consultando la tabla de encaminamiento en ambos encaminadores
+>     mediante la orden *show ip route ospf*. Incluye aquí la salida.
+>     Comprueba la métrica de cada ruta y a través de qué *router*
+>     se alcanza.
 
-RESPUESTA
+Sí, R2 debería haber aprendido a ir a `50.0.0.0` y a `11.0.0.0`, y R1 debería
+haber aprendido a ir a `20.0.0.0`.
 
-1.  Consulta la información de los vecinos que ha conocido cada
-    encaminador a través de los mensajes *HELLO* mediante: *show ip ospf
-    neighbor*. Incluye la salida.
+Podemos ver como es lo que esperábamos:
 
-RESPUESTA
+![show ip route ospf en R1 y R2](img/2-ospf-show-ip-route-ospf-r1-and-r2.png)
 
-1.  Consulta en cada encaminador la información de las bases de datos de
-    *Router Link States* y de *Network Link States* mediante: *show ip
-    ospf database router* y *show ip ospf database
-    network* respectivamente. Comprueba que la información mostrada
-    coincide con el contenido de los últimos *LS Update* enviados por
-    los encaminadores.
+> 1.  Consulta la información de los vecinos que ha conocido cada
+>     encaminador a través de los mensajes *HELLO* mediante: *show ip ospf
+>     neighbor*. Incluye la salida.
 
-RESPUESTA
+![show ip ospf neighbor en R1
+y R2](img/2-ospf-show-ip-ospf-neighbor-r1-and-r2.png)
 
-1.  Consulta un resumen de las bases de datos en cada encaminador con:
-    *show ip ospf database*. Incluye y comenta la salida obtenida.
+> 1.  Consulta en cada encaminador la información de las bases de datos de
+>     *Router Link States* y de *Network Link States* mediante: *show ip
+>     ospf database router* y *show ip ospf database
+>     network* respectivamente. Comprueba que la información mostrada
+>     coincide con el contenido de los últimos *LS Update* enviados por
+>     los encaminadores.
 
-RESPUESTA
+Podemos ver como los router link states son idénticos en ambos routers,
+y coincide con la información mandada en los últimos Router LS Update de R1
+y R2.
 
-Activación de R3 y R4
----------------------
+![show ip ospf database
+router](img/2-ospf-show-ip-ospf-database-router-r1-and-r2.png)
 
-Para observar los mensajes que envíen R3 y R4 cuando activen OSPF, y los
-que envíe R2 a consecuencia de la activación de R3 y R4, arranca
-*wireshark* en los enlaces entre R1 y R2, entre R2 y R3 y R3 con R4.
+Igualmente, podemos ver cómo los Network Link States son iguales, contienen
+tanto a R1 como R2, y también se corresponden con el último network LSU de R1 al
+grupo multicast:
 
-Configura OSPF en R3 y en R4. Para tratar de arrancarlos a la vez
-prepara las ordenes necesarias en un fichero de texto para copiar y
-pegar en cada uno de los encaminadores. Escribe aquí las órdenes
-necesarias.
+![show ip ospf database
+router](img/2-ospf-database-network-r1-r2.png)
 
-RESPUESTA
+Nótese que el número de secuencia no se corresponde porque había pasado algo de
+tiempo desde la captura, pero los datos no han cambiado.
 
-Analiza el comportamiento de los encaminadores estudiando las capturas
-con *wireshark*, los mensajes de depuración, consultando el estado de
-OSPF y de la orden show ip *route ospf* en cada encaminador:
+> 1.  Consulta un resumen de las bases de datos en cada encaminador con:
+>     *show ip ospf database*. Incluye y comenta la salida obtenida.
 
-1.  Trata de suponer los valores de *DR* y *BDR* en las subredes
-    20.0.0.0/8 y 30.0.0.0/8. Comprueba si tus suposiciones son ciertas.
-    Comprueba en los mensajes *HELLO* de la captura en R3 cómo se ha
-    producido la elección de *DR* y *BDR* al arrancar R3 y R4 a la vez.
+![show ip ospf database](img/2-ospf-show-ip-ospf-database-r1-r2.png)
 
-RESPUESTA
+Se puede comprobar como las bases de datos son idénticas (todos los routers
+pueden ver la topología de su área).
 
-1.  En la captura del enlace R3-R4 observa el intercambio de mensajes
-    *LS Update* que se produce mientras arrancan R3 y R4.
+Los routers actualmente son R1 y R2 (con sus correspondientes IDs), y las redes
+son la `10.0.0.0`, cuyo DR es el `50.0.0.2`.
 
-RESPUESTA
+# Activación de R3 y R4
 
-1.  En la captura del enlace R2-R3 observa el intercambio de mensajes
-    *LS Update* que se produce mientras arrancan R3 y R4. Observa
-    también en dicha captura los mensajes *LS Update* que R3 envía por
-    inundación de los recibidos por el de R4. Indica cómo puedes saber
-    si un *LS Update* lo ha originado el encaminador que lo envía o está
-    siendo propagado por inundación.
+> Para observar los mensajes que envíen R3 y R4 cuando activen OSPF, y los
+> que envíe R2 a consecuencia de la activación de R3 y R4, arranca
+> *wireshark* en los enlaces entre R1 y R2, entre R2 y R3 y R3 con R4.
+>
+> Configura OSPF en R3 y en R4. Para tratar de arrancarlos a la vez
+> prepara las ordenes necesarias en un fichero de texto para copiar y
+> pegar en cada uno de los encaminadores. Escribe aquí las órdenes
+> necesarias.
 
-RESPUESTA
+R3:
 
-1.  Antes de examinar la captura en el enlace de R1-R2 trata de suponer
-    qué tipos de mensaje aparecerán en ella. Comprueba tus suposiciones.
+```
+config t
+router ospf 1
+network 20.0.0.0 255.0.0.0 area 1
+network 30.0.0.0 255.0.0.0 area 1
+router-id 30.0.0.1
+exit
+exit
+wr
+```
 
-RESPUESTA
+R4:
 
-1.  Trata de suponer qué modificaciones se habrán realizado en las
-    tablas de encaminamiento de cada *route*r. Observa las tablas de
-    encaminamiento para verificar tus suposiciones.
+```
+config t
+router ospf 1
+network 30.0.0.0 255.0.0.0 area 1
+network 40.0.0.0 255.0.0.0 area 1
+network 41.0.0.0 255.0.0.0 area 1
+router-id 41.0.0.1
+exit
+exit
+wr
+```
 
-RESPUESTA
+Nótese que podríamos haber usado `passive-interface` con R4 (y con R1). No
+debería de afectar, pero dada la falta de tiempo, y que la ID de R4 sería (no
+obligatoriamente, pero...) la interfaz por la que se usaría `passive-interface`,
+no he querido arriesgarme. Cuando haya más tiempo lo pruebo.
 
-1.  Consulta la información de los vecinos que ha conocido cada
-    encaminador a través de los mensajes *HELLO*.
+> Analiza el comportamiento de los encaminadores estudiando las capturas
+> con *wireshark*, los mensajes de depuración, consultando el estado de
+> OSPF y de la orden show ip *route ospf* en cada encaminador:
+>
+> 1.  Trata de suponer los valores de *DR* y *BDR* en las subredes
+>     20.0.0.0/8 y 30.0.0.0/8. Comprueba si tus suposiciones son ciertas.
+>     Comprueba en los mensajes *HELLO* de la captura en R3 cómo se ha
+>     producido la elección de *DR* y *BDR* al arrancar R3 y R4 a la vez.
 
-RESPUESTA
+En la subred `20.0.0.0`, se debería de mantener el DR, y usar a `20.0.0.1` como
+BDR, ya que el router `20.0.0.1` ya estaba designado anteriormente, y por lo
+tanto el router `20.0.0.2` quedaría como BDR.
 
-1.  Consulta en cada encaminador la información de las bases de datos de
-    *Router Link States* y de *Network Link States*. Comprueba que la
-    información mostrada coincide con el contenido de los últimos *LS
-    Update* enviados por los encaminadores.
+En la subred `30.0.0.0`, debería de elegirse al router `30.0.0.2` como DR, por
+ser el mayor de los dos, y a `30.0.0.1` como BDR.
 
-RESPUESTA
+Podemos comprobar como estaba en lo cierto:
 
-1.  Consulta el resumen de las bases de datos en cada encaminador.
+![DR y BDR](img/3-ospf-designated-router.png)
 
-RESPUESTA
+> 1.  En la captura del enlace R3-R4 observa el intercambio de mensajes
+>     *LS Update* que se produce mientras arrancan R3 y R4.
 
-1.  Tras haber arrancado OSPF en los encaminadores R1, R2, R3 y R4, PC1
-    y PC2 deberían tener conectividad IP. Compruébalo con las órdenes
-    *ping* y trace (incluye aquí su salida).
+Podemos comprobar cómo R3 envía a R4 un total de 5 LSAs (3 router, 2 network)
+vía unicast.
 
-RESPUESTA
+Las tres router-LSA corresponden con los LSA de `20.0.0.1`, con los de
+`30.0.0.1` (los propios), y con los de `50.0.0.2`, que contienen toda la
+topología de red que conoce R3 en el momento.
 
-Reconfiguración de rutas: activación y desactivación de R5
-----------------------------------------------------------
+Sin embargo, R4 envía otro LS Update, pero sólo con Router-LSA, que es lo que él
+conoce en el momento, que son los stubs de las redes a donde está conectado.
+
+Tras recibirlo R3 lanza al grupo multicast un Router-LSA, con él ya como DR y la
+red `30.0.0.0` en el estado `Transit` en vez de Stub, y posteriormente (también
+al grupo multicast) un Network-LSA con las dos IDs como adyacentes (`30.0.0.1`
+y `41.0.0.1`).
+
+> 1.  En la captura del enlace R2-R3 observa el intercambio de mensajes
+>     *LS Update* que se produce mientras arrancan R3 y R4. Observa
+>     también en dicha captura los mensajes *LS Update* que R3 envía por
+>     inundación de los recibidos por el de R4. Indica cómo puedes saber
+>     si un *LS Update* lo ha originado el encaminador que lo envía o está
+>     siendo propagado por inundación.
+
+Se puede comprobar si un LS Update ha sido propagado mirando el `Advertising
+Router`. En este caso por ejemplo, se ven varios updates con las redes
+`41.0.0.0`, `40.0.0.0` y `30.0.0.0` que vienen por parte de `R4`.
+
+> 1.  Antes de examinar la captura en el enlace de R1-R2 trata de suponer
+>     qué tipos de mensaje aparecerán en ella. Comprueba tus suposiciones.
+
+Supongo que llegarán mensajes propagados tanto de R3 como de R4, con las nuevas
+rutas, y los routers ya existentes necesitarán sincronizar las LSDB.
+
+Podemos ver como ese es el caso, efectivamente recibiendo incrementalmente las
+actualizaciones por parte de R3 y R4, por parte de R2 claro (`10.0.0.2`), y con
+los correspondientes acklowdedges de R1.
+
+![Captura de R2 a R1](img/3-ospf-enable-r3-r4-in-r1-r2.png)
+
+> 1.  Trata de suponer qué modificaciones se habrán realizado en las
+>     tablas de encaminamiento de cada *router*. Observa las tablas de
+>     encaminamiento para verificar tus suposiciones.
+
+Ahora mismo todos los routers tendrían que tener todas las subredes como
+accesibles dentro de sus tablas de encaminamiento, con más o menos saltos (por
+ejemplo, R1 tendrá las redes `40.0.0.0` y `41.0.0.0` con la métrica más alta,
+4 si no me equivoco, debería ser 1 menos que RIP).
+
+![Tablas de rutas de los 4 routers](img/3-ospf-show-ip-route.png)
+
+> 1.  Consulta la información de los vecinos que ha conocido cada
+>     encaminador a través de los mensajes *HELLO*.
+
+Podemos hacerlo fácilmente con `show ip ospf neighbor`:
+
+![Vecinos de los routers](img/3-ospf-show-ip-ospf-neighbor.png)
+
+
+> 1.  Consulta en cada encaminador la información de las bases de datos de
+>     *Router Link States* y de *Network Link States*. Comprueba que la
+>     información mostrada coincide con el contenido de los últimos *LS
+>     Update* enviados por los encaminadores.
+
+No se incluye la captura aquí por ser demasiado grande, y la información se
+puede encontrar abajo, pero se puede comprobar cómo en efecto la correspondencia
+existe, y coincide con los últimos mensajes LS Update salvo por los
+cambios en números de secuencia dada la diferencia de tiempo.
+
+> 1.  Consulta el resumen de las bases de datos en cada encaminador.
+
+![](img/3-ospf-show-ip-ospf-database.png)
+
+> 1.  Tras haber arrancado OSPF en los encaminadores R1, R2, R3 y R4, PC1
+>     y PC2 deberían tener conectividad IP. Compruébalo con las órdenes
+>     *ping* y trace (incluye aquí su salida).
+
+![Ping de PC1 a PC2](img/3-ospf-ping-trace.png)
+
+# Reconfiguración de rutas: activación y desactivación de R5
 
 1.  Deja lanzado el *ping* de PC1 a PC2 (*ping 40.0.0.10 -t*), y
     reinicia OSPF en R1 *(clear ip ospf 1 process*). ¿Se ha producido

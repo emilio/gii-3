@@ -111,8 +111,51 @@ rulecolor=\color{gray}]{cpp}{../servo/servo.ino}
 \caption{Código del programa con el LDR}
 \end{listing}
 
+\subsection{Funcionamiento del circuito}
+
+Hemos usado el Servo como una caja negra para ser sinceros, pero el
+funcionamiento de un servo es (por lo general) bastante directo, simplemente
+varía la rotación en base al ancho de la señal de entrada (\textit{Pulse Width
+Modulation}), usando un potenciómetro, un motor DC, y un circuito integrado.
+
+Para ver más visualmente cómo funcionaba, ha sido de mucha ayuda
+(\cite{web:how-servos-work}).
+
 \section{Pantalla LCD}
 
+En la segunda parte de la práctica teníamos que estudiar el funcionamiento de
+los motores DC, pero como la placa de Arduino no nos ofrecía el voltaje
+necesario para hacer funcionar el motor, realizamos un circuito básico para
+comprobar el funcionamiento de la pantalla LCD de cara a la práctica final.
+
+
+\begin{figure}[H]
+  \includegraphics[width=\linewidth]{../img/lcd.pdf}
+  \caption{Pantalla LCD}
+  \label{fig:lcd}
+\end{figure}
+
+\subsection{Montaje de la placa}
+
+Una vez que obtuvimos el datasheet de nuestro modelo, realizamos las conexiones
+según nos indica la imagen superior, usando las salidas digitales de nuestra
+placa Arduino. Cabe destacar que para poder visualizar algo en la pantalla
+tuvimos que colocar un potenciómetro y usarlo para regular el contraste.
+
+No caímos en sacar una foto al montaje de la placa.
+
+\subsection{Programación de la placa}
+
+Una vez montado, realizamos un programa básico con el fin de que imprimiesemos
+por pantalla "Hello World!", aunque el resultado fue bastante decepcionante, ya
+que sólo conseguimos ver cuadrados negros (eso tras pasar un buen rato sin ver
+nada porque nuestro potenciómetro no estaba correctamente regulado).
+
+\begin{listing}[H]
+\inputminted[frame=single, framesep=.5em, linenos,
+rulecolor=\color{gray}]{cpp}{../vis/vis.ino}
+\caption{"Hello World!" fallido}
+\end{listing}
 
 \section{Referencias comentadas}
 

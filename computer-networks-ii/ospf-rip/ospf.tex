@@ -1,0 +1,933 @@
+\documentclass[10pt]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\usepackage{mathspec}
+\defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\newcommand{\euro}{€}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{framed}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage[spanish]{babel}
+\hypersetup{breaklinks=true,
+            unicode=true,            colorlinks=true,
+            citecolor=black,
+            urlcolor=black,
+            linkcolor=black,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width=\textwidth][width, height, ...]{}
+% \setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+
+\title{Guión OSPF\\\vspace{0.5em}{\large Redes de computadores II -- 2016}}
+\author{Emilio Cobos Álvarez (70912324-N)}
+\date{\today}
+
+\newenvironment{answerfigure}{\begin{center}}{\end{center}}
+\newenvironment{answer}{\color{Green}\begin{framed}}{\end{framed}}
+
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\clearpage
+
+\section{Nota para el corrector}
+
+Siento no entregar la página en el documento propuesto para el guión, pero es
+que trabajo mucho más lento con LibreOffice que con texto plano.
+
+Iba a recuperar la numeración de los ejercicios, pero no me da tiempo. Siento
+los inconvenientes y espero que puedas disculparme. Las respuestas siguen
+resaltadas apropiadamente.
+
+\section{Introducción}\label{introducciuxf3n}
+
+En el fichero \emph{RIPOSPF.rar} está definida una red como la que se
+muestra en la \protect\hyperlink{anchor-1}{Figura 1}. Descomprime el
+fichero de configuración del escenario \emph{RIPOSPF.rar} en la carpeta
+correspondiente de GNS3.
+
+Arranca todas las máquinas y abre una consola con cada una de ellas
+(orden \emph{consolas}). Los equipos PC1 y PC2 tienen rutas por defecto
+a R1 y R4 respectivamente. Los \emph{routers} no tienen configurada
+ninguna ruta, salvo la de las subredes a las que están directamente
+conectados.
+
+En los siguientes apartados se configurará OSPF en cada \emph{router}
+para que las tablas de encaminamiento permitan alcanzar cualquier punto
+de la red. Todos ellos estarán dentro de la misma área, luego los
+configuraremos con identificador de área igual a 1.
+
+\section{Activación de R1}\label{activaciuxf3n-de-r1}
+
+Para observar los mensajes que envíe R1 cuando se active OSPF, arranca
+\emph{wireshark} en todos los enlaces de R1. A continuación, configura
+OSPF en el encaminador R1 para que su identificador de \emph{router}
+sea la mayor de sus direcciones IP y exporte las rutas hacia las tres
+redes a las que está conectado.
+
+\begin{verbatim}
+config t
+router ospf 1
+network 10.0.0.0 255.0.0.0 area 1
+network 11.0.0.0 255.0.0.0 area 1
+network 50.0.0.0 255.0.0.0 area 1
+router-id 50.0.0.2
+exit
+exit
+wr
+\end{verbatim}
+
+Activa la depuración de los mensajes ospf: debug ip ospf events
+
+Espera un minuto aproximadamente e interrumpe las capturas.
+
+Interrumpe también los mensajes de depuración: no \emph{debug ip ospf
+events}
+
+Analiza el comportamiento de R1 estudiando las capturas del tráfico y
+los mensajes depuración para responder a las siguientes preguntas:
+
+Observa los mensajes \emph{HELLO} que se envían al arrancar OSPF en R1
+y analízalos utilizando \emph{wireshark}.
+
+¿Cada cuánto tiempo se envían dichos mensajes? Observa si coincide
+con el valor del campo \emph{HELLO Interval} de los mensajes.
+
+\begin{answer}
+En efecto, el valor coincide con el campo \emph{HELLO Interval}, y dicho
+valor es 10 segundos.
+\end{answer}
+
+Comprueba que el campo \emph{Area ID} se corresponde con el
+identificador de área que has configurado.
+
+
+\begin{answer}
+Sí, aunque el formato es el mismo que el típico para una dirección IPv4
+(\texttt{0.0.0.1}).
+\end{answer}
+
+Comprueba que el identificador del \emph{router} se corresponde con
+el que has configurado mirando el campo \emph{Source OSPF Router} de
+la cabecera obligatoria de OSPF en los mensajes \emph{HELLO}.
+Comprueba que este identificador es el mismo para los mensajes
+enviados por cualquiera de las interfaces de R1, aunque los mensajes
+se envíen con dirección IP origen diferente (cada mensaje llevará
+como dirección IP origen la de la interfaz de red de R1 por la que
+se envíe).
+
+\begin{answer}
+Sí, la id es \texttt{50.0.0.2}.
+\end{answer}
+
+Observa el valor de los campos \emph{DR} y \emph{BDR} en los
+primeros mensajes \emph{HELLO}. ¿Qué ocurre con dichos campos
+transcurridos 40 segundos después del primer mensaje \emph{HELLO}?
+¿Por qué?
+
+\begin{answer}
+En los primeros mensajes el valor del \emph{Designated Router} y del
+\emph{Backup Designated Router} es de \texttt{0.0.0.0}. Sin embargo,
+tras pasar 40 segundos, el valor del \emph{Designated Router} cambia a
+la IP del router en la interfaz correspondiente.
+
+El router se convierte en el router designado porque es el único router
+de la subred, y no tiene prioridad 0.
+\end{answer}
+
+¿Se observan en las capturas mensajes \emph{DB Description} o \emph{LS
+Update}? ¿Por qué?
+
+\begin{answer}
+No, no hay ninguna, porque no hay más routers en la subred, y OSPF es lo
+suficientemente ``listo'' como para saberlo y no enviar paquetes
+repetidos.
+\end{answer}
+
+¿Debería haber aprendido alguna ruta R1? Compruébalo consultando la
+tabla de encaminamiento mediante la orden \emph{show ip route}.
+Incluye aquí la salida.
+
+\begin{answer}
+No, no ha podido aprender ninguna porque no hay ningún otro router en la
+subred ``hablando'' OSPF.
+
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/1-ospf-show-ip-route-r1.png}
+\captionof{figure}{show ip route}
+\end{answerfigure}
+\end{answer}
+
+Consulta la información de los vecinos que ha conocido R1 a través de
+los mensajes \emph{HELLO} recibidos mediante: \emph{show ip ospf
+neighbor}. Incluye y comenta la salida obtenida.
+
+
+\begin{answer}
+Como era de esperar, la salida del comando está vacía.
+
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/1-ospf-show-ip-ospf-neighbor-r1.png}
+\captionof{figure}{show ip ospf neighbor}
+\end{answerfigure}
+\end{answer}
+
+Consulta la información de la base de datos de \emph{Router Link
+States} de R1 con: \emph{show ip ospf database router}. Incluye y
+comenta la salida obtenida\emph{.}
+
+\begin{answer}
+La primera línea nos dice la id del router (\texttt{50.0.0.2}), y su id
+de proceso interno (\texttt{1}).
+
+Se puede ver cómo aparece el número de interfaces, y las IDs y máscaras
+de red de las subredes a las que está conectado.
+
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/1-ospf-show-ip-ospf-database-router-r1.png}
+\captionof{figure}{show ip ospf database router}
+\end{answerfigure}
+\end{answer}
+
+Consulta la información de la base de datos de \emph{Network Link
+States} de R1 con: \emph{show ip ospf database network}. Incluye y
+comenta la salida obtenida.
+
+\begin{answer}
+Esta es la base de datos de los routers que conocen OSPF. Como era de
+esperar el único router que aparece es él mismo.
+
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/1-ospf-show-ip-ospf-database-network.png}
+\captionof{figure}{show ip ospf database network}
+\end{answerfigure}
+\end{answer}
+
+\section{Activación de R2}\label{activaciuxf3n-de-r2}
+
+Para observar los mensajes que envíe R2 cuando se active OSPF, y los que
+envíe R1 a consecuencia de la activación de R2, arranca \emph{wireshark}
+en los enlaces de R2 con R1 y R3 y en el enlace de R1 con R5.
+
+A continuación, configura OSPF en el encaminador R2 para que su
+identificador de \emph{router} sea la mayor de sus direcciones IP y para
+que exporte las rutas hacia las dos redes a las que está conectado.
+Incluye aquí las órdenes:
+
+\begin{verbatim}
+config t
+router ospf 1
+network 10.0.0.0 255.0.0.0 area 1
+network 20.0.0.0 255.0.0.0 area 1
+router-id 20.0.0.1
+exit
+exit
+wr
+\end{verbatim}
+
+Activa los mensajes de depuración. Incluye aquí la orden
+
+\begin{answer}
+\begin{verbatim}
+debug ip ospf events
+\end{verbatim}
+
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/1-ospf-enable-r2.png}
+\captionof{figure}{config and debug}
+\end{answerfigure}
+\end{answer}
+
+Espera dos minutos aproximadamente e interrumpe las capturas. Analiza el
+comportamiento de R1 y R2 estudiando las capturas de tráfico, los
+mensajes de depuración, consultando el estado de OSPF y de la orden
+\emph{show ip route ospf} en cada encaminador:
+
+Observa la captura realizada entre R1 y R2 y responde a las siguientes
+cuestiones:
+
+¿Qué tipo de mensajes aparecen cuando R1 detecta la presencia de R2
+y viceversa? ¿Cuál es su propósito? ¿Qué IP de destino llevan esos
+mensajes?
+
+\begin{answer}
+Tras el primer mensaje \texttt{Hello} de \texttt{R2} al grupo multicast,
+y tras haber recibido un Hello de \texttt{R1} por la misma vía,
+\texttt{R1} y \texttt{R2} sincronizan sus bases de datos usando mensajes
+\texttt{DB\ Description}.
+
+Estos mensajes van vía unicast al router interesado. Tras esos mensajes
+se realizan también \texttt{LS\ requests} (\emph{Link State Requests})
+mutuas vía unicast, que son respondidas con los correspondientes
+\texttt{LS\ updates} (también vía unicast).
+
+Cuando los routers individuales reciben las updates y cambia la
+información que almacenan, informan \textbf{al grupo multicast} de que
+la información ha cambiado con un \texttt{LS\ Update}, y cuando reciben
+la información vía multicast, envían la confirmación también vía
+multicast (\texttt{LS\ Acknowledge}).
+
+Si la información de su LSDB cambia por los datos contenidos en el
+\texttt{LS\ Update}, otro \texttt{LS\ Update} se enviará al grupo
+multicast.
+
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/2-ospf-r1-connect-r2.png}
+\captionof{figure}{captura relevante}
+\end{answerfigure}
+\end{answer}
+
+Observa los mensajes \emph{LS Request} que envían R1 y R2. ¿Qué
+\emph{LSA} pide cada uno al otro? ¿Qué IP de destino llevan estos
+mensajes?
+
+\begin{answer}
+La IP de destino es la IP de la interfaz del router conectada
+directamente, pero el \emph{Link State ID} es la ID del router, es decir
+la IP mayor del router en este caso.
+
+Por ejemplo, en el primer \emph{LS Request} de R1 a R2, tenemos un
+mensaje unicast de la dirección \texttt{10.0.0.1} a la dirección
+\texttt{10.0.0.2}, pero como el router OSPF de origen tenemos
+\texttt{50.0.0.2}, y como \emph{Link State ID} tenemos la
+\texttt{20.0.0.1}, es decir, las IDs de R1 y R2 respectivamente.
+
+De hecho, el paquete tiene \texttt{TTL=1}, por lo que no llegaría si la
+IP de destino estuviera en otra subred.
+\end{answer}
+
+Observa el primer mensaje \emph{LS Update} que envía R1. Comprueba
+que se corresponde con el \emph{LS Request} enviado por R2.
+Comprueba cómo se corresponde su contenido con lo almacenado en la
+base de datos de R1 analizada en el apartado anterior. Observa sus
+campos para ver si este mensaje incluye la información de que R1 ha
+descubierto a R2 como vecino. ¿Crees que la información contenida en
+este mensaje deberá cambiar próximamente? ¿Por qué? Observa el campo
+\emph{LS Age} del anuncio que viaja en el mensaje, y explica su
+valor.
+
+\begin{answer}
+Podemos comprobar cómo se corresponde con el de la Request de R2 porque
+podemos ver cómo tiene los campos \texttt{Link\ State\ ID} y
+\texttt{Advertising\ Router} iguales a la correspondiente Request
+(\texttt{50.0.0.2}).
+
+No aparece la información de que R1 ha descubierto a R2, aparecen las
+tres conexiones directas de R1.
+
+El contenido de este mensaje no tendrá que cambiar, porque es un mensaje
+LSA del router, es decir, sólo anuncia las interfaces configuradas, no
+qué routers son vecinos o similar\footnote{Lo siento, tenía que dejar
+  esto aquí: https://www.youtube.com/watch?v=aPtr43KHBGk}, y en R1 ya
+constaba la conexión directa con esas tres redes.
+
+Sobre el campo \emph{LS Age}, es cuánto tiempo ha pasado desde que el
+LSA correspondiente fue generado. En este caso eran 400 segundos, que
+era aproximadamente el tiempo que había pasado desde que encendí el
+escenario.
+\end{answer}
+
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/2-ospf-ls-update-r1-r2.png}
+\captionof{figure}{ls update R1 to R2}
+\end{answerfigure}
+
+Observa el primer mensaje \emph{LS Update} que envía R2. Comprueba
+que se corresponde con el \emph{LS Request} enviado por R1. Observa
+sus campos para ver si este mensaje incluye la información de que R2
+ha descubierto a R1 como vecino. ¿Crees que la información contenida
+en este mensaje deberá cambiar próximamente? ¿Por qué? Observa el
+campo \emph{LS Age} del anuncio que viaja en el mensaje, y explica
+su valor.
+
+\begin{answer}
+Se puede comprobar de manera análoga, el Link State ID es
+\texttt{20.0.0.1}, que es el correspondiente al request de R1.
+
+Igualmente, al ser un mensaje Router-LSA no tiene que contener los datos
+de que es vecino de R1, sino las interfaces configuradas. En estas no se
+incluye la red \texttt{20.0.0.0} todavía (supongo que por no tener un
+DR?), así que tendrá que cambiar e incluirlo.
+
+El campo LS Age en este caso es de 9 segundos, que entra dentro de lo
+esperado.
+\end{answer}
+
+Observa el segundo y tercer mensajes \emph{LS Update} que envía R1.
+¿Responden a algún \emph{LS Request} previo? ¿Por qué se envían?
+¿Qué información contienen? Observa el campo \emph{LS Age} de los
+anuncios que viajan en los mensajes, y explica su valor.
+
+\begin{answer}
+No, no responden a un LS Request previo, sino que se son enviados al
+grupo multicast.
+
+El segundo contiene las interfaces de R1 (router-LSA), con la interfaz
+\texttt{10.0.0.1} marcada como \emph{transit} en vez de como \emph{stub}
+(lo que quiere decir que mi respuesta a la penúltima pregunta era
+incorrecta). Esto quiere decir que ahora el tráfico entre routers OSPF
+puede pasar por esa red. Es enviado porque la información de la LSDB de
+R1 ha cambiado.
+
+El tercero es un network-LSA, que contiene los dos routers OSPF
+conectados a la red e información sobre ellos (\texttt{50.0.0.2} y
+\texttt{20.0.0.1}). Es enviado porque la información de la topología de
+la red ha cambiado y R1 es el DR.
+
+El campo LS Age es 1, porque la información acaba de ser incorporada a
+la LSDB.
+\end{answer}
+
+Observa el segundo mensaje \emph{LS Update} que envía R2. ¿Responde
+a algún \emph{LS Request} previo? ¿Por qué se envía? ¿Qué
+información contiene? Observa el campo \emph{LS Age} del anuncio que
+viaja en el mensaje, y explica su valor.
+
+\begin{answer}
+No, ese segundo mensaje no responde a ningún request, sino que se envía
+porque la LSDB de R2 ha cambiado dado que ahora se ha dado cuenta de que
+estaba conectado a la red \texttt{20.0.0.0}.
+
+El LS Age es 1 por esa misma razón, es información recién añadida a la
+LSDB.
+\end{answer}
+
+¿Por qué razón R2 no envía ningún mensaje \emph{Network-LSA}?
+
+\begin{answer}
+Porque no es el DR de la subred.
+\end{answer}
+
+Observa los mensajes \emph{LS Acknowledge}. Mira su contenido para
+comprobar a qué LSAs asienten.
+
+\begin{answer}
+Podemos comprobar tanto el número de secuencia como el Link State ID
+(ojo, \textbf{dentro del LSA Header}) para asegurarnos a qué LSA están
+asintiendo. Estarán asintiendo a todos los mensajes provenientes del
+Link State ID y con menor número de secuencia que los especificados en
+el paquete.
+\end{answer}
+
+Pasados 40 segundos del arranque de R2, ¿qué ocurre con los campos
+\emph{DR} y \emph{BDR} de los mensajes \emph{HELLO} que
+intercambian?
+
+\begin{answer}
+Que R2 se convierte en el BDR de la subred.
+\end{answer}
+
+Observa la captura realizada en R5:
+
+Explica por qué no aparecen los mensajes \emph{LS Update} que crea
+R1 y envía a R2.
+
+
+\begin{answer}
+Porque R1 está directamente conectado con R2, y son mensajes unicast.
+\end{answer}
+
+Explica por qué no aparecen los mensajes \emph{LS Update} que crea
+R2 y envía a R1, y R1 debería propagar por inundación.
+
+\begin{answer}
+Porque son mensajes con TTL=1, y por lo tanto son deshechados cuando van
+a ser enviados.
+\end{answer}
+
+Observa la captura realizada en R3:
+
+Explica por qué no aparecen los mensajes \emph{LS Update} que crea
+R2 y envía a R1.
+
+\begin{answer}
+Por la misma razón, hay conexión directa entre R1 y R2.
+\end{answer}
+
+Explica por qué no aparecen los mensajes \emph{LS Update} que crea
+R1 y envía a R2, y R2 debería propagar por inundación.
+
+\begin{answer}
+Porque R2 no es el DR, y además los mensajes tienen TTL=1
+\end{answer}
+
+¿Deberían haber aprendido alguna ruta R2 y R1? Compruébalo consultando
+la tabla de encaminamiento en ambos encaminadores mediante la orden
+\emph{show ip route ospf}. Incluye aquí la salida. Comprueba la
+métrica de cada ruta y a través de qué \emph{router} se alcanza.
+
+\begin{answer}
+Sí, R2 debería haber aprendido a ir a \texttt{50.0.0.0} y a
+\texttt{11.0.0.0}, y R1 debería haber aprendido a ir a
+\texttt{20.0.0.0}.
+
+Podemos ver como es lo que esperábamos:
+
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/2-ospf-show-ip-route-ospf-r1-and-r2.png}
+\captionof{figure}{show ip route ospf en R1 y R2}
+\end{answerfigure}
+\end{answer}
+
+Consulta la información de los vecinos que ha conocido cada
+encaminador a través de los mensajes \emph{HELLO} mediante: \emph{show
+ip ospf neighbor}. Incluye la salida.
+
+\begin{answer}
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/2-ospf-show-ip-ospf-neighbor-r1-and-r2.png}
+\captionof{figure}{show ip ospf neighbor en R1 y R2}
+\end{answerfigure}
+\end{answer}
+
+Consulta en cada encaminador la información de las bases de datos de
+\emph{Router Link States} y de \emph{Network Link States} mediante:
+\emph{show ip ospf database router} y \emph{show ip ospf database
+network} respectivamente. Comprueba que la información mostrada
+coincide con el contenido de los últimos \emph{LS Update} enviados por
+los encaminadores.
+
+\begin{answer}
+Podemos ver como los router link states son idénticos en ambos routers,
+y coincide con la información mandada en los últimos Router LS Update de
+R1 y R2.
+
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/2-ospf-show-ip-ospf-database-router-r1-and-r2.png}
+\captionof{figure}{show ip ospf database router}
+\end{answerfigure}
+
+Igualmente, podemos ver cómo los Network Link States son iguales,
+contienen tanto a R1 como R2, y también se corresponden con el último
+network LSU de R1 al grupo multicast:
+
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/2-ospf-database-network-r1-r2.png}
+\captionof{figure}{show ip ospf database router}
+\end{answerfigure}
+
+Nótese que el número de secuencia no se corresponde porque había pasado
+algo de tiempo desde la captura, pero los datos no han cambiado.
+\end{answer}
+
+Consulta un resumen de las bases de datos en cada encaminador con:
+\emph{show ip ospf database}. Incluye y comenta la salida obtenida.
+
+\begin{answer}
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/2-ospf-show-ip-ospf-database-r1-r2.png}
+\captionof{figure}{show ip ospf database}
+\end{answerfigure}
+
+Se puede comprobar como las bases de datos son idénticas (todos los
+routers pueden ver la topología de su área).
+
+Los routers actualmente son R1 y R2 (con sus correspondientes IDs), y
+las redes son la \texttt{10.0.0.0}, cuyo DR es el \texttt{50.0.0.2}.
+\end{answer}
+
+\section{Activación de R3 y R4}\label{activaciuxf3n-de-r3-y-r4}
+
+Para observar los mensajes que envíen R3 y R4 cuando activen OSPF, y los
+que envíe R2 a consecuencia de la activación de R3 y R4, arranca
+\emph{wireshark} en los enlaces entre R1 y R2, entre R2 y R3 y R3 con
+R4.
+
+Configura OSPF en R3 y en R4. Para tratar de arrancarlos a la vez
+prepara las ordenes necesarias en un fichero de texto para copiar y
+pegar en cada uno de los encaminadores. Escribe aquí las órdenes
+necesarias.
+
+\begin{answer}
+R3:
+
+\begin{verbatim}
+config t
+router ospf 1
+network 20.0.0.0 255.0.0.0 area 1
+network 30.0.0.0 255.0.0.0 area 1
+router-id 30.0.0.1
+exit
+exit
+wr
+\end{verbatim}
+
+R4:
+
+\begin{verbatim}
+config t
+router ospf 1
+network 30.0.0.0 255.0.0.0 area 1
+network 40.0.0.0 255.0.0.0 area 1
+network 41.0.0.0 255.0.0.0 area 1
+router-id 41.0.0.1
+exit
+exit
+wr
+\end{verbatim}
+
+Nótese que podríamos haber usado \texttt{passive-interface} con R4 (y
+con R1). No debería de afectar, pero dada la falta de tiempo, y que la
+ID de R4 sería (no obligatoriamente, pero\ldots{}) la interfaz por la
+que se usaría \texttt{passive-interface}, no he querido arriesgarme.
+Cuando haya más tiempo lo pruebo.
+\end{answer}
+
+Analiza el comportamiento de los encaminadores estudiando las capturas
+con \emph{wireshark}, los mensajes de depuración, consultando el estado
+de OSPF y de la orden show ip \emph{route ospf} en cada encaminador:
+
+Trata de suponer los valores de \emph{DR} y \emph{BDR} en las subredes
+20.0.0.0/8 y 30.0.0.0/8. Comprueba si tus suposiciones son ciertas.
+Comprueba en los mensajes \emph{HELLO} de la captura en R3 cómo se ha
+producido la elección de \emph{DR} y \emph{BDR} al arrancar R3 y R4 a
+la vez.
+
+\begin{answer}
+En la subred \texttt{20.0.0.0}, se debería de mantener el DR, y usar a
+\texttt{20.0.0.1} como BDR, ya que el router \texttt{20.0.0.1} ya estaba
+designado anteriormente, y por lo tanto el router \texttt{20.0.0.2}
+quedaría como BDR.
+
+En la subred \texttt{30.0.0.0}, debería de elegirse al router
+\texttt{30.0.0.2} como DR, por ser el mayor de los dos, y a
+\texttt{30.0.0.1} como BDR.
+
+Podemos comprobar como estaba en lo cierto:
+
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/3-ospf-designated-router.png}
+\captionof{figure}{DR y BDR}
+\end{answerfigure}
+\end{answer}
+
+En la captura del enlace R3-R4 observa el intercambio de mensajes
+\emph{LS Update} que se produce mientras arrancan R3 y R4.
+
+\begin{answer}
+Podemos comprobar cómo R3 envía a R4 un total de 5 LSAs (3 router, 2
+network) vía unicast.
+
+Las tres router-LSA corresponden con los LSA de \texttt{20.0.0.1}, con
+los de \texttt{30.0.0.1} (los propios), y con los de \texttt{50.0.0.2},
+que contienen toda la topología de red que conoce R3 en el momento.
+
+Sin embargo, R4 envía otro LS Update, pero sólo con Router-LSA, que es
+lo que él conoce en el momento, que son los stubs de las redes a donde
+está conectado.
+
+Tras recibirlo R3 lanza al grupo multicast un Router-LSA, con él ya como
+DR y la red \texttt{30.0.0.0} en el estado \texttt{Transit} en vez de
+Stub, y posteriormente (también al grupo multicast) un Network-LSA con
+las dos IDs como adyacentes (\texttt{30.0.0.1} y \texttt{41.0.0.1}).
+\end{answer}
+
+En la captura del enlace R2-R3 observa el intercambio de mensajes
+\emph{LS Update} que se produce mientras arrancan R3 y R4. Observa
+también en dicha captura los mensajes \emph{LS Update} que R3 envía
+por inundación de los recibidos por el de R4. Indica cómo puedes saber
+si un \emph{LS Update} lo ha originado el encaminador que lo envía o
+está siendo propagado por inundación.
+
+\begin{answer}
+Se puede comprobar si un LS Update ha sido propagado mirando el
+\texttt{Advertising\ Router}. En este caso por ejemplo, se ven varios
+updates con las redes \texttt{41.0.0.0}, \texttt{40.0.0.0} y
+\texttt{30.0.0.0} que vienen por parte de \texttt{R4}.
+\end{answer}
+
+Antes de examinar la captura en el enlace de R1-R2 trata de suponer
+qué tipos de mensaje aparecerán en ella. Comprueba tus suposiciones.
+
+\begin{answer}
+Supongo que llegarán mensajes propagados tanto de R3 como de R4, con las
+nuevas rutas, y los routers ya existentes necesitarán sincronizar las
+LSDB.
+
+Podemos ver como ese es el caso, efectivamente recibiendo
+incrementalmente las actualizaciones por parte de R3 y R4, por parte de
+R2 claro (\texttt{10.0.0.2}), y con los correspondientes acklowdedges de
+R1.
+
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/3-ospf-enable-r3-r4-in-r1-r2.png}
+\captionof{figure}{Captura de R2 a R1}
+\end{answerfigure}
+\end{answer}
+
+Trata de suponer qué modificaciones se habrán realizado en las tablas
+de encaminamiento de cada \emph{router}. Observa las tablas de
+encaminamiento para verificar tus suposiciones.
+
+\begin{answer}
+Ahora mismo todos los routers tendrían que tener todas las subredes como
+accesibles dentro de sus tablas de encaminamiento, con más o menos
+saltos (por ejemplo, R1 tendrá las redes \texttt{40.0.0.0} y
+\texttt{41.0.0.0} con la métrica más alta, 4 si no me equivoco, debería
+ser 1 menos que RIP).
+
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/3-ospf-show-ip-route.png}
+\captionof{figure}{Tablas de rutas de los 4 routers}
+\end{answerfigure}
+\end{answer}
+
+Consulta la información de los vecinos que ha conocido cada
+encaminador a través de los mensajes \emph{HELLO}.
+
+\begin{answer}
+Podemos hacerlo fácilmente con \texttt{show\ ip\ ospf\ neighbor}:
+
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/3-ospf-show-ip-ospf-neighbor.png}
+\captionof{figure}{Vecinos de los routers}
+\end{answerfigure}
+\end{answer}
+
+Consulta en cada encaminador la información de las bases de datos de
+\emph{Router Link States} y de \emph{Network Link States}. Comprueba
+que la información mostrada coincide con el contenido de los últimos
+\emph{LS Update} enviados por los encaminadores.
+
+\begin{answer}
+No se incluye la captura aquí por ser demasiado grande, y la información
+se puede encontrar abajo, pero se puede comprobar cómo en efecto la
+correspondencia existe, y coincide con los últimos mensajes LS Update
+salvo por los cambios en números de secuencia dada la diferencia de
+tiempo.
+\end{answer}
+
+Consulta el resumen de las bases de datos en cada encaminador.
+
+\begin{answer}
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/3-ospf-show-ip-ospf-database.png}
+\captionof{figure}{}
+\end{answerfigure}
+\end{answer}
+
+Tras haber arrancado OSPF en los encaminadores R1, R2, R3 y R4, PC1 y
+PC2 deberían tener conectividad IP. Compruébalo con las órdenes
+\emph{ping} y trace (incluye aquí su salida).
+
+\begin{answer}
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/3-ospf-ping-trace.png}
+\captionof{figure}{Ping y trace de PC1 a PC2}
+\end{answerfigure}
+\end{answer}
+
+\section{Reconfiguración de rutas: activación y desactivación de
+R5}\label{reconfiguraciuxf3n-de-rutas-activaciuxf3n-y-desactivaciuxf3n-de-r5}
+
+Deja lanzado el \emph{ping} de PC1 a PC2 (\emph{ping 40.0.0.10 -t}), y
+reinicia OSPF en R1 \emph{(clear ip ospf 1 process}). ¿Se ha producido
+pérdida de paquetes? ¿Por qué? Comprueba lo que ha sucedido con las
+capturas de tráfico necesarias. Compara lo sucedido para esta misma
+situación en la práctica de RIP.
+
+\begin{answer}
+Podemos comprobar cómo \textbf{sí se pierden paquetes} (unos 10
+aproximadamente), porque se tiene que volver a rehacer toda la
+reelección de DBR y sincronización de la LSDB.
+
+Podemos ver en el debug log de OSPF cómo el mayor período de pérdida de
+paquetes es hasta que recibe intercambian los DBD (\emph{DataBase
+Descriptor}), es decir, sincronizan las bases de datos, y recibe el
+primer LS Update de R2.
+
+A diferencia de RIP, donde todo el estado estaba disponible dentro de la
+red multicast, y era proveído casi instantáneamente por los vecinos, en
+OSPF, dada la mayor complejidad del protocolo, la información tarda
+bastante más en estar disponible.
+\end{answer}
+
+Realiza los cambios necesarios para que la ruta seguida por los
+datagramas IP que envía PC1 a PC2 vayan por la ruta
+\(PC1 \rightarrow R1 \rightarrow R5 \rightarrow R4 \rightarrow PC2\),
+y para que los que envía PC2 a PC1 sigan la ruta
+\(PC2 \rightarrow R4 \rightarrow R5 \rightarrow R1 \rightarrow PC1\).
+Para realizar este apartado no podrás añadir o eliminar manualmente
+rutas en las tablas de encaminamiento. Mirando la tabla de
+encaminamiento de R1, observa y apunta el número de segundos que
+aproximadamente tarda en aprender R1 la nueva ruta.
+
+\begin{answer}
+Al igual que en la anterior práctica, con configurar R5 adecuadamente
+(en este caso con OSPF) debería de ser suficiente. Vamos a comprobarlo
+experimentalmente:
+
+\begin{verbatim}
+config t
+router ospf 1
+network 50.0.0.0 255.0.0.0 area 1
+network 40.0.0.0 255.0.0.0 area 1
+router-id 50.0.0.1
+exit
+exit
+wr
+\end{verbatim}
+
+La ruta la ha aprendido relativamente rápidamente (estaba copiando el
+tiempo del primer \texttt{recv\ hello} (\texttt{00:49:14.251}), y cuando
+he querido poner la tabla de rutas (un par de segundos) ya la conocía.
+\end{answer}
+
+Comprueba que se está utilizando dicha ruta a través de la orden
+\emph{trace}. Comprueba las rutas y sus métricas en las tablas de
+encaminamiento de cada encaminador. Compara este valor con el anotado
+para esta misma situación en la práctica de RIP.
+
+\begin{answer}
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/4-ospf-ping-trace-pc1-pc2-with-r5.png}
+\captionof{figure}{Ping y trace con R5 configurado}
+\end{answerfigure}
+
+Podemos comprobar cómo \textbf{las métricas son exactamente las de RIP más 1}.
+
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/4-ospf-router-db-r5.png}
+\captionof{figure}{Bases de datos de los routers}
+\end{answerfigure}
+\end{answer}
+
+Deja lanzado en PC1 un \emph{ping} hacia PC2. Lanza las capturas de
+tráfico necesarias para explicar qué sucede cuando se interrumpe la
+ejecución de OSPF en el encaminador R5 (utiliza la orden \emph{no
+router ospf }). Podrás observar con la orden \emph{show ip route} que
+ahora R5 no conoce rutas aprendidas por OSPF. Tampoco exporta
+información de vecinos hacia otros encaminadores.
+
+¿Deja de funcionar el \emph{ping} de PC1 a PC2? ¿durante cuánto
+tiempo? (fíjate en el número de secuencia \emph{icmp\_seq}, éste
+aumenta con cada paquete enviado cada segundo).
+
+\begin{answer}
+Podemos comprobar como sí se pierde tráfico, durante 3 segundos
+aproximadamente, pero nada excesivamente importante.
+
+Este poco tiempo de downtime se puede explicar porque el router 5 manda
+un paquete LS Update a R1 cuando es desconfigurado, que R1 propaga
+inmediatamente. R1 puede entonces re-enrutar los paquetes por R2
+inmediatamente\footnote{¿Es en cuanto realiza R1 el ack del LS Update de
+  R2? Es lo que parece, ya que se ven un par de paquetes lanzados hacia
+  R5 tras el LS ack de R1, pero podría ser que R1 tardara en re-evaluar
+  las rutas.}.
+
+\begin{answerfigure}
+  \includegraphics[width=\textwidth]{img/4-ospf-disable-r5.png}
+  \captionof{figure}{Captura de tráfico al deshabilitar R5}
+\end{answerfigure}
+\end{answer}
+
+
+Observa durante este periodo, en el que no está funcionando R5, la
+tabla de encaminamiento de R1 y R4 y su lista de vecinos. Describe lo
+que ocurre. Muestra aquí la evolución de estas tablas. ¿Cuánto tiempo
+tardan R1 y R4 en olvidar las rutas por R5 y aprender las nuevas? ¿por
+qué? ¿Cuánto tiempo tarda R5 en desaparecer de la lista de vecinos de
+R1 y R4? ¿por qué? Ayúdate de las capturas del tráfico para explicar
+lo sucedido y contestar adecuadamente a las preguntas anteriores.
+Compara lo sucedido para esta misma situación en la práctica de RIP.
+
+\begin{answer}
+Parte de esta respuesta está respondida arriba. Tras otra comprobación,
+esa rápida propagación del LS Update mandado por el mismo R5 hacia R1 es
+la causante del rápido olvido de esas rutas y esos vecinos.
+
+Se propaga el LS Update de las rutas de R5 por toda la red, y es cuando
+recibe R1 otro update por parte de R2, con las nuevas rutas que él tiene
+para llegar a las redes \texttt{40.0.0.0} y \texttt{50.0.0.0} cuando
+comienza a enviar paquetes por R2 para llegar a \texttt{PC2}.
+
+Nótese que en dicho LS Update de R2 no viene información explícita sobre
+cómo llegar a \texttt{41.0.0.0}, sino sólo de las rutas que han
+cambiado. R1 ya sabe el estado de los links de R4 (y que es el único
+router por el que llegar a \texttt{PC2}, por lo que no le hace falta esa
+información de nuevo.
+
+Podemos comprobar que, gracias a tener esa actualización cuando cambia
+(que sería equivalente a tener triggered updates en RIP cuando se
+desconfigura), el tiempo durante el cual los datos de la tabla de rutas
+son erróneos es mucho menor.
+
+Sería interesante comprobar cuánto se tarda si el fallo fuera por un
+apagón (y por lo tanto ese último LS Update no se realizara). No creo
+que tenga tiempo antes de entregar esta práctica, pero probablemente lo
+pruebe con más calma.
+\end{answer}
+
+Interrumpe el \emph{ping} y comprueba la ruta que están siguiendo los
+mensajes intercambiados entre PC1 y PC2 con \emph{trace}. Incluye aquí
+la salida
+
+\begin{answer}
+Podemos comprobar como pasa por R2:
+
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/4-ospf-trace-pc1-pc2-without-r5.png}
+\captionof{figure}{Captura del trace de PC1 a PC2}
+\end{answerfigure}
+\end{answer}
+
+Por último, vuelve a configurar de nuevo \emph{OSPF} en R5. Observa
+cómo cambian las tablas de encaminamiento en R1 y R4 y apenas se
+interrumpe el \emph{ping}. Comprueba de nuevo cuál es ahora la ruta
+que están siguiendo los mensajes intercambiados entre PC1 y PC2 con
+\emph{trace}. Observa y apunta el número de segundos que
+aproximadamente tarda en aprenderse de nuevo la ruta a través de R5,
+mirando continuamente la tabla de encaminamiento de R1. Mira también
+los números de secuencia de los \emph{icmps} del \emph{ping}, y fíjate
+si alguno se pierde mientras se cambia de la ruta antigua a la ruta
+nueva. Compara estos datos con los observados para esta misma
+situación en la práctica de RIP.
+
+\begin{answer}
+Podemos ver cómo no se pierde ni un sólo paquete. Las tablas de
+encaminamiento están actualizadas en cuestión de un par de segundos, y
+la ruta que se sigue pasa a ser R5 prácticamente instantáneamente (desde
+que se estabiliza todo de nuevo y se reciben los correspondientes
+acknowledges).
+
+Este tiempo es ligeramente más lento que RIP. Ya he comentado esto con
+más detalle arriba, pero resumiendo, en RIP no hace falta tanta
+sincronización como en OSPF (en cuanto un vecino se daba cuenta de que
+había un vecino nuevo le mandaba los datos correspondientes).
+
+\begin{answerfigure}
+\includegraphics[width=\textwidth]{img/4-ospf-reconnect-r5.png}
+\captionof{figure}{Capturas relevantes}
+\end{answerfigure}
+\end{answer}
+
+\end{document}

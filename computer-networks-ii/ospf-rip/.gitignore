@@ -1,2 +1,6 @@
 *.pdf
 gns-project
+*.aux
+*.log
+*.toc
+*.out

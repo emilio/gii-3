@@ -1,5 +1,5 @@
 *.pdf
-gns-project
+gns-project-*
 *.aux
 *.log
 *.toc

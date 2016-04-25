@@ -93,7 +93,7 @@ suficientemente "listo" como para saberlo y no enviar paquetes repetidos.
 No, no ha podido aprender ninguna porque no hay ningún otro router en la subred
 "hablando" OSPF.
 
-![show ip route](img/1-ospf-show-ip-route-table-r1.png)
+![show ip route](img/1-ospf-show-ip-route-r1.png)
 
 > 1.  Consulta la información de los vecinos que ha conocido R1 a través
 >     de los mensajes *HELLO* recibidos mediante: *show ip ospf neighbor*.
@@ -124,7 +124,7 @@ TODO: TOS 0 metrics
 Esta es la base de datos de los routers que conocen OSPF. Como era de esperar
 el único router que aparece es él mismo.
 
-![show ip ospf database network](img/1-ospf-show-ip-ospf-database-network-r1.png)
+![show ip ospf database network](img/1-ospf-show-ip-ospf-database-network.png)
 
 # Activación de R2
 
@@ -520,74 +520,150 @@ cambios en números de secuencia dada la diferencia de tiempo.
 >     y PC2 deberían tener conectividad IP. Compruébalo con las órdenes
 >     *ping* y trace (incluye aquí su salida).
 
-![Ping de PC1 a PC2](img/3-ospf-ping-trace.png)
+![Ping y trace de PC1 a PC2](img/3-ospf-ping-trace.png)
 
 # Reconfiguración de rutas: activación y desactivación de R5
 
-1.  Deja lanzado el *ping* de PC1 a PC2 (*ping 40.0.0.10 -t*), y
-    reinicia OSPF en R1 *(clear ip ospf 1 process*). ¿Se ha producido
-    pérdida de paquetes? ¿Por qué? Comprueba lo que ha sucedido con las
-    capturas de tráfico necesarias. Compara lo sucedido para esta misma
-    situación en la práctica de RIP.
+> 1.  Deja lanzado el *ping* de PC1 a PC2 (*ping 40.0.0.10 -t*), y
+>     reinicia OSPF en R1 *(clear ip ospf 1 process*). ¿Se ha producido
+>     pérdida de paquetes? ¿Por qué? Comprueba lo que ha sucedido con las
+>     capturas de tráfico necesarias. Compara lo sucedido para esta misma
+>     situación en la práctica de RIP.
 
-RESPUESTA
+Podemos comprobar cómo **sí se pierden paquetes** (unos 10 aproximadamente),
+porque se tiene que volver a rehacer toda la reelección de DBR y sincronización
+de la LSDB.
 
-1.  Realiza los cambios necesarios para que la ruta seguida por los
-    datagramas IP que envía PC1 a PC2 vayan por la ruta PC1 =&gt; R1
-    =&gt; R5 =&gt; R4 =&gt; PC2, y para que los que envía PC2 a PC1
-    vayan por la ruta PC2 =&gt; R4 =&gt; R5 =&gt; R1 =&gt; PC1. Para
-    realizar este apartado no podrás añadir o eliminar manualmente rutas
-    en las tablas de encaminamiento. Mirando la tabla de encaminamiento
-    de R1, observa y apunta el número de segundos que aproximadamente
-    tarda en aprender R1 la nueva ruta.
+Podemos ver en el debug log de OSPF cómo el mayor período de pérdida de paquetes
+es hasta que recibe intercambian los DBD (*DataBase Descriptor*), es decir,
+sincronizan las bases de datos, y recibe el primer LS Update de R2.
 
-RESPUESTA
+A diferencia de RIP, donde todo el estado estaba disponible dentro de la red
+multicast, y era proveído casi instantáneamente por los vecinos, en OSPF, dada
+la mayor complejidad del protocolo, la información tarda bastante más en estar
+disponible.
 
-Comprueba que se está utilizando dicha ruta a través de la orden
-*trace*. Comprueba las rutas y sus métricas en las tablas de
-encaminamiento de cada encaminador. Compara este valor con el anotado
-para esta misma situación en la práctica de RIP.
+> 1.  Realiza los cambios necesarios para que la ruta seguida por los
+>     datagramas IP que envía PC1 a PC2 vayan por la ruta $PC1 \rightarrow R1
+>     \rightarrow R5 \rightarrow R4 \rightarrow PC2$, y para que los que envía
+>     PC2 a PC1 sigan la ruta $PC2 \rightarrow R4 \rightarrow R5 \rightarrow R1
+>     \rightarrow PC1$. Para realizar este apartado no podrás añadir o eliminar
+>     manualmente rutas en las tablas de encaminamiento. Mirando la tabla de
+>     encaminamiento de R1, observa y apunta el número de segundos que
+>     aproximadamente tarda en aprender R1 la nueva ruta.
 
-RESPUESTA
+Al igual que en la anterior práctica, con configurar R5 adecuadamente (en
+este caso con OSPF) debería de ser suficiente. Vamos a comprobarlo
+experimentalmente:
 
-1.  Deja lanzado en PC1 un *ping* hacia PC2. Lanza las capturas de
-    tráfico necesarias para explicar qué sucede cuando se interrumpe la
-    ejecución de OSPF en el encaminador R5 (utiliza la orden *no router
-    ospf &lt;num&gt;*). Podrás observar con la orden *show ip* *route*
-    que ahora R5 no conoce rutas aprendidas por OSPF. Tampoco exporta
-    información de vecinos hacia otros encaminadores.
-2.  ¿Deja de funcionar el *ping* de PC1 a PC2? ¿durante cuánto tiempo?
-    (fíjate en el número de secuencia *icmp\_seq*, éste aumenta con cada
-    paquete enviado cada segundo).
+```
+config t
+router ospf 1
+network 50.0.0.0 255.0.0.0 area 1
+network 40.0.0.0 255.0.0.0 area 1
+router-id 50.0.0.1
+exit
+exit
+wr
+```
 
-RESPUESTA
+La ruta la ha aprendido relativamente rápidamente (estaba copiando el tiempo del
+primer `recv hello` (`00:49:14.251`), y cuando he querido poner la tabla de
+rutas (un par de segundos) ya la conocía.
 
-1.  Observa durante este periodo, en el que no está funcionando R5, la
-    tabla de encaminamiento de R1 y R4 y su lista de vecinos. Describe
-    lo que ocurre. Muestra aquí la evolución de estas tablas. ¿Cuánto
-    tiempo tardan R1 y R4 en olvidar las rutas por R5 y aprender las
-    nuevas? ¿por qué? ¿Cuánto tiempo tarda R5 en desaparecer de la lista
-    de vecinos de R1 y R4? ¿por qué? Ayúdate de las capturas del tráfico
-    para explicar lo sucedido y contestar adecuadamente a las
-    preguntas anteriores. Compara lo sucedido para esta misma situación
-    en la práctica de RIP.
+> Comprueba que se está utilizando dicha ruta a través de la orden
+> *trace*. Comprueba las rutas y sus métricas en las tablas de
+> encaminamiento de cada encaminador. Compara este valor con el anotado
+> para esta misma situación en la práctica de RIP.
 
-RESPUESTA
+![Ping y trace con R5 configurado](img/4-ospf-ping-trace-pc1-pc2-with-r5.png)
 
-1.  Interrumpe el *ping* y comprueba la ruta que están siguiendo los
-    mensajes intercambiados entre PC1 y PC2 con *trace*. Incluye aquí la
-    salida
+![Bases de datos de los routers](img/4-ospf-router-db-r5.png)
 
-RESPUESTA
+> 1.  Deja lanzado en PC1 un *ping* hacia PC2. Lanza las capturas de
+>     tráfico necesarias para explicar qué sucede cuando se interrumpe la
+>     ejecución de OSPF en el encaminador R5 (utiliza la orden *no router
+>     ospf <num>*). Podrás observar con la orden *show ip route*
+>     que ahora R5 no conoce rutas aprendidas por OSPF. Tampoco exporta
+>     información de vecinos hacia otros encaminadores.
+> 2.  ¿Deja de funcionar el *ping* de PC1 a PC2? ¿durante cuánto tiempo?
+>     (fíjate en el número de secuencia *icmp\_seq*, éste aumenta con cada
+>     paquete enviado cada segundo).
 
-1.  Por último, vuelve a configurar de nuevo *OSPF* en R5. Observa cómo
-    cambian las tablas de encaminamiento en R1 y R4 y apenas se
-    interrumpe el *ping*. Comprueba de nuevo cuál es ahora la ruta que
-    están siguiendo los mensajes intercambiados entre PC1 y PC2 con
-    *trace*. Observa y apunta el número de segundos que aproximadamente
-    tarda en aprenderse de nuevo la ruta a través de R5, mirando
-    continuamente la tabla de encaminamiento de R1. Mira también los
-    números de secuencia de los *icmps* del *ping*, y fíjate si alguno
-    se pierde mientras se cambia de la ruta antigua a la ruta nueva.
-    Compara estos datos con los observados para esta misma situación en
-    la práctica de RIP.
+Podemos comprobar como sí se pierde tráfico, durante 3 segundos aproximadamente,
+pero nada excesivamente importante.
+
+Este poco tiempo de downtime se puede explicar porque el router 5 manda un
+paquete LS Update a R1 cuando es desconfigurado, que R1 propaga inmediatamente.
+R1 puede entonces re-enrutar los paquetes por R2 inmediatamente[^ack].
+
+[Captura de tráfico al deshabilitar R5](img/4-ospf-disable-r5.png)
+
+[^ack]: ¿Es en cuanto realiza R1 el ack del LS Update de R2? Es lo que parece, ya
+que se ven un par de paquetes lanzados hacia R5 tras el LS ack de R1, pero
+podría ser que R1 tardara en re-evaluar las rutas.
+
+> 1.  Observa durante este periodo, en el que no está funcionando R5, la
+>     tabla de encaminamiento de R1 y R4 y su lista de vecinos. Describe
+>     lo que ocurre. Muestra aquí la evolución de estas tablas. ¿Cuánto
+>     tiempo tardan R1 y R4 en olvidar las rutas por R5 y aprender las
+>     nuevas? ¿por qué? ¿Cuánto tiempo tarda R5 en desaparecer de la lista
+>     de vecinos de R1 y R4? ¿por qué? Ayúdate de las capturas del tráfico
+>     para explicar lo sucedido y contestar adecuadamente a las
+>     preguntas anteriores. Compara lo sucedido para esta misma situación
+>     en la práctica de RIP.
+
+Parte de esta respuesta está respondida arriba. Tras otra comprobación, esa
+rápida propagación del LS Update mandado por el mismo R5 hacia R1 es la causante
+del rápido olvido de esas rutas y esos vecinos.
+
+Se propaga el LS Update de las rutas de R5 por toda la red, y es cuando recibe
+R1 otro update por parte de R2, con las nuevas rutas que él tiene para llegar
+a las redes `40.0.0.0` y `50.0.0.0` cuando comienza a enviar paquetes por R2
+para llegar a `PC2`.
+
+Nótese que en dicho LS Update de R2 no viene información explícita sobre cómo
+llegar a `41.0.0.0`, sino sólo de las rutas que han cambiado. R1 ya sabe el
+estado de los links de R4 (y que es el único router por el que llegar a `PC2`,
+por lo que no le hace falta esa información de nuevo.
+
+Podemos comprobar que, gracias a tener esa actualización cuando cambia (que
+sería equivalente a tener triggered updates en RIP cuando se desconfigura), el
+tiempo durante el cual los datos de la tabla de rutas son erróneos es mucho
+menor.
+
+Sería interesante comprobar cuánto se tarda si el fallo fuera por un apagón (y
+por lo tanto ese último LS Update no se realizara). No creo que tenga tiempo
+antes de entregar esta práctica, pero probablemente lo pruebe con más calma.
+
+> 1.  Interrumpe el *ping* y comprueba la ruta que están siguiendo los
+>     mensajes intercambiados entre PC1 y PC2 con *trace*. Incluye aquí la
+>     salida
+
+Podemos comprobar como pasa por R2:
+
+![Captura del trace de PC1 a PC2](img/4-ospf-trace-pc1-pc2-without-r5.png)
+
+> 1.  Por último, vuelve a configurar de nuevo *OSPF* en R5. Observa cómo
+>     cambian las tablas de encaminamiento en R1 y R4 y apenas se
+>     interrumpe el *ping*. Comprueba de nuevo cuál es ahora la ruta que
+>     están siguiendo los mensajes intercambiados entre PC1 y PC2 con
+>     *trace*. Observa y apunta el número de segundos que aproximadamente
+>     tarda en aprenderse de nuevo la ruta a través de R5, mirando
+>     continuamente la tabla de encaminamiento de R1. Mira también los
+>     números de secuencia de los *icmps* del *ping*, y fíjate si alguno
+>     se pierde mientras se cambia de la ruta antigua a la ruta nueva.
+>     Compara estos datos con los observados para esta misma situación en
+>     la práctica de RIP.
+
+Podemos ver cómo no se pierde ni un sólo paquete. Las tablas de encaminamiento
+están actualizadas en cuestión de un par de segundos, y la ruta que se sigue
+pasa a ser R5 prácticamente instantáneamente (desde que se estabiliza todo de
+nuevo y se reciben los correspondientes acknowledges).
+
+Este tiempo es ligeramente más lento que RIP. Ya he comentado esto con más
+detalle arriba, pero resumiendo, en RIP no hace falta tanta sincronización como
+en OSPF (en cuanto un vecino se daba cuenta de que había un vecino nuevo le
+mandaba los datos correspondientes).
+
+![Capturas relevantes](img/4-ospf-reconnect-r5.png)

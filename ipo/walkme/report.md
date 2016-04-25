@@ -5,6 +5,7 @@ lang: es-ES
 csl: acm-sig-proceedings.csl
 babel-lang: spanish
 numbersections: true
+toc: true
 polyglossia-lang:
   options: []
   name: spanish
@@ -39,3 +40,15 @@ web utilizada para que pueda ser probada en local (en caso de no poder,
 consultar a los profesores para corregir mediante otros métodos) .
 
 Todo lo entregado se defenderá ante los profesores en tutorías personalizadas.
+
+## Configuración de WalkMe
+
+La configuración de WalkMe es relativamente básica, y consiste en un Walk-Thru
+que aparece automáticamente cuando el elemento principal está visible (es decir,
+cuando se carga la página por primera vez), un main goal y un resource.
+
+Tras acabar el Walk-Throw, aparecerá una encuesta acerca de la experiencia
+dentro de la página, con dos preguntas, una acerca de la página en sí, y otra
+acerca de WalkMe.
+
+Se adjunta una demostración de un Walk-Thru (archivo `showcase.ogv`).

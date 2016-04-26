@@ -346,15 +346,16 @@ tres conexiones directas de R1.
 
 El contenido de este mensaje no tendrá que cambiar, porque es un mensaje
 LSA del router, es decir, sólo anuncia las interfaces configuradas, no
-qué routers son vecinos o similar\footnote{Lo siento, tenía que dejar
-  esto aquí: https://www.youtube.com/watch?v=aPtr43KHBGk}, y en R1 ya
-constaba la conexión directa con esas tres redes.
+qué routers son vecinos o similar\footnotemark{}, y en R1 ya constaba la
+conexión directa con esas tres redes.
 
 Sobre el campo \emph{LS Age}, es cuánto tiempo ha pasado desde que el
 LSA correspondiente fue generado. En este caso eran 400 segundos, que
 era aproximadamente el tiempo que había pasado desde que encendí el
 escenario.
 \end{answer}
+\footnotetext{Lo siento, tenía que dejar esto aquí:
+https://www.youtube.com/watch?v=aPtr43KHBGk}
 
 \begin{answerfigure}
 \includegraphics[width=\textwidth]{img/2-ospf-ls-update-r1-r2.png}
@@ -839,17 +840,16 @@ aproximadamente, pero nada excesivamente importante.
 Este poco tiempo de downtime se puede explicar porque el router 5 manda
 un paquete LS Update a R1 cuando es desconfigurado, que R1 propaga
 inmediatamente. R1 puede entonces re-enrutar los paquetes por R2
-inmediatamente\footnote{¿Es en cuanto realiza R1 el ack del LS Update de
-  R2? Es lo que parece, ya que se ven un par de paquetes lanzados hacia
-  R5 tras el LS ack de R1, pero podría ser que R1 tardara en re-evaluar
-  las rutas.}.
-
+inmediatamente\footnotemark{}
 \begin{answerfigure}
   \includegraphics[width=\textwidth]{img/4-ospf-disable-r5.png}
   \captionof{figure}{Captura de tráfico al deshabilitar R5}
 \end{answerfigure}
 \end{answer}
 
+\footnotetext{¿Es en cuanto realiza R1 el ack del LS Update de R2? Es lo que
+  parece, ya que se ven un par de paquetes lanzados hacia R5 tras el LS ack de
+  R1, pero podría ser que R1 tardara en re-evaluar las rutas.}.
 
 Observa durante este periodo, en el que no está funcionando R5, la
 tabla de encaminamiento de R1 y R4 y su lista de vecinos. Describe lo

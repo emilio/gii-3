@@ -175,8 +175,9 @@ RIP). Esos mensajes son mensajes a dicho grupo multicast
 los routers vecinos, al ser un paquete multicast local.
 
 Sobre el porqué el ttl es 2, he encontrado alguna información
-interesante\footnote{https://learningnetwork.cisco.com/thread/40817,}\footnote{http://stackoverflow.com/questions/9745429/why-is-eigrp-and-rip-uses-ip-ttl-of-2-cisco}.
+interesante\footnotemark{}
 \end{answer}
+\footnotetext{https://learningnetwork.cisco.com/thread/40817, http://stackoverflow.com/questions/9745429/why-is-eigrp-and-rip-uses-ip-ttl-of-2-cisco}.
 
 \begin{exercise}
 Observa los mensajes RESPONSE que envía R1 periódicamente a través de
@@ -298,12 +299,12 @@ obstante, esos RESPONSE no están dirigidos directamente a ese router,
 sino al grupo multicast.
 
 Aparte, una vez guardas la configuración, el router envía un mensaje
-RESPONSE con las redes al grupo multicast\footnote{Como dato curioso, al
-  configurar uno de los routers se me olvidó escribir ``version 2''
-  antes de los comandos ``network \ldots{}'', y se vió un mensje del
-  tipo REQUEST del protocolo RIPv1 (obviamente sin respuesta), aunque
-  fue corregido rápidamente.}.
+RESPONSE con las redes al grupo multicast\footnotemark{}
 \end{answer}
+\footnotetext{Como dato curioso, al configurar uno de los routers se me olvidó
+  escribir ``version 2'' antes de los comandos ``network \ldots{}'', y se vió un
+  mensje del tipo REQUEST del protocolo RIPv1 (obviamente sin respuesta), aunque
+  fue corregido rápidamente.}.
 
 \begin{exercise}
 Comprueba la tabla de encaminamiento del encaminador recién arrancado,
@@ -505,13 +506,13 @@ ruta con igual métrica que la que ya tienen en su tabla de rutas?
 Se puede comprobar arriba cómo los routers CISCO almacenan ambas rutas
 con la misma métrica, en vez de descartar la menos actualizada.
 
-En teoría, según la documentación\footnote{http://www.cisco.com/c/en/us/support/docs/ip/border-gateway-protocol-bgp/5212-46.html},
+En teoría, según la documentación\footnotemark{}
 se usa para hacer load balancing, es decir, distribuir paquetes
 equitativamente.
+\end{answer}
+\footnotetext{http://www.cisco.com/c/en/us/support/docs/ip/border-gateway-protocol-bgp/5212-46.html},
 
 \section{Eliminación de rutas}\label{eliminaciuxf3n-de-rutas}
-\end{answer}
-
 \begin{exercise}
 El objetivo de este apartado es observar lo que ocurre cuando se
 interrumpe \emph{RIP} en R5. Se estudiará, en particular, el

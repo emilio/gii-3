@@ -53,8 +53,11 @@ dentro de la página, con dos preguntas, una acerca de la página en sí, y otra
 acerca de WalkMe.
 
 Se adjunta una demostración de un Walk-Thru en entorno de producción (archivo
-`showcase.ogv`). Previamente toda la configuración se realizó en entorno de test
-para evitar que los datos sean menos representativos.
+`showcase.ogv`[^video-quality]). Previamente toda la configuración se realizó en
+entorno de test para evitar que los datos sean menos representativos.
+
+[^video-quality]: Disculpas por la calidad, pero el tamaño máximo de archivo de
+moodle era de 10M.
 
 # Cambios en la interacción con la web
 

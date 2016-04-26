@@ -16,3 +16,6 @@
 [submodule "computer-architecture/mpi"]
 	path = computer-architecture/mpi
 	url = git@github.com:ecoal95/mpi.git
+[submodule "computer-networks-ii/ipv6-multicast-server"]
+	path = computer-networks-ii/ipv6-multicast-server
+	url = git@github.com:emilio/ipv6-multicast-server.git

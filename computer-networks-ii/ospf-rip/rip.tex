@@ -172,7 +172,7 @@ como puedan.
 Obviamente no hay respuesta (no hay ningún otro router configurado con
 RIP). Esos mensajes son mensajes a dicho grupo multicast
 \texttt{224.0.0.9}, aunque con \texttt{TTL=2}. No obstate sólo llegan a
-los routers vecinos{[}\^{}ttl-2{]}, al ser un paquete multicast local.
+los routers vecinos, al ser un paquete multicast local.
 
 Sobre el porqué el ttl es 2, he encontrado alguna información
 interesante\footnote{https://learningnetwork.cisco.com/thread/40817,}\footnote{http://stackoverflow.com/questions/9745429/why-is-eigrp-and-rip-uses-ip-ttl-of-2-cisco}.
@@ -222,6 +222,7 @@ router re-configurado en mi ordenador personal.
 \begin{answerfigure}
   \includegraphics[width=\textwidth]{img/post-show-ip-protocols-r1-rip.png}
   \captionof{figure}{Show IP protocols en R1}
+\end{answerfigure}
 \end{answer}
 
 \begin{exercise}
@@ -363,7 +364,7 @@ esperados tomada en mi ordenador particular tras reconfigurar la red.
 \begin{answerfigure}
   \includegraphics[width=\textwidth]{img/post-metrics-rip.png}
   \captionof{figure}{Métricas de R1, R2, R3 y R4}
-\end{answer}
+\end{answerfigure}
 \end{answer}
 
 \begin{exercise}

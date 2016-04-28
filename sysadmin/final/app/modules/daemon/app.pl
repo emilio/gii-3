@@ -12,7 +12,7 @@ use Linux::usermod;
 # TODO: Parse CLI args to change these,
 # and make a test suite.
 my $DAEMONIZE = 0;
-my $TEST_MODE = 0;
+my $TEST_MODE = 1;
 
 if ($DAEMONIZE) {
   Proc::Daemon::Init;
@@ -23,10 +23,9 @@ $SIG{TERM} = sub { $CONTINUE = 0 };
 
 my $port = 7777;
 
-
 # auto-flush on socket
-$| = 1;
-# creating a listening socket
+# $| = 1;
+
 my $socket = new IO::Socket::INET (
   LocalHost => '127.0.0.1',
   LocalPort => $port,
@@ -38,25 +37,27 @@ my $socket = new IO::Socket::INET (
 print "server waiting for client connection on port $port\n";
 
 sub check_user_login {
-  my ($socket, $username, $password) = @_;
+  my ($username, $password) = @_;
+
+  if (!check_user_exists($username)) {
+    return 0;
+  }
 
   my $user = Linux::usermod->new($username);
-  if (!$user) {
-    print "User not found: $username\n";
-    $socket->send(encode_json({ result => JSON::false }));
-    return;
-  }
 
   # TODO: Use PAM or something like that?
   my $encrypted_password = $user->get('password');
   my $hash = crypt($password, $encrypted_password);
 
   # Woohoo!
-  if ($hash eq $encrypted_password) {
-    $socket->send(encode_json({ result => JSON::true }));
-  } else {
-    $socket->send(encode_json({ result => JSON::false }));
-  }
+  return $hash eq $encrypted_password;
+}
+
+sub check_user_exists {
+  my ($username) = @_;
+  my %users = Linux::usermod->users();
+
+  return exists $users{$username};
 }
 
 sub do_action {
@@ -67,12 +68,21 @@ sub do_action {
   my $reencoded = encode_json($command);
   print "command: $reencoded";
 
+  my $result = 0;
   switch ($command->{command}) {
-    case "check" {
-      check_user_login($socket,
-                       $command->{username},
-                       $command->{password});
+    case "login" {
+      $result = check_user_login($command->{username},
+                                 $command->{password});
     }
+    case "user_exists" {
+      $result = check_user_exists($command->{username});
+    }
+  }
+
+  if ($result) {
+    $socket->send(encode_json({ result => JSON::true }));
+  } else {
+    $socket->send(encode_json({ result => JSON::false }));
   }
 }
 

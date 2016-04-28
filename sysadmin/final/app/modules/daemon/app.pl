@@ -5,14 +5,24 @@ use warnings;
 use JSON;
 use IO::Socket::INET;
 use Proc::Daemon;
+use Switch;
 use Try::Tiny;
+use Linux::usermod;
 
-# Proc::Daemon::Init;
+# TODO: Parse CLI args to change these,
+# and make a test suite.
+my $DAEMONIZE = 0;
+my $TEST_MODE = 0;
+
+if ($DAEMONIZE) {
+  Proc::Daemon::Init;
+}
 
 my $CONTINUE = 1;
 $SIG{TERM} = sub { $CONTINUE = 0 };
 
 my $port = 7777;
+
 
 # auto-flush on socket
 $| = 1;
@@ -27,25 +37,43 @@ my $socket = new IO::Socket::INET (
 
 print "server waiting for client connection on port $port\n";
 
-sub do_action {
-  my ($socket, $command) = @_;
+sub check_user_login {
+  my ($socket, $username, $password) = @_;
 
-  my $error = 0;
-  try {
-    $command = decode_json($command);
-  } catch {
-    print "JSON error caught: $command";
-    $error = 1;
-  };
-
-  if ($error) {
-    $socket->send("error");
+  my $user = Linux::usermod->new($username);
+  if (!$user) {
+    print "User not found: $username\n";
+    $socket->send(encode_json({ result => JSON::false }));
     return;
   }
 
+  # TODO: Use PAM or something like that?
+  my $encrypted_password = $user->get('password');
+  my $hash = crypt($password, $encrypted_password);
+
+  # Woohoo!
+  if ($hash eq $encrypted_password) {
+    $socket->send(encode_json({ result => JSON::true }));
+  } else {
+    $socket->send(encode_json({ result => JSON::false }));
+  }
+}
+
+sub do_action {
+  my ($socket, $command) = @_;
+
+  $command = decode_json($command);
+
   my $reencoded = encode_json($command);
   print "command: $reencoded";
-  $socket->send($reencoded);
+
+  switch ($command->{command}) {
+    case "check" {
+      check_user_login($socket,
+                       $command->{username},
+                       $command->{password});
+    }
+  }
 }
 
 while ($CONTINUE) {
@@ -62,8 +90,22 @@ while ($CONTINUE) {
   $client_socket->recv($data, 1024);
 
   print "Received: $data";
-  do_action($client_socket, $data);
+  my $error = 0;
 
+  if ($TEST_MODE) {
+    do_action($client_socket, $data);
+  } else {
+    try {
+      do_action($client_socket, $data);
+    } catch {
+      print "JSON error caught: $data";
+      $error = 1;
+    };
+  }
+
+  if ($error) {
+    $client_socket->send("error");
+  }
   # notify client that response has been sent
   shutdown($client_socket, 1);
 }

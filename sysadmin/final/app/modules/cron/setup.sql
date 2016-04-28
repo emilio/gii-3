@@ -1,0 +1,9 @@
+DROP ROLE app;
+DROP DATABASE app;
+
+/* TODO Don't hardcode this */
+CREATE ROLE app
+  WITH PASSWORD '12345678';
+
+CREATE DATABASE app;
+GRANT ALL PRIVILEGES ON DATABASE app TO 'app@localhost';

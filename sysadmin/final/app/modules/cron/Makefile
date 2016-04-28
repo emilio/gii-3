@@ -4,6 +4,7 @@ POSTGRES_USER ?= postgres
 # and all the stuff.
 .PHONY: install
 install:
-	su -c "pgsql postgres -f $(shell pwd)/setup.sql" postgres
-	su -c "pgsql app -f $(shell pwd)/schema.sql" postgres
-	crontab -l | { cat; echo "* * * * * $(shell pwd)/manage_requests.pl"; } | crontab -
+	cp *.sql /tmp
+	su -c "psql postgres -f /tmp/setup.sql" postgres
+	su -c "psql app -f /tmp/schema.sql" postgres
+	crontab -l | { cat; echo "* * * * * perl $(shell pwd)/manage_requests.pl"; } | crontab -

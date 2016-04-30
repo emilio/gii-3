@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Api::Client;
 
-use Test::Most tests => 8, 'die';
+use Test::Most tests => 11, 'die';
 
 my $client = new Api::Client();
 
@@ -18,8 +18,15 @@ ok $client->user_exists($weird), "Now $weird should exist";
 
 ok $client->group_exists("alumns"), "\"alumns\" group should exist";
 
-ok !$client->check_login($weird, "wrong_password"), "Should not be able to log in with wrong pass";
+my ($correct_login, $token) = $client->check_login($weird, "wrong_password");
+ok !$correct_login, "Should not be able to log in with wrong pass";
 
-ok $client->check_login($weird, "password"), "Should be able to login";
+($correct_login, $token) = $client->check_login($weird, "password");
+ok $correct_login, "Should be able to log in";
+ok length($token) > 1, "Token should be something";
+ok $client->check_login_token($weird, $token), "Token validation should work";
+
+($correct_login, $token) = $client->check_login($weird . "more_weirdness", "password");
+ok !$correct_login, "Shouldn't crash with not logged in user";
 
 ok $client->delete_user($weird), "Should be able to delete a user";

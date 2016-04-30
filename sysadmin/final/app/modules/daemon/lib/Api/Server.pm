@@ -82,8 +82,16 @@ sub do_command {
   my $result = 0;
   switch ($command->{command}) {
     case "login" {
-      $result = check_user_login($command->{username},
-                                 $command->{password});
+      my ($ok, $token) = check_user_login($command->{username},
+                                          $command->{password});
+      if ($ok) {
+        $client->send(encode_json({ result => JSON::true, token => $token }));
+        return;
+      }
+    }
+    case "check_login_token" {
+      $result = check_login_token($command->{username},
+                                  $command->{token});
     }
     case "user_exists" {
       $result = user_exists($command->{username});
@@ -119,7 +127,7 @@ sub check_user_login {
   my ($username, $password) = @_;
 
   if (!user_exists($username)) {
-    return 0;
+    return (0, undef);
   }
 
   my $user = Linux::usermod->new($username);
@@ -129,7 +137,24 @@ sub check_user_login {
   my $hash = crypt($password, $encrypted_password);
 
   # Woohoo!
-  return $hash eq $encrypted_password;
+  if ($hash eq $encrypted_password) {
+    return (1, $encrypted_password);
+  }
+
+  return (0, undef);
+}
+
+sub check_login_token {
+  my ($username, $token) = @_;
+
+  if (!user_exists($username)) {
+    return 0;
+  }
+
+  my $user = Linux::usermod->new($username);
+  my $encrypted_password = $user->get('password');
+
+  return $encrypted_password eq $token;
 }
 
 sub group_exists {

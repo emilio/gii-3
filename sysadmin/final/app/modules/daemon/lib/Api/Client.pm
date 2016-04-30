@@ -103,6 +103,22 @@ sub check_login {
       password => $password
   );
 
+  if ($response->{result} ne JSON::true) {
+    return (0, undef);
+  }
+
+  return (1, $response->{token});
+}
+
+sub check_login_token {
+  my ($self, $username, $token) = @_;
+
+  my $response = $self->call(
+    command => "check_login_token",
+    username => $username,
+    token => $token
+  );
+
   return $response->{result} eq JSON::true;
 }
 

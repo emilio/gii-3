@@ -31,17 +31,30 @@ sub handle {
   return $socket;
 }
 
-sub user_exists {
-  my ($self, $username) = @_;
+sub call {
+  my ($self, %command) = @_;
+
+  my $encoded = encode_json(\%command);
 
   my $socket = $self->handle();
-  $socket->send(encode_json({
-      command => "user_exists",
-      username => $username,
-  }));
+  $socket->send($encoded);
+
+  # Notify we've stopped writing.
+  shutdown($socket, 1);
 
   my $data = <$socket>;
   my $response = decode_json($data);
+
+  return $response;
+}
+
+sub user_exists {
+  my ($self, $username) = @_;
+
+  my $response = $self->call(
+      command => "user_exists",
+      username => $username,
+  );
 
   return $response->{result} eq JSON::true;
 }
@@ -49,14 +62,10 @@ sub user_exists {
 sub group_exists {
   my ($self, $groupname) = @_;
 
-  my $socket = $self->handle();
-  $socket->send(encode_json({
+  my $response = $self->call(
       command => "group_exists",
       groupname => $groupname,
-  }));
-
-  my $data = <$socket>;
-  my $response = decode_json($data);
+  );
 
   return $response->{result} eq JSON::true;
 }
@@ -64,14 +73,10 @@ sub group_exists {
 sub delete_user {
   my ($self, $username) = @_;
 
-  my $socket = $self->handle();
-  $socket->send(encode_json({
+  my $response = $self->call(
       command => "delete_user",
       username => $username
-  }));
-
-  my $data = <$socket>;
-  my $response = decode_json($data);
+  );
 
   return $response->{result} eq JSON::true;
 }
@@ -79,16 +84,12 @@ sub delete_user {
 sub create_user {
   my ($self, $username, $password, $type) = @_;
 
-  my $socket = $self->handle();
-  $socket->send(encode_json({
+  my $response = $self->call(
       command => "create_user",
       username => $username,
       password => $password,
       type => $type,
-  }));
-
-  my $data = <$socket>;
-  my $response = decode_json($data);
+  );
 
   return $response->{result} eq JSON::true;
 }
@@ -96,15 +97,11 @@ sub create_user {
 sub check_login {
   my ($self, $username, $password) = @_;
 
-  my $socket = $self->handle();
-  $socket->send(encode_json({
+  my $response = $self->call(
       command => "login",
       username => $username,
       password => $password
-  }));
-
-  my $data = <$socket>;
-  my $response = decode_json($data);
+  );
 
   return $response->{result} eq JSON::true;
 }

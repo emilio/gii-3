@@ -46,12 +46,11 @@ sub wait_and_dispatch_command {
   my $client_port = $client_socket->peerport();
   print "connection from $client_address:$client_port\n";
 
-  my $data = "";
-  $client_socket->recv($data, 1024);
+  my $data = <$client_socket>;
 
   print "Received: $data";
-  my $error = 0;
 
+  my $error = 0;
   if ($self->{hard_fail}) {
     do_command($client_socket, $data);
   } else {

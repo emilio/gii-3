@@ -1,0 +1,2 @@
+#!/bin/sh
+perl /etc/sysadmin-app/sysadmin-app.pl --daemonize

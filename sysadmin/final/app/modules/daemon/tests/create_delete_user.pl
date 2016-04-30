@@ -1,3 +1,4 @@
+use lib '/etc/sysadmin-app/lib';
 use strict;
 use warnings;
 use Api::Client;

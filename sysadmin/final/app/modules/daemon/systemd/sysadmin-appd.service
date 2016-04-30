@@ -1,0 +1,7 @@
+[Unit]
+Description=Application daemon for final sysadmin practice
+After=syslog.target
+
+[Service]
+ExecStart=/etc/sysadmin-app/systemd/start
+Type=forking

@@ -17,18 +17,19 @@ my $status = "";
 foreach $service (@SERVICES) {
   my $service_status = "not-running";
   foreach $process (@{$table->table}) {
-    if ($process->cmndline ~= /$service/) {
+    if ($process->cmndline =~ /$service/) {
       $service_status = "running";
-      break;
+      last;
     }
   }
 
   $status .= "<li class=\"$service status-$service_status\">";
-  $status .= "$service <span class=\"status\"></span>";
+  $status .= "$service <span class=\"status\">$service_status</span>";
   $status .= "</li>";
 }
 
-my $template = new CGI::Template;
+my $template = new CGI::Template();
+
 print $template->header();
 print $template->content(
   STATUS => $status,

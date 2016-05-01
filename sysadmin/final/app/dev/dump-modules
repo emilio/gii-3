@@ -55,7 +55,7 @@ TMP_TARGET=$(mktemp)
 echo > $TMP_TARGET
 echo > $TMP_TARGET.tmp
 for file in $(find . -type f -name '*.pl'); do
-  perl -d:Modlist "$file" 2> "$TMP_TARGET.tmp"
+  perl -d:Modlist=stop "$file" 2> "$TMP_TARGET.tmp"
   if [ $? -ne 0 ]; then
     error "Some module for $file (or Devel::Modlist) seems not to be installed"
     cat "$TMP_TARGET.tmp"

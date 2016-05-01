@@ -43,8 +43,6 @@ sub call {
   shutdown($socket, 1);
 
   my $data = <$socket>;
-
-  print "Response: $data\n";
   my $response = decode_json($data);
 
   return $response;

@@ -43,6 +43,8 @@ sub call {
   shutdown($socket, 1);
 
   my $data = <$socket>;
+
+  print "Response: $data\n";
   my $response = decode_json($data);
 
   return $response;
@@ -94,6 +96,16 @@ sub create_user {
   return $response->{result} eq JSON::true;
 }
 
+sub user_in_group {
+  my ($self, $username, $group) = @_;
+
+  my $response = $self->call(
+      command => "user_in_group",
+      username => $username,
+      groupname => $group
+  );
+}
+
 sub check_login {
   my ($self, $username, $password) = @_;
 
@@ -104,10 +116,10 @@ sub check_login {
   );
 
   if ($response->{result} ne JSON::true) {
-    return (0, undef);
+    return (0, undef, undef);
   }
 
-  return (1, $response->{token});
+  return (1, $response->{token}, $response->{groups});
 }
 
 sub check_login_token {

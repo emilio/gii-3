@@ -7,6 +7,8 @@ use Switch;
 use Try::Tiny;
 use Linux::usermod;
 
+my @ALLOWED_GROUPS = ("teachers", "alumns");
+
 # Creates the application server, this should be done just
 # by the daemon
 sub new {
@@ -48,7 +50,7 @@ sub wait_and_dispatch_command {
 
   my $data = <$client_socket>;
 
-  print "Received: $data";
+  print "Received: $data\n";
 
   my $error = 0;
   if ($self->{hard_fail}) {
@@ -57,7 +59,7 @@ sub wait_and_dispatch_command {
     try {
       do_command($client_socket, $data);
     } catch {
-      print "JSON error caught: $data";
+      print "JSON error caught: $data\n";
       $error = 1;
     };
   }
@@ -76,18 +78,24 @@ sub do_command {
 
   $command = decode_json($command);
 
-  my $reencoded = encode_json($command);
-  print "command: $reencoded";
-
   my $result = 0;
   switch ($command->{command}) {
     case "login" {
-      my ($ok, $token) = check_user_login($command->{username},
-                                          $command->{password});
+      my ($ok, $token, @groups) = check_user_login($command->{username},
+                                                   $command->{password});
+
       if ($ok) {
-        $client->send(encode_json({ result => JSON::true, token => $token }));
+        $client->send(encode_json({
+          result => JSON::true,
+          token => $token,
+          groups => \@groups
+        }));
         return;
       }
+    }
+    case "user_in_group" {
+      $result = user_in_group($command->{username},
+                              $command->{groupname});
     }
     case "check_login_token" {
       $result = check_login_token($command->{username},
@@ -123,6 +131,19 @@ sub user_exists {
   return exists $users{$username};
 }
 
+sub user_in_group {
+  my ($username, $groupname) = @_;
+
+  if (!user_exists($username) or !group_exists($groupname)) {
+    return 0;
+  }
+
+  my $group = Linux::usermod->new($groupname, 1);
+  my @users = split(",", $group->get("users"));
+
+  return grep {$username eq $_} @users;
+}
+
 sub check_user_login {
   my ($username, $password) = @_;
 
@@ -130,18 +151,32 @@ sub check_user_login {
     return (0, undef);
   }
 
+  # Only allow logging in users from allowed groups
+  my @allowed_groups = ();
+  foreach $allowed_group (@ALLOWED_GROUPS) {
+    print "$username in group $allowed_group?\n";
+    if (user_in_group($username, $allowed_group)) {
+      push @allowed_groups, $allowed_group;
+    }
+  }
+
+  if (!scalar @allowed_groups) {
+    return (0, undef, undef);
+  }
+
+  print "Groups: @allowed_groups " . scalar @allowed_groups . "\n";
+
   my $user = Linux::usermod->new($username);
 
-  # TODO: Use PAM or something like that?
   my $encrypted_password = $user->get('password');
   my $hash = crypt($password, $encrypted_password);
 
   # Woohoo!
   if ($hash eq $encrypted_password) {
-    return (1, $encrypted_password);
+    return (1, $encrypted_password, @allowed_groups);
   }
 
-  return (0, undef);
+  return (0, undef, undef);
 }
 
 sub check_login_token {
@@ -176,7 +211,15 @@ sub delete_user {
 sub create_user {
   my ($username, $password, $type) = @_;
 
-  if ($type ne "alumn" and $type ne "teacher") {
+  my $allowed_type = 0;
+  foreach $allowed_group (@ALLOWED_GROUPS) {
+    if ($type . "s" eq $allowed_group) {
+      $allowed_type = 1;
+      break;
+    }
+  }
+
+  if (!$allowed_type) {
     return 0;
   }
 
@@ -196,11 +239,12 @@ sub create_user {
   }
 
   my $group = Linux::usermod->new($groupname, 1);
-  my @group_users = $group->get("users");
-  push @group_users, $username;
 
-  my $gid = $group->get("gid");
-  $group->set("users", "@users");
+  my @group_users = split(",", $group->get("users"));
+  push @group_users, $username;
+  @group_users = grep { $_ ne '' } @group_users;
+
+  $group->set("users", join(" ", @group_users));
 
   return 1;
 }

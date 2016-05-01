@@ -4,3 +4,4 @@ HOSTNAME ?= localhost
 .PHONY: install
 install:
 	apt-get install -y postgresql postgresql-client
+	service postgresql restart

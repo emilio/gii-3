@@ -21,7 +21,7 @@ install:
 	su -c "dropdb -i $(MOODLE_DB_NAME)" postgres || true
 	su -c "dropuser -i $(MOODLE_DB_USER)" postgres || true
 	su -c "createuser -U $(POSTGRES_USER) -e -d -P $(MOODLE_DB_USER)" postgres
-	su -c "createdb -O $(MOODLE_DB_USER) $(MOODLE_DB_NAME)" postgres
+	su -c "createdb -E UTF8 -O $(MOODLE_DB_USER) $(MOODLE_DB_NAME)" postgres
 	cd $(MOODLE_TARGET_DIR) && php admin/cli/install.php --dbtype=pgsql \
 	  --dbname=$(MOODLE_DB_NAME) \
 	  --dbuser=$(MOODLE_DB_USER) \

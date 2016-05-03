@@ -24,10 +24,6 @@ if ($DAEMONIZE) {
 my $CONTINUE = 1;
 $SIG{TERM} = sub { $CONTINUE = 0 };
 
-
-# auto-flush on socket
-# $| = 1;
-
 my $server = new Api::Server();
 
 if ($TEST_MODE) {

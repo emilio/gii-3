@@ -215,7 +215,7 @@ sub create_user {
   foreach $allowed_group (@ALLOWED_GROUPS) {
     if ($type . "s" eq $allowed_group) {
       $allowed_type = 1;
-      break;
+      last;
     }
   }
 

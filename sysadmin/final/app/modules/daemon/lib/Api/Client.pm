@@ -81,6 +81,8 @@ sub delete_user {
   return $response->{result} eq JSON::true;
 }
 
+# TODO: Also receive $email and $address, and either give them to the server, or
+# create the database record here.
 sub create_user {
   my ($self, $username, $password, $type) = @_;
 

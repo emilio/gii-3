@@ -1,0 +1,50 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Register</title>
+<link rel="stylesheet" href="css/main.css">
+
+<h1>Register</h1>
+<form action="" method="POST">
+  <p>
+    <label for="user_name">Username:</label>
+    <input type="text"
+           c-pattern="[A-Za-z0-9]+"
+           c-required
+           placeholder="jdoe"
+           name="user_name"
+           id="user_name">
+
+  <p>
+    <label for="password">Password:</label>
+    <input type="password"
+           c-required
+           name="password"
+           id="password">
+
+  <p>
+    <label for="password_confirmation">Password confirmation:</label>
+    <input type="password"
+           c-required
+           name="password_confirmation"
+           id="password_confirmation">
+
+  <p>
+    <label for="email">Email:</label>
+    <input type="text"
+           c-required
+           placeholder="john@doe.tld"
+           name="email"
+           id="email">
+
+  <p>
+    <label for="address">Address:</label>
+    <textarea
+           c-required
+           placeholder="Downward Avenue, 3, Los Santos"
+           name="address"
+           id="address">
+    </textarea>
+
+  <p>
+    <input type="submit" value="Register">
+</form>

@@ -4,20 +4,15 @@ use strict;
 use warnings;
 
 use CGI;
-use CGI::Session;
 use CGI::Template;
+use CGI::Session;
 
 my $request = new CGI();
-my $template = new CGI::Template();
 
 my $sessid = $request->cookie("sessid") || undef;
 if ($sessid) {
   my $session = new CGI::Session("driver:File", $sessid, {Directory=>'/tmp'});
-  if ($session->param("user_name")) {
-    print $request->redirect("profile.pl");
-    return;
-  }
+  $session->clear(["user_name", "login_token"]);
 }
 
-print $template->header();
-print $template->content();
+print $request->redirect("login.pl");

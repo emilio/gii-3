@@ -134,9 +134,8 @@ sub user_exists {
 sub user_in_group {
   my ($username, $groupname) = @_;
 
-  if (!user_exists($username) or !group_exists($groupname)) {
-    return 0;
-  }
+  return 0 unless user_exists($username);
+  return 0 unless group_exists($groupname);
 
   my $group = Linux::usermod->new($groupname, 1);
   my @users = split(",", $group->get("users"));
@@ -154,7 +153,6 @@ sub check_user_login {
   # Only allow logging in users from allowed groups
   my @allowed_groups = ();
   foreach $allowed_group (@ALLOWED_GROUPS) {
-    print "$username in group $allowed_group?\n";
     if (user_in_group($username, $allowed_group)) {
       push @allowed_groups, $allowed_group;
     }
@@ -203,6 +201,17 @@ sub delete_user {
   my $username = shift;
 
   return 0 unless user_exists($username);
+  return 0 if $username eq "root";
+
+  # Remove from any group before removing the user
+  foreach $allowed_group (@ALLOWED_GROUPS) {
+    if (user_in_group($username, $allowed_group)) {
+      my $group = Linux::usermod->new($allowed_group, 1);
+      my @group_users = split(",", $group->get("users"));
+      @group_users = grep { $_ ne $username } @group_users;
+      $group->set("users", join(" ", @group_users));
+    }
+  }
 
   Linux::usermod->del($username);
   return 1;

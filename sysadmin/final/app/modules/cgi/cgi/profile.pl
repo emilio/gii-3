@@ -9,18 +9,22 @@ use CGI::Template;
 
 use Api::Client;
 
-my $request = new CGI;
-
-my $sessid = $request->param("sessid");
-my $session = new CGI::Session("driver:File", $sessid, {Directory=>'/tmp'});
-$sessid = $session->id();
-
+my $request = new CGI();
 my $template = new CGI::Template();
+my $new_cookie;
+
+my $sessid = $request->cookie("sessid") || undef;
+my $session = new CGI::Session("driver:File", $sessid, {Directory=>'/tmp'});
+if (not defined $sessid) {
+  $new_cookie = $request->cookie(-name => "sessid",
+                                 -value => $session->id());
+}
+$sessid = $session->id();
 
 my $user_name = $session->param("user_name");
 my $login_token = $session->param("login_token");
 
-my $api_client = new Api::Client;
+my $api_client = new Api::Client();
 
 # Should be logged in, but could be trying now via POST
 if (!$user_name or !$login_token) {
@@ -48,11 +52,18 @@ if (!$api_client->check_login_token($user_name, $login_token)) {
   $template->error("invalid login token");
 }
 
-# Check updates
+# my $user = $api_client->get_user_info($user_name);
+
+# TODO: process updates
 if ($request->request_method eq "POST") {
 }
 
-print $template->header();
+if (defined $new_cookie) {
+  print $template->header(-cookie => $new_cookie);
+} else {
+  print $template->header();
+}
+
 print $template->content(
   SELF => $request->request_uri,
   USER_NAME => $user_name,

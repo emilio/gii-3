@@ -6,6 +6,7 @@ use warnings;
 use CGI;
 use CGI::Session;
 use CGI::Template;
+use HTML::Entities;
 
 use Api::Client;
 
@@ -52,10 +53,13 @@ if (!$api_client->check_login_token($user_name, $login_token)) {
   $template->error("invalid login token");
 }
 
-# my $user = $api_client->get_user_info($user_name);
-
-# TODO: process updates
 if ($request->request_method eq "POST") {
+  # Delete the user if he requests so
+  if ($request->param("action") eq "Delete account") {
+    $api_client->delete_user($user_name);
+    print $request->redirect("logout.pl");
+    exit 0;
+  }
 }
 
 if (defined $new_cookie) {
@@ -64,8 +68,11 @@ if (defined $new_cookie) {
   print $template->header();
 }
 
+my %data = $api_client->get_user_data($user_name);
+
 print $template->content(
-  SELF => $request->request_uri,
+  EMAIL => $data{"email"},
+  ADDRESS => encode_entities($data{"address"}),
   USER_NAME => $user_name,
   SESSID => $sessid
 );

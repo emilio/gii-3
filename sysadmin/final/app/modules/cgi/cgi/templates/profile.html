@@ -5,7 +5,28 @@
 
 <h1>#!USER_NAME!#</h1>
 <form action="" method="POST">
+  <p>
+    <label for="email">Email:<label>
+    <input type="email"
+           required
+           name="email"
+           id="email"
+           value="#!EMAIL!#">
 
-  <input type="submit" value="Submit">
-  <a href="logout.pl">Log out</a>
+  <p>
+    <label for="address">Address:<label>
+    <textarea
+           required
+           name="address"
+           id="address">#!ADDRESS!#</textarea>
+
+  <p>
+    <input type="submit"
+           name="action"
+           value="Update profile">
+    <input type="submit"
+           name="action"
+           value="Delete account"
+           onclick="return confirm('Are you sure?')">
+    <a href="logout.pl">Log out</a>
 </form>

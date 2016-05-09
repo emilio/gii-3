@@ -123,7 +123,7 @@ sub get_user_data {
                                 WHERE username = ?");
   return undef unless $statement->execute($username);
 
-  my ($username, $email, $address) = $statement->fetchrow_array();
+  my ($_username, $email, $address) = $statement->fetchrow_array();
 
   my %ret = ();
 

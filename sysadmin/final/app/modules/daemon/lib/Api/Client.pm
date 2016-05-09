@@ -1,8 +1,21 @@
 package Api::Client;
+use Email::Valid;
+use Config::General;
 use Api::Common;
 use JSON;
+use Carp;
+use DBI;
 
 use IO::Socket::INET;
+
+my $CONFIG_HANDLE = Config::General->new("/etc/sysadmin-app/sysadminapprc");
+my %DB_CONFIG = $CONFIG_HANDLE->getall();
+
+my $DB = DBI->connect("dbi:Pg:dbname=$DB_CONFIG{'db_name'}",
+                      $DB_CONFIG{'db_user'},
+                      $DB_CONFIG{'db_pass'});
+
+croak "Invalid DB handle: $DB_CONFIG{'db_user'}, $DB_CONFIG{'db_name'}" unless $DB->ping();
 
 # Api consumer, for now one needs to be created per API call,
 # which is kind of expensive.
@@ -73,6 +86,11 @@ sub group_exists {
 sub delete_user {
   my ($self, $username) = @_;
 
+  my $statement = $DB->prepare("DELETE FROM users WHERE username = ?");
+
+  # Consciuously ignore the error
+  $statement->execute($username);
+
   my $response = $self->call(
       command => "delete_user",
       username => $username
@@ -81,10 +99,49 @@ sub delete_user {
   return $response->{result} eq JSON::true;
 }
 
+sub update_user_data {
+  my ($self, $username, $email, $address) = @_;
+
+  # We do an insert and do nothing on failure, then an update.
+  my $statement = $DB->prepare("INSERT INTO users (username, email, address) \
+                               VALUES (?, ?, ?)");
+  return 1 if $statement->execute($username, $email, $address);
+
+  $statement = $DB->prepare("UPDATE users SET email = ?, address = ? WHERE \
+                             username = ?");
+
+  return 1 if $statement->execute($email, $address, $username);
+
+  return 0;
+}
+
+sub get_user_data {
+  my ($self, $username) = @_;
+
+  # We do an insert and do nothing on failure, then an update.
+  my $statement = $DB->prepare("SELECT username, email, address FROM users \
+                                WHERE username = ?");
+  return undef unless $statement->execute($username);
+
+  my ($username, $email, $address) = $statement->fetchrow_array();
+
+  my %ret = ();
+
+  $ret{'email'} = $email;
+  $ret{'address'} = $address;
+
+  return %ret;
+}
+
 # TODO: Also receive $email and $address, and either give them to the server, or
 # create the database record here.
 sub create_user {
-  my ($self, $username, $password, $type) = @_;
+  my ($self, $username, $password, $type, $email, $address) = @_;
+
+  if ($email and $address) {
+    return 0 unless Email::Valid->address($email);
+    return 0 unless $self->update_user_data($username, $email, $address);
+  }
 
   my $response = $self->call(
       command => "create_user",

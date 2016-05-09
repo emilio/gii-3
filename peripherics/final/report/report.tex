@@ -1,0 +1,82 @@
+\documentclass{article}
+
+\usepackage{fontspec}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{titlesec}
+\usepackage{titling}
+\usepackage{minted}
+\usepackage{natbib}
+\usepackage{xcolor}
+\usepackage{subcaption}
+\usepackage[a4paper, top=1in, bottom=1in]{geometry}
+
+\usepackage[shorthands=off,main=spanish]{babel}
+
+\renewcommand{\listingscaption}{Programa}
+\def\listingautorefname~#1\null{(Programa #1)\null}
+%\def\figureautorefname~#1\null{(Figura #1)\null}
+\def\figureautorefname~#1\null{(#1)\null}
+
+% \newcommand{\sectionbreak}{\clearpage}
+
+\pretitle{\begin{center} \includegraphics[width=200pt]{usal.png} \\ \vspace{3em} \LARGE}
+\title{Práctica final con Arduino \\ \large Periféricos}
+\author{Emilio Cobos Álvarez, Christian Bonal Martín}
+\date{9 de Mayo de 2016}
+
+\begin{document}
+
+\maketitle
+
+\clearpage
+\tableofcontents
+\setlength{\parskip}{1em}
+\setlength{\parindent}{0pt}
+\newpage
+
+\section{Objetivo y descripción de la práctica}
+
+El objetivo de la práctica es realizar una mini-estación meteorológica para
+poder monitorizar la temperatura y la humedad de un lugar.
+
+Para ello usaremos diversos sensores como periféricos de entrada (el TMP-36 para
+la temperatura, y el DHT-11 para la humedad), y una pantalla LCD como periférico
+de salida.
+
+Como pequeña funcionalidad extra, se ha añadido una advertencia en caso de que
+la temperatura se desvíe de un rango de valores determinado.
+
+\section{Descripción del circuito}
+
+Se ha usado como placa una placa \textit{Arduino Uno} como en las prácticas
+anteriores.
+
+El circuito es relativamente estándar, con la pantalla LCD conectada entre los
+pines digitales 2 y 12, un RTD TMP-36 conectado a la entrada analógica
+\texttt{A0}, y el sensor de humedad DHT-11 conectado al pin digital 13.
+
+% TODO: Imagen del circuito
+
+\subsection{Pantalla LCD}
+
+La pantalla LCD utilizada ha sido una pantalla estándar de 16x2 columnas.
+
+\paragraph{Funcionamiento}
+
+\paragraph{Programa  de ejemplo}
+
+
+\subsection{Sensor de humedad y temperatura DHT-11}
+\subsection{Sensor de temperatura TMP-36}
+
+\section{Programación de la placa}
+
+% TODO: meter en "Conclusión"?
+\section{Dificultades y observaciones}
+
+\bibliographystyle{plainnat}
+\bibliography{bibliography}
+
+\end{document}

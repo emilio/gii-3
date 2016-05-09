@@ -1,31 +1,39 @@
 #!/usr/bin/perl -w
 use Proc::ProcessTable;
 use CGI::Template;
+use Net::FTP;
 
-my @SERVICES = (
-  "apache2", # This is kind of stupid, the page won't load if apache isn't running.
-  "sshd",
-  "ftpd",
-  "postfix",
-  "saslauthd",
-  "sysadmin-appd",
-);
+sub proc_exists {
+  my ($table, $name) = @_;
+
+  foreach $p (@{$table->table}) {
+    return 1 if $p->cmndline =~ /$name/;
+  }
+  return 0;
+}
 
 my $table = new Proc::ProcessTable;
 
-my $status = "";
-foreach $service (@SERVICES) {
-  my $service_status = "not-running";
-  foreach $process (@{$table->table}) {
-    if ($process->cmndline =~ /$service/) {
-      $service_status = "running";
-      last;
-    }
-  }
+my %services = ();
 
-  $status .= "<li class=\"$service status-$service_status\">";
-  $status .= "$service <span class=\"status\">$service_status</span>";
-  $status .= "</li>";
+my $ftp_conn = new Net::FTP('127.0.0.1');
+$services{'ftp'} = $ftp_conn ? 1 : 0;
+$ftp_conn->quit() if $ftp_conn;
+
+$services{'sshd'} = proc_exists($table, "sshd");
+$services{'apache2'} = proc_exists($table, "apache2");
+$services{'postfix'} = proc_exists($table, "postfix");
+$services{'sysadmin-appd'} = proc_exists($table, "sysadmin-app");
+
+
+my $status = "";
+foreach $service (sort(keys %services)) {
+  my $service_status = $services{$service} ? "running": "not-running";
+
+  $status .= "<tr class=\"$service status-$service_status\">";
+  $status .= "  <td class=\"name\">$service</td>";
+  $status .= "  <td class=\"status\">$service_status</td>";
+  $status .= "</tr>";
 }
 
 my $template = new CGI::Template();

@@ -7,12 +7,14 @@ use CGI;
 use CGI::Session;
 use CGI::Template;
 use HTML::Entities;
+use Email::Valid;
 
 use Api::Client;
 
 my $request = new CGI();
 my $template = new CGI::Template();
 my $new_cookie;
+my $error;
 
 my $sessid = $request->cookie("sessid") || undef;
 my $session = new CGI::Session("driver:File", $sessid, {Directory=>'/tmp'});
@@ -60,6 +62,17 @@ if ($request->request_method eq "POST") {
     print $request->redirect("logout.pl");
     exit 0;
   }
+
+  if ($request->param("action") eq "Update profile") {
+    my ($email, $address) = ($request->param("email"), $request->param("address"));
+    if (!$email or !$address) {
+      $error = "Empty email or address.";
+    } elsif (!Email::Valid->address($email)) {
+      $error = "Invalid email address";
+    } elsif (!$api_client->update_user_data($user_name, $email, $address)) {
+      $error = "Unable to update the user data";
+    }
+  }
 }
 
 if (defined $new_cookie) {
@@ -71,6 +84,7 @@ if (defined $new_cookie) {
 my %data = $api_client->get_user_data($user_name);
 
 print $template->content(
+  ERROR => $error,
   EMAIL => $data{"email"},
   ADDRESS => encode_entities($data{"address"}),
   USER_NAME => $user_name,

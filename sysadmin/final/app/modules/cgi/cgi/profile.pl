@@ -14,7 +14,7 @@ use Api::Client;
 my $request = new CGI();
 my $template = new CGI::Template();
 my $new_cookie;
-my $error;
+my $error = "";
 
 my $sessid = $request->cookie("sessid") || undef;
 my $session = new CGI::Session("driver:File", $sessid, {Directory=>'/tmp'});

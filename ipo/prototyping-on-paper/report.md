@@ -1,5 +1,5 @@
 ---
-title: Prototipado en papel - Google Play Music
+title: Prototipado en papel -- Google Play Music
 subtitle: Interacción Persona Ordenador
 date: 10 de Mayo de 2016
 toc: true
@@ -17,7 +17,7 @@ author:
   - Ulises Herrero Sánchez (44414199A)
 abstract: |
   En esta práctica se realiza un análisis crítico de *Google Play Music*,
-  y propone un rediseño basado en el usuario y poniendo la funcionalidad por
+  y se propone un rediseño basado en el usuario y poniendo la funcionalidad por
   delante de la apariencia, realizando un prototipado en papel como prueba de
   concepto.
 ---
@@ -108,7 +108,41 @@ por defecto en su móvil Android tenía un tema claro y que, aunque le gusta,
 preferiría poder tener una forma de cambiarlo porque le resulta molesto a la
 vista por la noche.
 
-## Propuesta
+# Propuesta
 
 Teniendo en cuenta los datos expuestos anteriormente, proponemos un rediseño de
 la aplicación que solventaría estos problemas de forma centrada en el usuario.
+
+El rediseño trata de solucionar los problemas de usabilidad reportados por los
+usuarios.
+
+Da prevalencia a la colección de música en la primera pantalla, ofreciendo la
+compra únicamente durante la reproducción, y de tal manera que no sea intrusiva
+para el usuario.
+
+Proponemos mostrar las letras de la canción durante la reproducción si el
+usuario hace swipe hacia arriba, una acción que ahora mismo no se utiliza para
+nada.
+
+Integra un modo noche en el menú principal (que en la aplicación actual tiene
+mucho espacio libre), de tal manera que cambiar de un modo a otro
+sólo estaría a dos toques de distancia.
+
+También se añade la opción para compartir playlists desde el menú de listas de
+reproducción, donde se pueden marcar como públicas para que aparezcan en el feed
+de otros usuarios que están en tus contactos de Google.
+
+Finalmente, el rediseño también añade un widget totalmente personalizable para
+los usuarios más impacientes, que permite:
+
+ * Mostrar la información de la canción actual.
+ * Pausar y reanudar la canción con un sólo toque.
+ * Pasar a la canción anterior o siguiente deslizando el dedo hacia la izquierda
+ o hacia la derecha.
+ * Decir si te gusta la canción o no deslizando el dedo hacia arriba o hacia
+ abajo.
+ * Cambiar a una canción completamente aleatoria de tu colección realizando un
+ movimiento circular.
+
+Creemos que estos cambios conllevarían una mejor experiencia de usuario, y en
+general una mejor adopción del producto.

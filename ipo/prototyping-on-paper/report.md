@@ -1,9 +1,12 @@
 ---
-title: Prototipado en papel -- Google Play Music
-subtitle: Interacción Persona Ordenador
+title: Rediseño de *Google Play Music*
+subtitle: Práctica de prototipado en papel -- Interacción Persona Ordenador
 date: 10 de Mayo de 2016
 toc: true
-fontsize: 12pt
+fontsize: 11pt
+header-includes:
+ - \usepackage{titlesec}
+ - \newcommand{\sectionbreak}{\clearpage}
 lang: es
 numbersections: true
 babel-lang: spanish
@@ -17,17 +20,16 @@ author:
   - Víctor Alonso Fraile (70909161T)
   - Ulises Herrero Sánchez (44414199A)
 abstract: |
-  En esta práctica se realiza un análisis crítico de *Google Play Music*,
-  y se propone un rediseño basado en el usuario y poniendo la funcionalidad por
-  delante de la apariencia, realizando un prototipado en papel como prueba de
-  concepto.
+  En esta práctica se realiza un análisis crítico de la aplicación *Google Play
+  Music* para Android, y se propone un rediseño basado en el usuario y poniendo
+  la funcionalidad por delante de la apariencia, realizando un prototipado en
+  papel como prueba de concepto.
 ---
 
 # Introducción y fondo teórico
 
-El principal concepto de diseño al que hemos dado vueltas en esta práctica es el
-concepto de usabilidad. Pasamos a exponer mínimamente algunos conceptos de los
-vistos en clase que hemos tratado durante la práctica.
+Pasamos a exponer mínimamente algunos conceptos de los vistos en clase que hemos
+tratado durante la práctica:
 
 Usabilidad:
 
@@ -169,8 +171,6 @@ importante, y es que, a pesar de que los datos son extremadamente valiosos,
 **sólo hemos preguntado a compañeros de facultad**, por lo que nos estamos
 perdiendo una cantidad enorme de puntos de vista de otros usuarios potenciales,
 que en un proceso de investigación más exhaustivo deberíamos de tener en cuenta.
-
-\clearpage
 
 # Propuesta
 

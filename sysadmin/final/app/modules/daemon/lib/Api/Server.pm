@@ -6,6 +6,9 @@ use JSON;
 use Switch;
 use Try::Tiny;
 use Linux::usermod;
+use File::Copy::Recursive qw(dircopy);
+use File::Path qw(make_path remove_tree);
+use File::Finder;
 
 my @ALLOWED_GROUPS = ("teachers", "alumns");
 
@@ -146,9 +149,7 @@ sub user_in_group {
 sub check_user_login {
   my ($username, $password) = @_;
 
-  if (!user_exists($username)) {
-    return (0, undef);
-  }
+  return 0 unless user_exists($username);
 
   # Only allow logging in users from allowed groups
   my @allowed_groups = ();
@@ -158,9 +159,7 @@ sub check_user_login {
     }
   }
 
-  if (!scalar @allowed_groups) {
-    return (0, undef, undef);
-  }
+  return 0 unless scalar @allowed_groups;
 
   print "Groups: @allowed_groups " . scalar @allowed_groups . "\n";
 
@@ -174,15 +173,13 @@ sub check_user_login {
     return (1, $encrypted_password, @allowed_groups);
   }
 
-  return (0, undef, undef);
+  return 0;
 }
 
 sub check_login_token {
   my ($username, $token) = @_;
 
-  if (!user_exists($username)) {
-    return 0;
-  }
+  return 0 unless user_exists($username);
 
   my $user = Linux::usermod->new($username);
   my $encrypted_password = $user->get('password');
@@ -214,6 +211,9 @@ sub delete_user {
   }
 
   Linux::usermod->del($username);
+  Linux::usermod->grpdel($username) if group_exists($username);
+  remove_tree("/home/$username");
+
   return 1;
 }
 
@@ -228,19 +228,24 @@ sub create_user {
     }
   }
 
-  if (!$allowed_type) {
-    return 0;
-  }
+  return 0 unless $allowed_type;
 
-  if (user_exists($username)) {
-    return 0;
-  }
+  return 0 if user_exists($username);
 
   Linux::usermod->add($username, $password);
+  Linux::usermod->grpadd($username);
 
   my $user = Linux::usermod->new($username);
+  my $usergrp = Linux::usermod->new($username, 1);
+
+  # Setup home directory
+  my $homedir = "/home/$username";
+  make_path($homedir, { owner => $username, group => $username });
+  dircopy("/etc/skel", $homedir);
+  chown($user->get('uid'), $usergrp->get('gid'), File::Finder->in($homedir));
+
   $user->set("shell", "/bin/false");
-  $user->set("home", "/home/" . $username);
+  $user->set("home", $homedir);
 
   my $groupname = $type . "s";
   if (!group_exists($groupname)) {

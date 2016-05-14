@@ -54,8 +54,8 @@ $$\mathbb{Z}/(n) = \{ \bar{0}, \bar{1}, \dots, \overline{n - 1} \}$$
 
 Let's define the sum and product inside $\mathbb{Z}/(n)$:
 
-$$\bar{a} + \bar{b} = \overline{a + b} \\
-\bar{a} \cdot \bar{b} = \overline{a \cdot b}$$
+$$\bar{a} + \bar{b} = \overline{a + b}$$
+$$\bar{a} \cdot \bar{b} = \overline{a \cdot b}$$
 
 For example, in $\mathbb{Z}/(2) = \{ \bar{0}, \bar{1} \}$:
 

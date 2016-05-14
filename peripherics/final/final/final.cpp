@@ -9,7 +9,10 @@ const uint8_t LCD_ROWS = 2;
 const uint8_t LCD_RS = 2;
 const uint8_t LCD_READ_WRITE = 3;
 const uint8_t LCD_ENABLE = 4;
-LiquidCrystal lcd(LCD_RS, LCD_READ_WRITE, LCD_ENABLE, 5, 6, 7, 8, 9, 10, 11, 12);
+LiquidCrystal lcd(LCD_RS,
+                  LCD_READ_WRITE,
+                  LCD_ENABLE,
+                  5, 6, 7, 8, 9, 10, 11, 12);
 
 // Tresholds to show a warning
 const float TEMPERATURE_MAX = 25.0;
@@ -96,7 +99,8 @@ void loop() {
   lcd.print(dht11.getHumidity());
   lcd.print('%');
 
-  if (temperature > TEMPERATURE_MAX || temperature < TEMPERATURE_MIN)
+  if (temperature > TEMPERATURE_MAX ||
+          temperature < TEMPERATURE_MIN)
       show_warning = !show_warning;
   else
       show_warning = false;

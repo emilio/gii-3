@@ -10,7 +10,7 @@
 \usepackage{natbib}
 \usepackage{xcolor}
 \usepackage{subcaption}
-\usepackage[a4paper, top=1in, bottom=1in]{geometry}
+% \usepackage[a4paper, top=1in, bottom=1in]{geometry}
 
 \usepackage[shorthands=off,main=spanish]{babel}
 
@@ -21,9 +21,20 @@
 
 % \newcommand{\sectionbreak}{\clearpage}
 
+% Make paragraphs like subsubsubsections
+\setcounter{secnumdepth}{4}
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+% Hack for multipage code
+
+\newenvironment{multipagecode}{}{}
+
 \pretitle{\begin{center} \includegraphics[width=200pt]{usal.png} \\ \vspace{3em} \LARGE}
 \title{Práctica final con Arduino \\ \large Periféricos}
-\author{Emilio Cobos Álvarez, Christian Bonal Martín}
+\author{Emilio Cobos Álvarez \and Christian Bonal Martín}
 \date{9 de Mayo de 2016}
 
 \begin{document}
@@ -57,24 +68,177 @@ El circuito es relativamente estándar, con la pantalla LCD conectada entre los
 pines digitales 2 y 12, un RTD TMP-36 conectado a la entrada analógica
 \texttt{A0}, y el sensor de humedad DHT-11 conectado al pin digital 13.
 
-% TODO: Imagen del circuito
+\begin{figure}[H]
+  \includegraphics[width=\linewidth]{../img/final-circuit.jpg}
+  \caption{Montaje del circuito}
+  \label{fig:final-circuit}
+\end{figure}
 
 \subsection{Pantalla LCD}
 
-La pantalla LCD utilizada ha sido una pantalla estándar de 16x2 columnas.
+La pantalla LCD utilizada ha sido una pantalla estándar de 16 columnas por 2
+filas. Se ha utilizado la biblioteca \texttt{LiquidCrystal} de Arduino para su
+manejo.
 
-\paragraph{Funcionamiento}
+\subsubsection{Funcionamiento}
 
-\paragraph{Programa  de ejemplo}
+Las pantallas LCD funcionan encendiendo o apagando píxels digitalmente, siendo
+cada píxel uno de los diferentes puntos que conforman la imagen final mostrada
+en la pantalla.
 
+En esta pantalla, los píxels son sólo o blancos o negros (encendidos o
+apagados), pero se podrían hacer de color con varios subpíxels por cada píxel
+(uno rojo, uno azul, y uno verde).
+
+Las pantallas LCD usan cristal líquido combinado con cristales polarizados.
+
+\paragraph{El cristal líquido}
+
+El cristal líquido, irónicamente, no es líquido como tal, sino una especie de
+estado de la materia entre líquido y sólido. La parte curiosa del cristal
+líquido es que cuando se le aplica una corriente eléctrica su estructura cambia,
+de estar más doblada a más recta.
+
+Esto se usa para ``desviar la luz", o más adecuadamente hablando, cambiar la
+dirección de oscilación del campo electromagnético de la luz, como veremos más
+adelante.
+
+\paragraph{El cristal polarizado}
+
+Intuitivamente, un cristal polarizado sólo deja pasar la luz que pasa a través
+de él perpendicularmente. Esta es una definición muy imprecisa pero suficiente
+para entender cómo funcionan las pantallas LCD.
+
+No obstante, a continuación daremos un poco más de fondo a esa definición.
+
+La luz es una onda electromagnética transversal, lo que quiere decir que la
+oscilación del campo electromagnético es perpendicular a su dirección de
+propagación.
+
+La polarización de una onda es la propiedad de que esa onda pueda oscilar con
+más de una orientación.
+
+La mayoría de fuentes de luz emiten luz con campos eléctricos
+\footnote{En una onda electromagnética el campo eléctrico y el magnético que la
+forman oscilan perpendicularmente entre sí. Cuando hablamos de polarización se
+estudia por convención el campo eléctrico, porque el vector de campo magnético
+se puede obtener a partir del eléctrico.} en cualquier  dirección de todas las
+posibles direcciones perpendiculares a la de propagación.
+
+Llamaremos \textbf{luz polarizada a aquella que tiene una determinada dirección
+de oscilación}.
+
+Una de las formas de obtener luz polarizada, es usar un filtro
+polarizador\cite{wiki:polarizer}, que
+sólo deja pasar la luz que oscila en una sola dirección.
+
+\paragraph{Combinación}
+
+Una pantalla LCD funciona con una luz brillante continuamente alumbrando detrás
+de la pantalla, y varios píxels hecho cada uno con \textbf{dos filtros
+polarizadores, y una pequeña cantidad de cristal líquido entre ellos}.
+
+Cuando hay corriente a través del cristal líquido, deja pasar la luz
+perfectamente, así que \textbf{la luz polarizada que deja pasar el primer filtro
+la deja pasar el segundo también, y el píxel parece claro}.
+
+Sin embargo, cuando no hay corriente, el cristal líquido cambia de estructura,
+desviando la dirección de la luz, y esto hace que \textbf{el segundo cristal
+polarizado la bloquee, apareciendo el píxel oscuro}.
+
+Así, la pantalla LCD es un circuito integrado que mediante una serie de pines
+más o menos conveniente que permite controlar la electricidad que se le da a los
+transistores de cada píxel.
+
+\subsubsection{Programa de ejemplo}
+
+Se adjunta un programa de ejemplo de la pantalla LCD que imprime el típico
+mensaje ``Hello, world!" por la pantalla.
+
+\begin{listing}[H]
+\inputminted[frame=single, framesep=.5em, linenos,
+  rulecolor=\color{gray}]{cpp}{../vis/vis.cpp}
+\caption{Programa de ejemplo para la pantalla LCD}
+\end{listing}
 
 \subsection{Sensor de humedad y temperatura DHT-11}
+
+Parte de Christian.
+
 \subsection{Sensor de temperatura TMP-36}
 
+Ya usamos este sensor en la primera sesión de prácticas, así que sirva esto como
+recapitulación.
+
+\subsubsection{Funcionamiento}
+
+El TMP-36 es un RTD o \textit{Resistance Temperature Detector}
+(\cite{wiki:rtd}).
+
+Algunos de los RTD pueden usar termistores, pero a diferencia de estos, la
+relación que tiene el voltaje de salida ($V_{out}$) con la temperatura es
+lineal, en vez de exponencial. Esto no sólo simplifica el tratamiento de sus
+datos, y también suelen tener mucho más rango de temperaturas que los
+termistores.
+
+Si se quiere más rango aún de temperaturas, otra opción podría ser un
+\href{https://es.wikipedia.org/wiki/Termopar}{termopar}.
+
+La fórmula que relaciona la temperatura en este modelo, según
+\href{http://www.analog.com/media/en/technical-documentation/data-sheets/TMP35_36_37.pdf}
+{la hoja de datos del sensor} (\cite{web:tmp36-data-sheet}) es:
+
+$$T = \frac{V_{out} - 500}{10}$$
+
+Donde $T$ está en grados centígrados, y $V_{out}$ en milivoltios.
+
+\subsection{Programa de ejemplo}
+
+\begin{listing}[H]
+\inputminted[frame=single, framesep=.5em, linenos,
+  rulecolor=\color{gray}]{cpp}{../../arduino-1/temperature/temperature.ino}
+\caption{Programa de ejemplo para el RTD}
+\end{listing}
+
+\clearpage
 \section{Programación de la placa}
 
-% TODO: meter en "Conclusión"?
+Teniendo todo lo anterior, realizar el programa final es cuestión de acoplar
+los programas anteriores.
+
+Como técnica para evitar variaciones drásticas de temperatura reportadas por el
+sensor TMP-36, se usa una caché estática con las cuatro últimas lecturas, y se
+hace la media de las mismas, en la función \texttt{Tmp36AvgTemperature}.
+
+Además de eso, se ha añadido la funcionalidad para alertar si la temperatura se
+sale de un rango determinado (ver \texttt{TEMPERATURE\_MAX} y
+\texttt{TEMPERATURE\_MIN}), en cuyo caso se mostrará una exclamación parpadeando
+en la parte derecha de la pantalla.
+
+\begin{multipagecode}
+\inputminted[frame=single, framesep=.5em, linenos,
+  rulecolor=\color{gray}]{cpp}{../final/final.cpp}
+\captionof{listing}{Programa final}
+\end{multipagecode}
+
 \section{Dificultades y observaciones}
+
+\subsection{¿Por qué se ha usado C++ en vez de la IDE de Arduino?}
+
+Arduino tiene un IDE que no está demasiado mal, pero el hecho de que en Linux no
+funcione tan bien como debería, y que editar los archivos desde un editor
+externo conlleva una serie de pasos bastante larga son razones grandes en su
+contra.
+
+En particular, \textbf{añadir una librería no funcionaba correctamente en
+nuestro sistema}.
+
+Esto fue razón más que de sobra para que, aprovechando el ejemplo del código de
+la librería que encontramos para el DHT-11, hiciéramos el cambio a C++.
+
+Como ventaja extra, hemos aprendido una gran cantidad de cosas acerca del
+funcionamiento de la plataforma Arduino y de todas las utilidades de consola que
+proporciona.
 
 \bibliographystyle{plainnat}
 \bibliography{bibliography}

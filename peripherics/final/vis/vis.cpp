@@ -11,7 +11,8 @@ const uint8_t RS = 8;
 
 #include "LiquidCrystal.h"
 
-LiquidCrystal lcd(RS, READ_WRITE, ENABLE, 11, 12, 2, 3, 4, 5, 6, 7);
+LiquidCrystal lcd(RS, READ_WRITE, ENABLE,
+                  11, 12, 2, 3, 4, 5, 6, 7);
 
 // Setup the out pins
 void setup() {

@@ -65,7 +65,6 @@ main:
 
   subf  f17, f17, f18
 
-; TODO: f5 and f6 can be moved around to be convenient
 ; f5: -A_2
   subf f5, f0, f2
 ; f6: -A_3

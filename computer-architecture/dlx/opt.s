@@ -1,4 +1,4 @@
-.data
+.data 0x2000
 ; Input matrix 1
 M1:
 M10:
@@ -86,42 +86,47 @@ main:
   subu r1, r31, r1
   movi2fp f17, r1
 
-; f18 = X = 1/(|A|^2) * 1/|B|
-; f19 = Y = 1/(|B|^2) * 1/|A|
-  multf f18, f7, f7
+; f8 = tmp = 1/|A| * 1 / |B|
+; f10 = X = tmp * tmp
+; f18 = Y = 1/(|B|^3) * 1/|A|
+; f19 = Z = 1/(|A|^3) * 1/|B|
+  multf f8, f7, f17
+  multf f10, f8, f8
+
+  multf f18, f8, f17
   multf f18, f18, f17
 
-  multf f19, f17, f17
+  multf f19, f8, f7
   multf f19, f19, f7
 
 ; Row 1
 ; R0 =  a4 * X
-  multf f20,  f4, f18
+  multf f20,  f4, f10
 ; R1 = -a2 * X
-  multf f21,  f5, f18
-; R2 =  b4 * X
+  multf f21,  f5, f10
+; R2 =  b4 * Y
   multf f22, f14, f18
-; R3 = -b2 * X
+; R3 = -b2 * Y
   multf f23, f15, f18
 
 ; Row 2
 ; R4  = -a3 * X
-  multf f24,  f6, f18
+  multf f24,  f6, f10
 ; R5  =  a1 * X
-  multf f25,  f1, f18
-; R6  = -b3 * X
+  multf f25,  f1, f10
+; R6  = -b3 * Y
   multf f26, f16, f18
-; R7  =  b1 * X
+; R7  =  b1 * Y
   multf f27, f11, f18
 
 ; Row 3
-; R8  =  b4 * Y
-  multf f28, f14, f19
-; R9  = -b2 * Y
-  multf f29, f15, f19
-; R10 =  a4 * Y
+; R8  =  b4 * X
+  multf f28, f14, f10
+; R9  = -b2 * X
+  multf f29, f15, f10
+; R10 =  a4 * Z
   multf f30,  f4, f19
-; R11 = -a2 * Y
+; R11 = -a2 * Z
   multf f31,  f5, f19
 
 ; Transact the first row
@@ -132,13 +137,13 @@ main:
   sf 12(r1), f23
 
 ; Row 4
-; R12 = -b3 * Y
-  multf f20, f16, f19
-; R13 =  b1 * Y
-  multf f21, f11, f19
-; R14 = -a3 * Y
+; R12 = -b3 * X
+  multf f20, f16, f10
+; R13 =  b1 * X
+  multf f21, f11, f10
+; R14 = -a3 * Z
   multf f22,  f6, f19
-; R15 =  a1 * Y
+; R15 =  a1 * Z
   multf f23,  f1, f19
 
 ; Second row

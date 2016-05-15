@@ -1,6 +1,7 @@
 \documentclass{article}
 
 \usepackage{fontspec}
+\usepackage{gensymb}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{cleveref}
@@ -29,7 +30,6 @@
 {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
 
 % Hack for multipage code
-
 \newenvironment{multipagecode}{}{}
 
 \pretitle{\begin{center} \includegraphics[width=200pt]{usal.png} \\ \vspace{3em} \LARGE}
@@ -163,7 +163,69 @@ mensaje ``Hello, world!" por la pantalla.
 
 \subsection{Sensor de humedad y temperatura DHT-11}
 
-Parte de Christian.
+El DHT-11 es un sensor básico de humedad y temperatura de costo reducido. Usa un
+sensor de capacidad para medir la humedad y un termistor para medir la
+temperatura del aire que lo rodea.
+
+Está diseñado para medir temperaturas entre $0$ y $50\degree C$ con una
+precisión de $\pm 2\degree C$ y para medir humedad entre $20\%$ y $80\%$ con una
+precisión de $5\%$ con periodos de muestreo de 1 segundo.
+
+Sólo lee cantidades enteras, luego no podremos leer una temperatura o una
+humedad con decimales.
+
+\subsubsection{Funcionamiento}
+
+El DHT-11 requiere su propio protocolo para comunicarse a través de un sólo
+hilo. Este protocolo es simple y puede implementarse usando los pines de I/O en
+cualquier microcontrolador.
+
+El microcontrolador debe iniciar la comunicación con el DHT-11 manteniendo la
+linea de datos en estado bajo durante al menos $18ms$. Luego el DHT-11 envía una
+respuesta con un pulso a nivel bajo de $80\mu s$ y luego deja ``flotar" la línea
+de datos por otros $80\mu s$.
+
+Los datos binarios se codifican según la longitud del pulso alto. Todos los bits
+comienzan con un pulso bajo de $50\mu s$.
+
+Luego viene un pulso alto que varía según el estado lógico o el valor del bit
+que el DHT-11 desea transmitir.
+
+Se utilizan pulsos de $26$ a $28\mu s$ para un $0$ y pulsos de $70\mu s$ para un
+$1$. Los pulsos se repiten hasta un total de 40 bits.
+
+En cuanto a los datos, se transmiten 40 bits (5 bytes) en total, cuyo valor se
+describe a continuación:
+
+\begin{itemize}
+  \item La parte entera de la humedad relativa (\textit{RH}).
+  \item La parte decimal de la humedad relativa (no se utiliza, siempre es 0).
+  \item La parte entera de la temperatura.
+  \item La parte decimal de la temperatura (no se utiliza, siempre es 0).
+  \item El último byte es la suma de comprobación (checksum), resultante de
+    sumar todos los bytes anteriores.
+\end{itemize}
+
+\subsubsection{Programa de ejemplo}
+
+Usamos la librería GPLv3 encontrada en la
+\href{http://playground.arduino.cc/main/DHT11Lib}{página oficial de Arduino}. Se
+incluye en la entrega de la práctica, y se puede comprobar cómo el código se
+corresponde con el protocolo descrito anteriormente, con algunas diferencias
+mínimas:
+
+\begin{itemize}
+  \item Se esperan $5ms$ como tiempo de espera, citando al autor: ``to be safe".
+  \item El límite para que la respuesta sea considerada un $1$ es exactamente
+    $40ms$ (que está dentro de lo esperado dada la especificación del
+    protocolo).
+\end{itemize}
+
+\begin{listing}[H]
+\inputminted[frame=single, framesep=.5em, linenos,
+  rulecolor=\color{gray}]{cpp}{../dht11/dht11.cpp}
+\caption{Programa de ejemplo para el DHT-11}
+\end{listing}
 
 \subsection{Sensor de temperatura TMP-36}
 
@@ -192,7 +254,7 @@ $$T = \frac{V_{out} - 500}{10}$$
 
 Donde $T$ está en grados centígrados, y $V_{out}$ en milivoltios.
 
-\subsection{Programa de ejemplo}
+\subsubsection{Programa de ejemplo}
 
 \begin{listing}[H]
 \inputminted[frame=single, framesep=.5em, linenos,

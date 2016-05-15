@@ -31,16 +31,12 @@ MR:
 ONE:
   .float 1.0
 
-; http://bits.stephan-brumme.com/inverse.html
-INVERSE_CONSTANT:
-  .word 0x7EEEEEEE
-
 .text
 .global main
 
 main:
 ; lf f0, ZERO
-  lw r31, INVERSE_CONSTANT(r0)
+  lf f10, ONE(r0)
 
 ; 1..4 = A_1..4
   lf f1, M10(r0)
@@ -53,7 +49,7 @@ main:
 ; f6: -A_3
   subf f6, f0, f3
 
-; f7: |A|
+; f17: |A|
   multf f7, f1, f4
   multf f8, f2, f3
   subf  f7, f7, f8
@@ -75,16 +71,12 @@ main:
   multf f18, f12, f13
   subf  f17, f17, f18
 
-; NOTE: |A| and |B| won't be accessible anymore
 ; f7: 1/|A|
-  movfp2i r1, f7
-  subu r1, r31, r1
-  movi2fp f7, r1
+; NOTE: no way to access |A| again
+  divf f7, f10, f7
 
 ; f17: 1/|B|
-  movfp2i r1, f17
-  subu r1, r31, r1
-  movi2fp f17, r1
+  divf f17, f10, f17
 
 ; f18 = X = 1/(|A|^2) * 1/|B|
 ; f19 = Y = 1/(|B|^2) * 1/|A|

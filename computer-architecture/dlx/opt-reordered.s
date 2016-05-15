@@ -44,38 +44,34 @@ main:
 
 ; 1..4 = A_1..4
   lf f1, M10(r0)
-  lf f2, M11(r0)
-  lf f3, M12(r0)
   lf f4, M13(r0)
-
-; f5: -A_2
-  subf f5, f0, f2
 ; f7: |A|
   multf f7, f1, f4
-; f6: -A_3
-  subf f6, f0, f3
+  lf f2, M11(r0)
+  lf f3, M12(r0)
+
   multf f8, f2, f3
 ; 11..14 = B_1..4
   lf f11, M20(r0)
-  lf f12, M21(r0)
-  lf f13, M22(r0)
   lf f14, M23(r0)
+  lf f12, M21(r0)
+; f17: |B|
+  multf f17, f11, f14
+  lf f13, M22(r0)
   subf  f7, f7, f8
 
 
-; f17: |B|
-  multf f17, f11, f14
+  multf f18, f12, f13
 ; f15: -B_2
   subf f15, f0, f12
 ; f16: -B_3
   subf f16, f0, f13
-  multf f18, f12, f13
 ; f7: 1/|A|
 ; NOTE: no way to access |A| again
   movfp2i r1, f7
+  subf  f17, f17, f18
   subu r1, r31, r1
   movi2fp f7, r1
-  subf  f17, f17, f18
 
 ; f17: 1/|B|
   movfp2i r1, f17
@@ -89,6 +85,10 @@ main:
   multf f8, f7, f17
 ; Transact the first row
   lw r1, MR(r0)
+; f6: -A_3
+  subf f6, f0, f3
+; f5: -A_2
+  subf f5, f0, f2
   multf f18, f8, f17
   multf f19, f8, f7
   multf f10, f8, f8
@@ -139,23 +139,23 @@ main:
 ; R12 = -b3 * X
   multf f20, f16, f10
   sf 32(r1), f28
+  sf 36(r1), f29
 ; R13 =  b1 * X
   multf f21, f11, f10
-  sf 36(r1), f29
+  sf 40(r1), f30
+  sf 44(r1), f31
 ; R14 = -a3 * Z
   multf f22,  f6, f19
-  sf 40(r1), f30
+  sf 48(r1), f20
+  sf 52(r1), f21
 ; R15 =  a1 * Z
   multf f23,  f1, f19
-  sf 44(r1), f31
 
 ; Second row
 
 ; Third row
 
 ; Fourth (and last!) row
-  sf 48(r1), f20
-  sf 52(r1), f21
   sf 56(r1), f22
   sf 60(r1), f23
 

@@ -1,1 +1,1 @@
-include ../../session.mk
+include ../../../session.mk

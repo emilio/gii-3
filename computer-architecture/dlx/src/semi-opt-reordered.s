@@ -35,12 +35,11 @@ ONE:
 .global main
 
 main:
-; lf f0, ZERO
-  lf f31, ONE(r0)
-
 ; 1..4 = A_1..4
   lf f1, M10(r0)
   lf f4, M13(r0)
+  lf f31, ONE(r0)
+
 ; f17: |A|
   multf f7, f1, f4
   lf f2, M11(r0)

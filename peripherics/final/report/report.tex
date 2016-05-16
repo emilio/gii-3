@@ -69,9 +69,17 @@ pines digitales 2 y 12, un RTD TMP-36 conectado a la entrada analógica
 \texttt{A0}, y el sensor de humedad DHT-11 conectado al pin digital 13.
 
 \begin{figure}[H]
-  \includegraphics[width=\linewidth]{../img/final-circuit.jpg}
-  \caption{Montaje del circuito}
-  \label{fig:final-circuit}
+  \centering
+  \begin{subfigure}{.4\linewidth}
+    \includegraphics[width=\linewidth]{../img/final-circuit.jpg}
+    \caption{Diagrama del circuito}
+    \label{fig:final-circuit-diagram}
+  \end{subfigure}
+  \begin{subfigure}{.4\linewidth}
+    \includegraphics[width=\linewidth]{../img/circuit.jpg}
+    \caption{Circuito en funcionamiento}
+    \label{fig:final-circuit}
+  \end{subfigure}
 \end{figure}
 
 \subsection{Pantalla LCD}
@@ -301,6 +309,11 @@ la librería que encontramos para el DHT-11, hiciéramos el cambio a C++.
 Como ventaja extra, hemos aprendido una gran cantidad de cosas acerca del
 funcionamiento de la plataforma Arduino y de todas las utilidades de consola que
 proporciona.
+
+\section{Otros adjuntos}
+
+Aparte del código como es habitual, y todo el contenido del informe, se adjunta
+un vídeo del circuito funcionando (en la carpeta \texttt{video}).
 
 \bibliographystyle{plainnat}
 \bibliography{bibliography}

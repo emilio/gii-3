@@ -19,18 +19,10 @@ void setup() {
 void loop() {
   int result = device.read();
 
-  switch (result) {
-  case Dht11::OK:
-    break;
-  case Dht11::ERROR_TIMEOUT:
-    Serial.println("Timeout");
-    break; // Keep going
-  case Dht11::ERROR_CHECKSUM:
-    Serial.println("Checksum error");
-    return;
-  default:
-    Serial.println("WTF?");
-    return;
+  if (result != Dht11::OK) {
+      Serial.print("Error: ");
+      Serial.println(result);
+      return;
   }
 
   Serial.print("Humidity (%):");

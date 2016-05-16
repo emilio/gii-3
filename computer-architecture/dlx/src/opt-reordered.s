@@ -40,11 +40,11 @@ INVERSE_CONSTANT:
 
 main:
 ; lf f0, ZERO
-  lw r31, INVERSE_CONSTANT(r0)
 
 ; 1..4 = A_1..4
   lf f1, M10(r0)
   lf f4, M13(r0)
+  lw r31, INVERSE_CONSTANT(r0)
 ; f7: |A|
   multf f7, f1, f4
   lf f2, M11(r0)
@@ -60,12 +60,7 @@ main:
   lf f13, M22(r0)
   subf  f7, f7, f8
 
-
   multf f18, f12, f13
-; f15: -B_2
-  subf f15, f0, f12
-; f16: -B_3
-  subf f16, f0, f13
 ; f7: 1/|A|
 ; NOTE: no way to access |A| again
   movfp2i r1, f7
@@ -87,12 +82,15 @@ main:
   lw r1, MR(r0)
 ; f6: -A_3
   subf f6, f0, f3
+  multf f18, f8, f17
 ; f5: -A_2
   subf f5, f0, f2
-  multf f18, f8, f17
   multf f19, f8, f7
+; f15: -B_2
+  subf f15, f0, f12
   multf f10, f8, f8
-
+; f16: -B_3
+  subf f16, f0, f13
   multf f18, f18, f17
   multf f19, f19, f7
 

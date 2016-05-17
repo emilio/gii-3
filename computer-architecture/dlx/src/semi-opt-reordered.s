@@ -54,23 +54,30 @@ main:
   subf  f7, f7, f8
 ; f17: |B|
   multf f18, f12, f13
+  eqf f7, f0
+  bfpt end
+
 ; f15: -B_2
   subf f15, f0, f12
-; f16: -B_3
-  subf f16, f0, f13
-
 ; f7: 1/|A|
   divf f7, f31, f7
 
   subf  f17, f17, f18
 
+; f16: -B_3
+  subf f16, f0, f13
+
+  eqf f17, f0
+  bfpt end
+
+
+; f17: 1/|B|
+  divf f17, f31, f17
+
 ; f5: -A_2
   subf f5, f0, f2
 ; f6: -A_3
   subf f6, f0, f3
-
-; f17: 1/|B|
-  divf f17, f31, f17
 
 ; Transact the first row
   lw r1, MR(r0)
@@ -147,4 +154,5 @@ main:
   sf 56(r1), f22
   sf 60(r1), f23
 
+end:
   trap 0

@@ -61,12 +61,20 @@ main:
   subf  f7, f7, f8
 
   multf f18, f12, f13
+; f7 == 0?
+  eqf f7, f0
+  bfpt end
+
 ; f7: 1/|A|
 ; NOTE: no way to access |A| again
   movfp2i r1, f7
-  subf  f17, f17, f18
   subu r1, r31, r1
+  subf f17, f17, f18
   movi2fp f7, r1
+
+; f17 == 0?
+  eqf f17, f0
+  bfpt end
 
 ; f17: 1/|B|
   movfp2i r1, f17
@@ -157,4 +165,5 @@ main:
   sf 56(r1), f22
   sf 60(r1), f23
 
+end:
   trap 0

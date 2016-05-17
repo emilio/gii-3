@@ -105,43 +105,43 @@ La versión sin división está anotada para que sea lo más legible posible.
 
 #### Total
 
-  * **N° de ciclos**: 172
-  * **N° de instrucciones ejecutadas (IDs)**: 65
+  * **N° de ciclos**: 176
+  * **N° de instrucciones ejecutadas (IDs)**: 69
 
 #### Stalls
 
-  * **RAW stalls**: 21 (12.21%)
-      * **LD stalls**: 1 (4.76%)
+  * **RAW stalls**: 23 (13.07%)
+      * **LD stalls**: 1 (4.35%)
       * **Branch/Jump stalls**: 0
-      * **Floating point stalls**: 20 (95%)
+      * **Floating point stalls**: 22 (95.65%)
   * **WAW stalls**: 0
-  * **Structural stalls**: 78 (45.35%)
+  * **Structural stalls**: 78 (44.32%)
   * **Control stalls**: 0
-  * **Trap stalls**: 3 (1.74%)
-  * **Total**:  102 (59.3%)
+  * **Trap stalls**: 3 (1.70%)
+  * **Total**:  104 (59.09%)
 
 #### Conditional Branches
 
-  * **Total**: 0
+  * **Total**: 2 (3.00%)
       * **Tomados**: 0
-      * **No tomados**: 0
+      * **No tomados**: 2 (100%)
 
 #### Instrucciones Load/Store
 
-  * **Total**: 26
+  * **Total**: 26 (37.68%)
       * **Loads**: 10 (38.46%)
       * **Stores**: 16 (61.54%)
 
 #### Instrucciones de punto flotante
 
-  * **Total**: 32 (49.23%)
+  * **Total**: 32 (46.38%)
       * **Sumas**: 6 (18.75%)
       * **Multiplicaciones**: 26 (81.25%)
       * **Divisiones**: 0
 
 #### Traps
 
-  * **Traps**: 1 (1.54%)
+  * **Traps**: 1 (1.45%)
 
 ## Con división (`src/semi-opt.s`)
 
@@ -149,43 +149,43 @@ La versión sin división está anotada para que sea lo más legible posible.
 
 #### Total
 
-  * **N° de ciclos**: 203
-  * **N° de instrucciones ejecutadas (IDs)**: 61
+  * **N° de ciclos**: 208
+  * **N° de instrucciones ejecutadas (IDs)**: 65
 
 #### Stalls
 
-  * **RAW stalls**: 39 (19.21%)
-      * **LD stalls**: 1 (2.56%)
+  * **RAW stalls**: 41 (19.71%)
+      * **LD stalls**: 1 (2.44%)
       * **Branch/Jump stalls**: 0
-      * **Floating point stalls**: 38(97.44%)
+      * **Floating point stalls**: 40 (97.56%)
   * **WAW stalls**: 0
-  * **Structural stalls**: 96 (47.29%)
+  * **Structural stalls**: 96 (46.15%)
   * **Control stalls**: 0
-  * **Trap stalls**: 3 (1.48%)
-  * **Total**:  138 (67.98%)
+  * **Trap stalls**: 3 (1.44%)
+  * **Total**:  140 (67.31%)
 
 #### Conditional Branches
 
-  * **Total**: 0
+  * **Total**: 2 (3.08%)
       * **Tomados**: 0
-      * **No tomados**: 0
+      * **No tomados**: 2 (100%)
 
 #### Instrucciones Load/Store
 
-  * **Total**: 26
+  * **Total**: 26 (40.00%)
       * **Loads**: 10 (38.46%)
       * **Stores**: 16 (61.54%)
 
 #### Instrucciones de punto flotante
 
-  * **Total**: 34 (49.23%)
+  * **Total**: 34 (52.31%)
       * **Sumas**: 6 (17.65%)
       * **Multiplicaciones**: 26 (76.47%)
       * **Divisiones**: 2 (5.88%)
 
 #### Traps
 
-  * **Traps**: 1 (1.64%)
+  * **Traps**: 1 (1.54%)
 
 # Versión optimizada
 
@@ -195,43 +195,43 @@ La versión sin división está anotada para que sea lo más legible posible.
 
 #### Total
 
-  * **N° de ciclos**: 146
-  * **N° de instrucciones ejecutadas (IDs)**: 65
+  * **N° de ciclos**: 147
+  * **N° de instrucciones ejecutadas (IDs)**: 69
 
 #### Stalls
 
-  * **RAW stalls**: 5 (3.38%)
-      * **LD stalls**: 1 (11.11%)
+  * **RAW stalls**: 6 (4.08%)
+      * **LD stalls**: 1 (16.67%)
       * **Branch/Jump stalls**: 0
-      * **Floating point stalls**: 8 (100%)
+      * **Floating point stalls**: 5 (83.33%)
   * **WAW stalls**: 0
-  * **Structural stalls**: 67 (45.89%)
+  * **Structural stalls**: 67 (45.58%)
   * **Control stalls**: 0
-  * **Trap stalls**: 6 (4.11%)
-  * **Total**:  81 (56.16%)
+  * **Trap stalls**: 6 (4.08%)
+  * **Total**:  79(53.74%)
 
 #### Conditional Branches
 
-  * **Total**: 0
+  * **Total**: 2
       * **Tomados**: 0
-      * **No tomados**: 0
+      * **No tomados**: 2 (100%)
 
 #### Instrucciones Load/Store
 
   * **Total**: 26
-      * **Loads**: 10 (38.46%)
+      * **Loads**: 10 (37.68%)
       * **Stores**: 16 (61.54%)
 
 #### Instrucciones de punto flotante
 
-  * **Total**: 32 (49.23%)
+  * **Total**: 32 (46.38%)
       * **Sumas**: 6 (18.75%)
       * **Multiplicaciones**: 26 (81.25%)
       * **Divisiones**: 0
 
 #### Traps
 
-  * **Traps**: 1 (1.54%)
+  * **Traps**: 1 (1.45%)
 
 ## Con división (`src/semi-opt-reordered.s`)
 
@@ -240,42 +240,42 @@ La versión sin división está anotada para que sea lo más legible posible.
 #### Total
 
   * **N° de ciclos**: 177
-  * **N° de instrucciones ejecutadas (IDs)**: 61
+  * **N° de instrucciones ejecutadas (IDs)**: 65
 
 #### Stalls
 
-  * **RAW stalls**: 26 (14.70%)
-      * **LD stalls**: 2 (7.96%%)
+  * **RAW stalls**: 23 (12.99%)
+      * **LD stalls**: 2 (8.70%%)
       * **Branch/Jump stalls**: 0
-      * **Floating point stalls**: 24 (92.31%)
+      * **Floating point stalls**: 21 (91.30%)
   * **WAW stalls**: 0
-  * **Structural stalls**: 86 (48.60%)
+  * **Structural stalls**: 84 (47.46%)
   * **Control stalls**: 0
   * **Trap stalls**: 6 (3.40%)
-  * **Total**:  119 (66.67%)
+  * **Total**:  113 (63.84%)
 
 #### Conditional Branches
 
-  * **Total**: 0
+  * **Total**: 2 (3.08%)
       * **Tomados**: 0
-      * **No tomados**: 0
+      * **No tomados**: 2 (100%)
 
 #### Instrucciones Load/Store
 
-  * **Total**: 26
+  * **Total**: 26 (40.00%)
       * **Loads**: 10 (38.46%)
       * **Stores**: 16 (61.54%)
 
 #### Instrucciones de punto flotante
 
-  * **Total**: 34 (55.74%)
+  * **Total**: 34 (52.31%)
       * **Sumas**: 6 (17.65%)
       * **Multiplicaciones**: 26 (76.47%)
       * **Divisiones**: 2 (5.88%)
 
 #### Traps
 
-  * **Traps**: 1 (1.64%)
+  * **Traps**: 1 (1.54%)
 
 # Optimizaciones realizadas
 
@@ -326,7 +326,6 @@ paralelismo a nivel de instrucción y mantener tanto a la ALU como a la FPU
 ocupada el máximo tiempo posible ha sido nuestra principal estrategia de
 optimización, más allá de la optimización de la inversión, que obviamente es una
 amplia ganancia de 30 ciclos prácticamente gratuita.
-
 
 # Comparación de resultados
 

@@ -54,6 +54,9 @@ main:
   multf f8, f2, f3
   subf  f7, f7, f8
 
+  eqf f7, f0
+  bfpt end
+
 ; 11..14 = B_1..4
   lf f11, M20(r0)
   lf f12, M21(r0)
@@ -70,6 +73,9 @@ main:
   multf f17, f11, f14
   multf f18, f12, f13
   subf  f17, f17, f18
+
+  eqf f17, f0
+  bfpt end
 
 ; f7: 1/|A|
   divf f7, f31, f7
@@ -155,4 +161,5 @@ main:
   sf 56(r1), f22
   sf 60(r1), f23
 
+end:
   trap 0

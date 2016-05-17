@@ -9,6 +9,15 @@ M12:
   .float 1.23
 M13:
   .float 7.52
+; To test |A| = 0
+; M10:
+;   .float 4
+; M11:
+;   .float 4
+; M12:
+;   .float 4
+; M13:
+;   .float 4
 
 ; Input matrix 2
 M2:
@@ -58,6 +67,10 @@ main:
   multf f8, f2, f3
   subf  f7, f7, f8
 
+  ; if it's 0, end
+  eqf f7, f0
+  bfpt end
+
 ; 11..14 = B_1..4
   lf f11, M20(r0)
   lf f12, M21(r0)
@@ -74,6 +87,10 @@ main:
   multf f17, f11, f14
   multf f18, f12, f13
   subf  f17, f17, f18
+
+  ; if it's 0, end
+  eqf f17, f0
+  bfpt end
 
 ; NOTE: |A| and |B| won't be accessible anymore
 ; f7: 1/|A|
@@ -164,4 +181,5 @@ main:
   sf 56(r1), f22
   sf 60(r1), f23
 
+end:
   trap 0

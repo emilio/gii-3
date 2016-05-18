@@ -15,7 +15,10 @@ h1 {
 
 input::-moz-focus-inner { border: 0; padding: 0; }
 
-form, .status-table, .error {
+form,
+.status-table,
+.error,
+.success {
   max-width: 30em;
   margin: 1em auto;
 }
@@ -25,14 +28,24 @@ form, .status-table {
   padding: 0 1em;
 }
 
-.error {
+.error,
+.success {
   color: white;
-  background-color: rgb(255, 62, 62);
-  border: 1px solid rgb(209, 0, 0);
   padding: 0.5em 1em;
 }
 
-.error:empty {
+.error {
+  background-color: rgb(255, 62, 62);
+  border: 1px solid rgb(209, 0, 0);
+}
+
+.success {
+  background: #46c058;
+  border: 1px solid #56ab56;
+}
+
+.error:empty,
+.success:empty {
   display: none;
 }
 

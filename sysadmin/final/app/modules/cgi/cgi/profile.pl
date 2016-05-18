@@ -55,15 +55,16 @@ if (!$api_client->check_login_token($user_name, $login_token)) {
   $template->error("invalid login token");
 }
 
-if ($request->request_method eq "POST") {
+my $action;
+if ($request->request_method eq "POST" and ($action = $request->param("action"))) {
   # Delete the user if he requests so
-  if ($request->param("action") eq "Delete account") {
+  if ($action eq "Delete account") {
     $api_client->delete_user($user_name);
     print $request->redirect("logout.pl");
     exit 0;
   }
 
-  if ($request->param("action") eq "Update profile") {
+  if ($action eq "Update profile") {
     my $email = $request->param("email");
     my $address = $request->param("address");
 
@@ -76,16 +77,23 @@ if ($request->request_method eq "POST") {
     }
   }
 
-  if ($request->param("action") eq "Update password") {
+  if ($action eq "Update password") {
     my $password = $request->param("password");
     my $password_confirmation = $request->param("password_confirmation");
 
     if (!$password or !$password_confirmation) {
       $error = "Missing password";
-    } elsif ($pasword ne $password_confirmation) {
+    } elsif ($password ne $password_confirmation) {
       $error = "Password mismatch";
     } elsif (!$api_client->update_user_password($user_name, $password)) {
       $error = "Unknown error while updating the password";
+    } else {
+      my ($correct_login, $new_token) = $api_client->check_login($user_name, $password);
+      if (!$correct_login) {
+        $error = "Invalid login after changing password, something is really fucked up";
+      } else {
+        $session->param("login_token", $new_token);
+      }
     }
   }
 }
@@ -98,8 +106,16 @@ if (defined $new_cookie) {
 
 my %data = $api_client->get_user_data($user_name);
 
+my $success = "";
+if ($request->request_method eq "POST" and
+    $action and
+    (not $error or length($error) == 0)) {
+  $success = "Success!";
+}
+
 print $template->content(
   ERROR => $error,
+  SUCCESS => $success,
   EMAIL => $data{"email"},
   ADDRESS => encode_entities($data{"address"}),
   USER_NAME => $user_name,

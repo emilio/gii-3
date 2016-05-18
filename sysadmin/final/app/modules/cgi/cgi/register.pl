@@ -29,12 +29,14 @@ if ($request->request_method eq "POST") {
   my $password_confirmation = $request->param("password_confirmation");
   my $email = $request->param("email");
   my $address = $request->param("address");
+  my $type = $request->param("type");
 
   if (!$user_name ||
       !$password ||
       !$password_confirmation ||
       !$email ||
-      !$address) {
+      !$address ||
+      !$type) {
     $template->error("Empty parameter");
   }
 
@@ -50,13 +52,17 @@ if ($request->request_method eq "POST") {
     $template->error("Invalid username, must be alphanumeric");
   }
 
+  if ($type ne "teacher" and $type ne "alumn") {
+    $template->error("Invalid type");
+  }
+
   my $client = new Api::Client();
   if ($client->user_exists($user_name)) {
     $template->error("$user_name already exists");
   }
 
   # We only create alumns by default
-  if (!$client->create_user($user_name, $password, "alumn", $email, $address)) {
+  if (!$client->create_user($user_name, $password, $type, $email, $address)) {
     $template->error("Failed to create user");
   }
 

@@ -9,7 +9,7 @@
     <label for="user_name">Username:</label>
     <input type="text"
            c-pattern="[A-Za-z0-9]+"
-           c-required
+           required
            placeholder="jdoe"
            name="user_name"
            id="user_name">
@@ -17,21 +17,21 @@
   <p>
     <label for="password">Password:</label>
     <input type="password"
-           c-required
+           required
            name="password"
            id="password">
 
   <p>
     <label for="password_confirmation">Password confirmation:</label>
     <input type="password"
-           c-required
+           required
            name="password_confirmation"
            id="password_confirmation">
 
   <p>
     <label for="email">Email:</label>
-    <input type="text"
-           c-required
+    <input type="email"
+           required
            placeholder="john@doe.tld"
            name="email"
            id="email">
@@ -39,11 +39,19 @@
   <p>
     <label for="address">Address:</label>
     <textarea
-           c-required
+           required
            placeholder="Downward Avenue, 3, Los Santos"
            name="address"
            id="address">
     </textarea>
+
+  <p>
+    <label for="type">Type:</label>
+    <select required name="type">
+      <option value="">-- Choose one --</option>
+      <option value="teacher">Teacher</option>
+      <option value="alumn">Alumn</option>
+    </select>
 
   <p>
     <input type="submit" value="Register">

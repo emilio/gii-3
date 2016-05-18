@@ -4,7 +4,7 @@ use warnings;
 use Api::Client;
 use Data::Dumper;
 
-use Test::Most tests => 25, 'die';
+use Test::Most tests => 27, 'die';
 
 my $client = new Api::Client();
 
@@ -31,7 +31,10 @@ ok $correct_login, "Should be able to log in";
 ok length($token), "Token should be something";
 ok $client->check_login_token($weird, $token), "Token validation should work";
 
-# print "Got groups: " . join(',', @$groups) . "\n";
+ok $client->update_user_password($weird, "1111"), "Should be able to update the user password";
+($correct_login, $token, $groups) = $client->check_login($weird, "1111");
+ok $correct_login, "Should be able to log in with new pass";
+
 ok $groups, "Should belong to at least one group";
 
 ($correct_login, $token, undef) = $client->check_login($weird . "more_weirdness", "password");

@@ -238,6 +238,9 @@ sub create_user {
   my $user = Linux::usermod->new($username);
   my $usergrp = Linux::usermod->new($username, 1);
 
+  # Mark as primary group
+  $user->set('gid', $usergrp->get('gid'));
+
   # Setup home directory
   my $homedir = "/home/$username";
   make_path($homedir, { owner => $username, group => $username });

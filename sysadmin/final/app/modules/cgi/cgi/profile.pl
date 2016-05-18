@@ -64,13 +64,28 @@ if ($request->request_method eq "POST") {
   }
 
   if ($request->param("action") eq "Update profile") {
-    my ($email, $address) = ($request->param("email"), $request->param("address"));
+    my $email = $request->param("email");
+    my $address = $request->param("address");
+
     if (!$email or !$address) {
       $error = "Empty email or address.";
     } elsif (!Email::Valid->address($email)) {
       $error = "Invalid email address";
     } elsif (!$api_client->update_user_data($user_name, $email, $address)) {
       $error = "Unable to update the user data";
+    }
+  }
+
+  if ($request->param("action") eq "Update password") {
+    my $password = $request->param("password");
+    my $password_confirmation = $request->param("password_confirmation");
+
+    if (!$password or !$password_confirmation) {
+      $error = "Missing password";
+    } elsif ($pasword ne $password_confirmation) {
+      $error = "Password mismatch";
+    } elsif (!$api_client->update_user_password($user_name, $password)) {
+      $error = "Unknown error while updating the password";
     }
   }
 }

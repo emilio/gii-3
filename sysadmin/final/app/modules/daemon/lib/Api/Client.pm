@@ -191,4 +191,16 @@ sub check_login_token {
   return $response->{result} eq JSON::true;
 }
 
+sub update_user_password {
+  my ($self, $username, $password) = @_;
+
+  my $response = $self->call(
+    command => "update_user_password",
+    username => $username,
+    password => $password
+  );
+
+  return $response->{result} eq JSON::true;
+}
+
 1;

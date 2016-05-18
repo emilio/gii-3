@@ -75,6 +75,19 @@ sub wait_and_dispatch_command {
   shutdown($client_socket, 1);
 }
 
+sub update_user_password {
+  my ($username, $password) = @_;
+
+  return 0 unless $username;
+  return 0 unless $password;
+  return 0 unless user_exists($username);
+
+  $user = Linux::usermod->new($username);
+  $user->set('password', $password);
+
+  return 1;
+}
+
 # "Class methods"
 sub do_command {
   my ($client, $command) = @_;
@@ -114,6 +127,10 @@ sub do_command {
       $result = create_user($command->{username},
                             $command->{password},
                             $command->{type});
+    }
+    case "update_user_password" {
+      $result = update_user_password($command->{username},
+                                     $command->{password});
     }
     case "delete_user" {
       $result = delete_user($command->{username})

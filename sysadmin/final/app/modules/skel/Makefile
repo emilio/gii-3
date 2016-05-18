@@ -1,4 +1,5 @@
 
 .PHONY: install
 install:
-	stow files -t /etc/skel
+	mkdir -p /etc/skel
+	cp -rf files/* /etc/skel

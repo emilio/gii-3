@@ -1,6 +1,6 @@
 ---
-title: Introducción
-subtitle: Teoría de Códigos y Teoría de la Información
+title: Sharks With Lasers
+subtitle: Práctica WalkMe - Interacción Persona Ordenador
 lang: es-ES
 csl: acm-sig-proceedings.csl
 babel-lang: spanish

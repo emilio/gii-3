@@ -1,0 +1,5 @@
+# /etc/cron.d/sysadmin-backup: crontab entry to backup home directories
+
+
+# Every day at 5:00 am...
+0 5 * * * /etc/sysadmin-app/backups/do-backup > /var/log/sysadmin-app-backups.log 2>&1

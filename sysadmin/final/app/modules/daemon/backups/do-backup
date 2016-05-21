@@ -1,0 +1,31 @@
+#!/bin/bash
+# DIR=/etc/sysadmin-app
+DIR=/home
+BACKUP_DIR=/var/backups
+BACKUP_NAME=homedirs
+BACKUP_FILE=$BACKUP_DIR/$BACKUP_NAME
+
+mkdir -p "$BACKUP_DIR"
+
+remove=0
+if [ $(date +"%w") -eq 7 -o ! -f $BACKUP_FILE.0.tar ]; then
+  if [ -f "$BACKUP_FILE.snap" ]; then
+    mv "$BACKUP_FILE.snap" "$BACKUP_FILE.snap.bak"
+  fi
+  level=0
+  remove=1
+else
+  last_level=$(ls $BACKUP_FILE.*.tar | uniq | sort | tail -1 | rev | cut -d. -f 2)
+  level=$(expr $last_level + 1)
+fi
+
+tar -g "$BACKUP_FILE.snap" -vcf "$BACKUP_FILE.$level.tar" "$DIR"
+
+if [ $remove -eq 1 ]; then
+  rm -f "$BACKUP_FILE.snap.bak"
+  find $BACKUP_DIR -name "$BACKUP_NAME.*.tar" -\! -name "$BACKUP_NAME.0.tar" -delete
+fi
+
+# TODO: Upload remotely "$BACKUP_FILE.snap"
+# if [ $level -eq 0 ]; then
+# fi

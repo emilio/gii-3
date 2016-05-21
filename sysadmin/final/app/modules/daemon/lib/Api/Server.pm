@@ -270,6 +270,7 @@ sub create_user {
   my $groupname = $type . "s";
   if (!group_exists($groupname)) {
     Linux::usermod->grpadd($groupname);
+    create_shared_folder() if $type eq "teacher";
   }
 
   my $group = Linux::usermod->new($groupname, 1);
@@ -281,6 +282,16 @@ sub create_user {
   $group->set("users", join(" ", @group_users));
 
   return 1;
+}
+
+# This creates the shared folder once a teacher has been created
+# TODO: Don't hardcode shit here
+sub create_shared_folder {
+  die("teachers group should exist") unless group_exists("teachers");
+  my $shared_dir = "/etc/sysadmin-app/apuntes";
+  remove_tree($shared_dir);
+  make_path($shared_dir, { owner => "root", group => "teachers" });
+  chmod(0775, $shared_dir);
 }
 
 1;

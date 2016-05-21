@@ -4,7 +4,7 @@ use warnings;
 use Api::Client;
 use Data::Dumper;
 
-use Test::Most tests => 27, 'die';
+use Test::Most tests => 31, 'die';
 
 my $client = new Api::Client();
 
@@ -44,9 +44,17 @@ ok $client->delete_user($weird), "Should be able to delete a user";
 
 ok !-d "/home/$weird", "And the homedir should no longer exist";
 
+ok !$client->user_exists($weird), "$weird should not exist";
+
 ok !$client->create_user($weird, "password", "alumn", "invalidemail", "123 av. st"), "Should not be able to create a user with an invalid email";
 
-ok !$client->user_exists($weird), "$weird should not exist";
+ok $client->create_user($weird . "teacher", "password", "teacher", "test\@teacher.com", "123 av. st"), "Should be able to create a teacher";
+
+ok $client->group_exists("teachers"), "Teachers group should exist afterwards";
+
+ok -d "/etc/sysadmin-app/apuntes", "Shared folder should exist";
+
+ok $client->delete_user($weird . "teacher"), "Deleting the teacher should be possible";
 
 ok $client->create_user($weird, "password", "alumn", "test\@gmail.com", "123 av. st"), "Should be able to create a user with email and address";
 

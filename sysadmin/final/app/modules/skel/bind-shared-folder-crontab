@@ -1,0 +1,8 @@
+# /etc/cron.d/bind-shared-folder-crontab: ensures the shared folder is
+# correctly bound to the home directories of the users.
+
+# Every 10 minutes...
+#
+# This is mostly a hack, and I'm not totally sure this would play well with
+# user deletion...
+*/5 * * * * root /etc/sysadmin-app/shared-folder/ensure-shared-folder-accessible > /var/log/sysadmin-app-shared.log 2>&1

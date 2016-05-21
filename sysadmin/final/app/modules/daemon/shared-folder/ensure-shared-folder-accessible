@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# This script is used to keep accessible the shared `apuntes` directory inside
+# the chroot jail.
+#
+# This is intended to be used as root by a cronjob. The "proper" way to do it
+# is using fstab to mount it on startup, but I'd prefer not to do that because
+# editing the fstab file automatically is, at least, dangerous, and it has to
+# be edited every time a user is registered.
+#
+# Anyway, this also cleans up any home dir of any user that couldn't be deleted
+# manually.
+USERS=$(cat /etc/group |                     \
+          grep -e '^\(teachers\|alumns\):' | \
+          cut -d : -f 4 |                    \
+          tr , " " | tr '\n' " ")
+
+for user in $USERS; do
+  home=$(cat /etc/passwd |                   \
+           grep -e "^$user:" |               \
+           cut -d : -f 6 |                   \
+           grep -e '^/home')
+  if [ "x$home" != "x" ]; then
+    # Try to rmdir, if it failed either it didn't exist or wasn't empty (either
+    # already mounted or with other contents).
+    rmdir "$home/apuntes" > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      mkdir "$home/apuntes"
+      mount --bind "/etc/sysadmin-app/apuntes" "$home/apuntes"
+      if [ $? -eq 0 ]; then
+        echo "$home/apuntes mounted successfully"
+      fi
+    else
+      echo "Couldn't remount $home/apuntes, already mounted?"
+    fi
+  fi
+done
+
+# Find mountpoints of dead users
+mounted_dirs=$(mount | grep -e "/home/.*/apuntes" --only-matching)
+for directory in $mounted_dirs; do
+  username=$(echo "$directory" | cut -d / -f 3);
+  if [ "x$username" != "x" ]; then
+    # This is just a dumb test to ensure I don't fuck it while testing in my
+    # local machine
+    if [ "$username" != "emilio" ]; then
+      cat /etc/passwd | grep -e "^$username:" > /dev/null 2>&1
+      if [ $? -ne 0 ]; then
+        if [ -d "/home/$username" ]; then
+          # This user no longer exists, unmount the dir and remove it.
+          umount "$directory"
+          rm -rf "/home/$username"
+        fi
+      fi
+    fi
+  fi
+done

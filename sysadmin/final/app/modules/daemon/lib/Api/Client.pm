@@ -141,7 +141,7 @@ sub get_user_data {
 
   $ret{'email'} = $email;
   $ret{'address'} = $address;
-  $ret{'token'} = $address;
+  $ret{'token'} = $token;
 
   return %ret;
 }
@@ -246,7 +246,15 @@ sub update_user_password {
     password => $password
   );
 
-  return $response->{result} eq JSON::true;
+  my $ret = $response->{result} eq JSON::true;
+
+  if ($ret) {
+    my $statement = $DB->prepare("UPDATE users SET token = NULL WHERE username = ?");
+    # Consciously ignore errors.
+    $statement->execute($username);
+  }
+
+  return $ret;
 }
 
 sub set_feature {

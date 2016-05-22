@@ -1,0 +1,25 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Regenerate password</title>
+<link rel="stylesheet" href="css/main.css">
+
+<h1>#!USER_NAME!#</h1>
+<form action="" method="POST">
+  <input type="hidden" name="username" value="#!USER_NAME!#">
+  <input type="hidden" name="token" value="#!TOKEN!#">
+  <p>
+    <label for="password">New password:</label>
+    <input type="password"
+           id="password"
+           name="password">
+  <p>
+    <label for="password_confirmation">Password Confirmation:</label>
+    <input type="password"
+           id="password_confirmation"
+           name="password_confirmation">
+
+  <p>
+    <input type="submit"
+           name="action"
+           value="Update password">
+</form>

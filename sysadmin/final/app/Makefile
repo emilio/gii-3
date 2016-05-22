@@ -15,6 +15,7 @@ cpan-install:
 cpan-dump: $(REQ)
 	@echo > /dev/null
 
+.PHONY: $(REQ)
 $(REQ): dev/dump-modules $(PERL_FILES)
 	@./dev/dump-modules $(shell pwd) $@
 

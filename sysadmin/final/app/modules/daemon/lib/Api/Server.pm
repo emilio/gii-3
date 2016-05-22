@@ -304,19 +304,52 @@ sub set_feature {
 
   return 0 unless user_exists($username);
 
-  # switch ($feature) {
-  #   case "personal_webpage" {
-  #   }
-  # }
+  switch ($feature) {
+    case "personal_webpage" {
+      if ($value) {
+        setup_personal_webpage($username);
+      } else {
+        remove_personal_page($username);
+      }
+    }
+  }
 
   return 0;
+}
+
+sub set_owner {
+  my ($username, $folder) = @_;
+  my $user = Linux::usermod->new($username);
+  my $usergrp = Linux::usermod->new($username, 1);
+  chown($user->get('uid'), $usergrp->get('gid'), File::Finder->in($folder));
+}
+
+sub remove_personal_page {
+  if (-d "/home/$username/public_html") {
+    move("/home/$username/public_html", "/home/$username/public_html.bak");
+    set_owner($username, "/home/$username/public_html");
+  }
+
+  return 1;
 }
 
 sub setup_personal_webpage {
   my $username = shift;
 
+  if (-d "/home/$username/public_html") {
+    return 1;
+  }
+
+  if (-d "/home/$username/public_html.bak") {
+    move("/home/$username/public_html.bak", "/home/$username/public_html");
+    set_owner($username, "/home/$username/public_html");
+    return 1;
+  }
+
   make_path("/home/$username/public_html", { owner => $username, group => $username });
   dircopy("/etc/skel/public_html", "/home/$username/public_html");
+  set_owner($username, "/home/$username/public_html");
+  return 1;
 }
 
 1;

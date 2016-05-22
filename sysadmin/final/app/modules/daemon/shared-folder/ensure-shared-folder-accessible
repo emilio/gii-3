@@ -52,7 +52,7 @@ for user in $USERS; do
         #              --plugins "$home/public_html/_plugins"  \
         chown www-data:www-data -R "$home/public_html/_site"
       elif [ -d "$home/public_html" ]; then
-        chown www-data:www-data -R "$home/public_html"
+        # chown www-data:www-data -R "$home/public_html"
       fi
     else
       echo "jekyll not found, please install it or configure \$PATH!"

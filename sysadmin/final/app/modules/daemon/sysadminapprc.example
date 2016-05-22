@@ -1,0 +1,8 @@
+db_name = sysadminapp
+db_user = sysadminapp
+db_pass = sysadminapp
+# Mailer ports are locked in my university,
+# feel free to edit this and Client.pm to use
+# another mailer.
+gmail_mailer_login = xxx@gmail.com
+gmail_mailer_pass = xxx

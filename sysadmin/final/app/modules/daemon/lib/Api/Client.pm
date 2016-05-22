@@ -5,17 +5,27 @@ use Api::Common;
 use JSON;
 use Carp;
 use DBI;
+use Session::Token;
 
 use IO::Socket::INET;
 
 my $CONFIG_HANDLE = Config::General->new("/etc/sysadmin-app/sysadminapprc");
-my %DB_CONFIG = $CONFIG_HANDLE->getall();
+my %CONFIG = $CONFIG_HANDLE->getall();
 
-my $DB = DBI->connect("dbi:Pg:dbname=$DB_CONFIG{'db_name'}",
-                      $DB_CONFIG{'db_user'},
-                      $DB_CONFIG{'db_pass'});
+my $DB = DBI->connect("dbi:Pg:dbname=$CONFIG{'db_name'}",
+                      $CONFIG{'db_user'},
+                      $CONFIG{'db_pass'});
 
-croak "Invalid DB handle: $DB_CONFIG{'db_user'}, $DB_CONFIG{'db_name'}" unless $DB->ping();
+croak "Invalid DB handle: $CONFIG{'db_user'}, $CONFIG{'db_name'}" unless $DB->ping();
+
+
+sub get_mailer {
+  return Email::Send::SMTP::Gmail->new(
+    -smtp => 'smtp.gmail.com',
+    -login => $CONFIG{'gmail_mailer_login'},
+    -port => 587,
+    -pass => $ENV{'gmail_mailer_pass'});
+}
 
 # Api consumer, for now one needs to be created per API call,
 # which is kind of expensive.
@@ -99,18 +109,19 @@ sub delete_user {
   return $response->{result} eq JSON::true;
 }
 
+# NOTE: This also updates the token to null if not present as parameter.
 sub update_user_data {
-  my ($self, $username, $email, $address) = @_;
+  my ($self, $username, $email, $address, $token) = @_;
 
   # We do an insert and do nothing on failure, then an update.
-  my $statement = $DB->prepare("INSERT INTO users (username, email, address) \
-                               VALUES (?, ?, ?)");
-  return 1 if $statement->execute($username, $email, $address);
+  my $statement = $DB->prepare("INSERT INTO users (username, email, address, token) \
+                               VALUES (?, ?, ?, ?)");
+  return 1 if $statement->execute($username, $email, $address, $token);
 
-  $statement = $DB->prepare("UPDATE users SET email = ?, address = ? WHERE \
+  $statement = $DB->prepare("UPDATE users SET email = ?, address = ?, token = ? WHERE \
                              username = ?");
 
-  return 1 if $statement->execute($email, $address, $username);
+  return 1 if $statement->execute($email, $address, $token, $username);
 
   return 0;
 }
@@ -119,16 +130,17 @@ sub get_user_data {
   my ($self, $username) = @_;
 
   # We do an insert and do nothing on failure, then an update.
-  my $statement = $DB->prepare("SELECT username, email, address FROM users \
+  my $statement = $DB->prepare("SELECT username, email, address, token FROM users \
                                 WHERE username = ?");
   return undef unless $statement->execute($username);
 
-  my ($_username, $email, $address) = $statement->fetchrow_array();
+  my ($_username, $email, $address, $token) = $statement->fetchrow_array();
 
   my %ret = ();
 
   $ret{'email'} = $email;
   $ret{'address'} = $address;
+  $ret{'token'} = $address;
 
   return %ret;
 }
@@ -161,6 +173,39 @@ sub user_in_group {
       username => $username,
       groupname => $group
   );
+}
+
+sub generate_remember_password_token_and_send_email {
+  my ($self, $username, $remind_url) = @_;
+
+  # Check that we have the user data and that the user exists
+  my $statement = $DB->prepare("SELECT username, email FROM users WHERE username = ?");
+  return 0 unless $statement->execute($username);
+
+  my ($_username, $email) = $statement->fetchrow_array();
+  my $token = Session::Token->new->get;
+
+  $statement = $DB->prepare("UPDATE users SET token = ? WHERE username = ?");
+  return 0 unless $statement->execute($token, $username);
+
+  return $self->send_password_reminder_to_user($username, $email, $token, $remind_url);
+}
+
+sub send_password_reminder_to_user {
+  my ($self, $username, $email, $token, $remind_url) = @_;
+
+  my $mailer = get_mailer();
+  my $url = "$remind_url?username=$username\&token=$token";
+
+  $mailer->send(
+    -to => $email,
+    -subject => "[sysadmin-app] Password reminder for $username",
+    -body => "Please go to $url if this was intended."
+  );
+
+  $mail->bye;
+
+  return 1;
 }
 
 sub check_login {
@@ -212,7 +257,6 @@ sub set_feature {
     feature => $feature,
     value => $value,
   );
-
 
   return $response->{result} eq JSON::true;
 }

@@ -18,6 +18,8 @@ USERS=$(cat /etc/group |                     \
           cut -d : -f 4 |                    \
           tr , " " | tr '\n' " ")
 
+echo "Starting maintenance routine at $(date)"
+
 for user in $USERS; do
   home=$(cat /etc/passwd |                   \
            grep -e "^$user:" |               \
@@ -42,7 +44,7 @@ for user in $USERS; do
       if [ -d "$home/public_html/_posts" ]; then
         should_restore_index=0;
         config_file="$home/public_html/build-config.yml"
-        if [ -f "$home/pubic_html/index.jekyll.html" ]; then
+        if [ -f "$home/public_html/index.jekyll.html" ]; then
           if [ -f "$home/public_html/index.html" ]; then
             should_restore_index=1;
             cp "$home/public_html/index.html" "$home/public_html/index.html.pre_jekyll"

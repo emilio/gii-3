@@ -7,6 +7,7 @@ use Switch;
 use Try::Tiny;
 use Linux::usermod;
 use File::Copy::Recursive qw(dircopy);
+use File::Copy qw(move);
 use File::Path qw(make_path remove_tree);
 use File::Finder;
 
@@ -328,9 +329,10 @@ sub set_owner {
 }
 
 sub remove_personal_page {
+  my $username = shift;
   if (-d "/home/$username/public_html") {
     move("/home/$username/public_html", "/home/$username/public_html.bak");
-    set_owner($username, "/home/$username/public_html");
+    set_owner($username, "/home/$username/public_html.bak");
   }
 
   return 1;

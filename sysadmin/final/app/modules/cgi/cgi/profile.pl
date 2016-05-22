@@ -96,6 +96,13 @@ if ($request->request_method eq "POST" and ($action = $request->param("action"))
       }
     }
   }
+
+  if ($action eq "Update features") {
+    my $personal_page_enabled = $request->param("features_personal_page");
+    if (!$api_client->set_feature($user_name, "personal_page", $personal_page_enabled)) {
+      $error .= "Error " . ($personal_page_enabled ? "enabling" : "disabling") . " personal page.";
+    }
+  }
 }
 
 if (defined $new_cookie) {

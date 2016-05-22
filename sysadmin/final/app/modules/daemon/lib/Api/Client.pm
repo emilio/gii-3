@@ -203,4 +203,18 @@ sub update_user_password {
   return $response->{result} eq JSON::true;
 }
 
+sub set_feature {
+  my ($username, $feature, $value) = @_;
+
+  my $response = $self->call(
+    command => "set_feature",
+    username => $username,
+    feature => $feature,
+    value => $value,
+  );
+
+
+  return $response->{result} eq JSON::true;
+}
+
 1;

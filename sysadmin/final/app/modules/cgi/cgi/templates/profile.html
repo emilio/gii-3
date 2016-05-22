@@ -50,10 +50,26 @@
 
   <form action="" method="POST">
     <p>
+      <label>
+        <input type="checkbox"
+               value="1"
+               name="features_personal_page">
+        Personal web page (once created it will be located <a href="/~#!USER_NAME!#">here</a>).
+      </label>
+
+    <p>
+      <input type="submit"
+             name="action"
+             value="Update features">
+  </form>
+
+  <form action="" method="POST">
+    <p>
       <input type="submit"
              name="action"
              value="Delete account"
              onclick="return confirm('Are you sure?')">
       <a href="logout.pl">Log out</a>
   </form>
+
 </div>

@@ -135,6 +135,11 @@ sub do_command {
     case "delete_user" {
       $result = delete_user($command->{username})
     }
+    case "set_feature" {
+      $result = set_feature($command->{username},
+                            $command->{feature},
+                            $command->{value});
+    }
   }
 
   if ($result) {
@@ -292,6 +297,26 @@ sub create_shared_folder {
   remove_tree($shared_dir);
   make_path($shared_dir, { owner => "root", group => "teachers" });
   chmod(0775, $shared_dir);
+}
+
+sub set_feature {
+  my ($username, $feature, $value) = @_;
+
+  return 0 unless user_exists($username);
+
+  # switch ($feature) {
+  #   case "personal_webpage" {
+  #   }
+  # }
+
+  return 0;
+}
+
+sub setup_personal_webpage {
+  my $username = shift;
+
+  make_path("/home/$username/public_html", { owner => $username, group => $username });
+  dircopy("/etc/skel/public_html", "/home/$username/public_html");
 }
 
 1;

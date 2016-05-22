@@ -10,6 +10,9 @@
 #
 # Anyway, this also cleans up any home dir of any user that couldn't be deleted
 # manually.
+#
+# Also, this now takes care of processing with jekill the static sites if
+# needed.
 USERS=$(cat /etc/group |                     \
           grep -e '^\(teachers\|alumns\):' | \
           cut -d : -f 4 |                    \
@@ -32,6 +35,27 @@ for user in $USERS; do
       fi
     else
       echo "Couldn't remount $home/apuntes, already mounted?"
+    fi
+
+    # Process the static site
+    if [ "x$(which jekyll)" != "x" ]; then
+      if [ -d "$home/public_html/_posts" ]; then
+        config_file="$home/public_html/build-config.yml"
+        echo "baseurl: \"/~$user/\"" > "$config_file"
+        echo "url: \"\"" >> "$config_file"
+        cd "$home/public_html"
+        jekyll build --config "$home/public_html/_config.yml,$config_file"
+        # jekyll build -s "$home/public_html/_posts"           \
+        #              -d "$home/public_html/_site"            \
+        #              --config "$config_file,$home/public_html/_config.yml" \
+        #              --layouts "$home/public_html/_layouts"  \
+        #              --plugins "$home/public_html/_plugins"  \
+        chown www-data:www-data -R "$home/public_html/_site"
+      elif [ -d "$home/public_html" ]; then
+        chown www-data:www-data -R "$home/public_html"
+      fi
+    else
+      echo "jekyll not found, please install it or configure \$PATH!"
     fi
   fi
 done

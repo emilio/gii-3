@@ -6,6 +6,7 @@ use JSON;
 use Carp;
 use DBI;
 use Session::Token;
+use Email::Send::SMTP::Gmail;
 
 use IO::Socket::INET;
 
@@ -24,7 +25,7 @@ sub get_mailer {
     -smtp => 'smtp.gmail.com',
     -login => $CONFIG{'gmail_mailer_login'},
     -port => 587,
-    -pass => $ENV{'gmail_mailer_pass'});
+    -pass => $CONFIG{'gmail_mailer_pass'});
 }
 
 # Api consumer, for now one needs to be created per API call,
@@ -203,7 +204,7 @@ sub send_password_reminder_to_user {
     -body => "Please go to $url if this was intended."
   );
 
-  $mail->bye;
+  $mailer->bye;
 
   return 1;
 }

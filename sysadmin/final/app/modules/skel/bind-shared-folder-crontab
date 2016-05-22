@@ -5,4 +5,5 @@
 #
 # This is mostly a hack, and I'm not totally sure this would play well with
 # user deletion...
+PATH=/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin
 */5 * * * * root /etc/sysadmin-app/shared-folder/ensure-shared-folder-accessible > /var/log/sysadmin-app-shared.log 2>&1

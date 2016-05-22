@@ -1,2 +1,4 @@
 # Ignore the shared folder that will reside here
 apuntes
+# Also ignore the real config
+sysadminapprc

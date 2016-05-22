@@ -53,8 +53,6 @@ sub wait_and_dispatch_command {
 
   my $data = <$client_socket>;
 
-  print "Received: $data\n";
-
   my $error = 0;
   if ($self->{hard_fail}) {
     do_command($client_socket, $data);
@@ -95,6 +93,9 @@ sub do_command {
   $command = decode_json($command);
 
   my $result = 0;
+
+  print "Command: $command->{command}\n";
+
   switch ($command->{command}) {
     case "login" {
       my ($ok, $token, @groups) = check_user_login($command->{username},
@@ -302,14 +303,16 @@ sub create_shared_folder {
 sub set_feature {
   my ($username, $feature, $value) = @_;
 
+  print "set_feature: $username, $feature, $value\n";
+
   return 0 unless user_exists($username);
 
   switch ($feature) {
-    case "personal_webpage" {
+    case "personal_page" {
       if ($value) {
-        setup_personal_webpage($username);
+        return setup_personal_webpage($username);
       } else {
-        remove_personal_page($username);
+        return remove_personal_page($username);
       }
     }
   }
@@ -335,6 +338,8 @@ sub remove_personal_page {
 
 sub setup_personal_webpage {
   my $username = shift;
+
+  print "Setting personal webpage for $username\n";
 
   if (-d "/home/$username/public_html") {
     return 1;

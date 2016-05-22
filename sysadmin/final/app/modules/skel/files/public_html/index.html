@@ -1,23 +1,23 @@
----
-layout: default
----
+<!doctype html>
+<meta charset="utf-8">
+<title>Página personal</title>
+<h1>Página personal</h1>
+<p>
+  Hola! Si es la primera vez que lees esto, estamos preparando tu blog
+  personal.
 
-<div class="home">
+<p>
+  Te proveemos con una instalación de <a href="//jekyllrb.com">Jekyll</a>
+  totalmente configurable. Tienes un post de ejemplo en la carpeta
+  <code>_posts/</code> de <a href="/mftp">tu directorio personal</a>.
 
-  <h1 class="page-heading">Posts</h1>
+<p>
+  El sitio se reconstruirá automáticamente cada 10 minutos.  Puedes configurar
+  el título y otros parámetros en el archivo <code>_config.yml</code>. Para ver
+  toda la configuración disponible ve a
+  <a href="//jekyllrb.com/docs">la documentación oficial</a>.
 
-  <ul class="post-list">
-    {% for post in site.posts %}
-      <li>
-        <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
-
-        <h2>
-          <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-        </h2>
-      </li>
-    {% endfor %}
-  </ul>
-
-  <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>
-
-</div>
+<p>
+  Puedes optar por tener una página mucho más personalizada si eliges borrar la
+  carpeta <code>_posts/</code> (y <code>_site/</code> si el sitio ya se ha
+  generado).

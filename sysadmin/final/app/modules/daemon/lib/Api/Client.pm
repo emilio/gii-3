@@ -204,7 +204,7 @@ sub update_user_password {
 }
 
 sub set_feature {
-  my ($username, $feature, $value) = @_;
+  my ($self, $username, $feature, $value) = @_;
 
   my $response = $self->call(
     command => "set_feature",

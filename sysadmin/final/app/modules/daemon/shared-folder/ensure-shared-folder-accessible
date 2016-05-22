@@ -40,7 +40,16 @@ for user in $USERS; do
     # Process the static site
     if [ "x$(which jekyll)" != "x" ]; then
       if [ -d "$home/public_html/_posts" ]; then
+        should_restore_index=0;
         config_file="$home/public_html/build-config.yml"
+        if [ -f "$home/pubic_html/index.jekyll.html" ]; then
+          if [ -f "$home/public_html/index.html" ]; then
+            should_restore_index=1;
+            cp "$home/public_html/index.html" "$home/public_html/index.html.pre_jekyll"
+          fi
+          cp "$home/public_html/index.jekyll.html" "$home/public_html/index.html"
+        fi
+
         echo "baseurl: \"/~$user/\"" > "$config_file"
         echo "url: \"\"" >> "$config_file"
         cd "$home/public_html"
@@ -51,8 +60,11 @@ for user in $USERS; do
         #              --layouts "$home/public_html/_layouts"  \
         #              --plugins "$home/public_html/_plugins"  \
         chown www-data:www-data -R "$home/public_html/_site"
-      elif [ -d "$home/public_html" ]; then
-        # chown www-data:www-data -R "$home/public_html"
+        if [ $should_restore_index -eq 1 ];then
+          mv "$home/public_html/index.html.pre_jekyll" "$home/public_html/index.html"
+        fi
+      # elif [ -d "$home/public_html" ]; then
+      #   chown www-data:www-data -R "$home/public_html"
       fi
     else
       echo "jekyll not found, please install it or configure \$PATH!"

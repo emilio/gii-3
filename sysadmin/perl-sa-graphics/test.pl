@@ -5,8 +5,8 @@ use Email::Send::SMTP::Gmail;
 use Excel::Writer::XLSX;
 
 if (@ARGV != 1) {
-	print "Usage: $0 [file]\n";
-	exit 1;
+  print "Usage: $0 [file]\n";
+  exit 1;
 }
 
 my $file = $ARGV[0];

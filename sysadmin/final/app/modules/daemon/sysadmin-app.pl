@@ -18,10 +18,11 @@ GetOptions("daemonize" => \$DAEMONIZE,
            or die("Error in command line arguments\n");
 
 if ($DAEMONIZE) {
-  Proc::Daemon::Init({
-    child_STDOUT => '>>+/var/log/sysadmin-appd-daemon.log',
-    child_STDERR => '>>+/var/log/sysadmin-appd-daemon.err'
-  });
+#   Proc::Daemon::Init({
+#     child_STDOUT => '>>+/var/log/sysadmin-appd-daemon.log',
+#     child_STDERR => '>>+/var/log/sysadmin-appd-daemon.err'
+#   });
+  Proc::Daemon::Init;
   print "sysadmin-appd-daemon started\n";
 }
 

@@ -1,9 +1,0 @@
-root=xxx@gmail.com
-mailhub=smtp.gmail.com:587
-rewriteDomain=gmail.com
-hostname=localhost
-UseTLS=Yes
-UseSTARTTLS=Yes
-AuthUser=xxx
-AuthPass=xxx
-FromLineOverride=yes

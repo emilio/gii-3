@@ -26,3 +26,6 @@ inet_protocols = all
 # Custom shit
 home_mailbox = Maildir/
 mailbox_command =
+
+# 3 * 1024 * 1024 = 3MB of quota
+mailbox_size_limit = 3145728

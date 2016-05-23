@@ -7,9 +7,9 @@ install:
 	$(RM) /etc/sysadmin-app
 	ln -s $(shell pwd) /etc/sysadmin-app
 	$(RM) /etc/init.d/sysadmin-appd
-	([ -d /etc/init.d ] && ln -s /etc/sysadmin-app/init.d/sysadmin-appd /etc/init.d) || true
+	([ -d /etc/init.d ] && cp /etc/sysadmin-app/init.d/sysadmin-appd /etc/init.d) || true
 	$(RM) /etc/systemd/system/sysadmin-appd.service
-	([ -d /etc/systemd/system ] && ln -s /etc/sysadmin-app/systemd/sysadmin-appd.service /etc/systemd/system/) || true
+	([ -d /etc/systemd/system ] && cp /etc/sysadmin-app/systemd/sysadmin-appd.service /etc/systemd/system/) || true
 	service sysadmin-appd restart 2>/dev/null || systemctl restart sysadmin-appd.service
 	$(info WARNING: make sure the data you introduce here \
 		     matches the contents of the sysadminapprc)

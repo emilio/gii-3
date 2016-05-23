@@ -1,0 +1,9 @@
+# /etc/cron.d/report: sends a report to $MAILTO, and if it doesn't find it, to
+# root@$(hostname)
+#
+# vim: syntax=crontab
+
+PATH=/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin
+MAILTO=ecoal95@gmail.com
+# 0 0 * * * root perl /etc/sysadmin-app/reporting/report.pl > /var/log/sysadmin-app-reporting.log 2>&1
+*/5 0 * * * root perl /etc/sysadmin-app/reporting/report.pl > /var/log/sysadmin-app-reporting.log 2>&1

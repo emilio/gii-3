@@ -195,18 +195,33 @@ sub generate_remember_password_token_and_send_email {
 sub send_password_reminder_to_user {
   my ($self, $username, $email, $token, $remind_url) = @_;
 
-  my $mailer = get_mailer();
   my $url = "$remind_url?username=$username\&token=$token";
 
-  $mailer->send(
-    -to => $email,
-    -subject => "[sysadmin-app] Password reminder for $username",
-    -body => "Please go to $url if this was intended."
-  );
-
-  $mailer->bye;
+  $self->send_generic_email($email,
+                            "[sysadmin-app] Password reminder for $username",
+                            "Please go to $url if this was intended.");
 
   return 1;
+}
+
+sub send_generic_email {
+  my ($self, $email, $subject, $body, $attachments) = @_;
+
+  my %params = (
+    -to => $email,
+    -subject => $subject,
+    -body => $body,
+  );
+
+  if (defined $attachments) {
+    $params{'-attachments'} = $attachments;
+  }
+
+  my $mailer = get_mailer();
+
+  $mailer->send(%params);
+
+  $mailer->bye;
 }
 
 sub check_login {

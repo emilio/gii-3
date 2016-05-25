@@ -18,7 +18,6 @@ install:
 	su -c "createuser -U $(POSTGRES_USER) -e -d -P $(APP_DB_USER)" postgres
 	su -c "createdb -E UTF8 -O $(APP_DB_USER) $(APP_DB_NAME)" postgres
 	psql -U $(APP_DB_USER) -d $(APP_DB_NAME) -a -f /etc/sysadmin-app/schema.sql
-	@echo > /dev/null
 
 .PHONY: test
 test:

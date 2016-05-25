@@ -8,7 +8,8 @@ install:
 	a2enmod cgi
 	a2enmod ssl
 	a2enmod userdir
-	stow config -t /etc/apache2/conf-enabled
-	rm /etc/apache2/sites-enabled/*.conf
+	stow config -t /etc/apache2/conf-enabled || stow config -t /etc/apache2/conf.d
+	rm /etc/apache2/sites-enabled/*
+	mkdir -p /var/www/html
 	stow sites -t /etc/apache2/sites-enabled
 	service apache2 restart

@@ -32,11 +32,11 @@ session-notes: $(TARGETS)
 
 %.pdf: %.tex $(DOT_TARGETS)
 	$(info [DOC] $< -> $@)
-	@pandoc $(PANDOC_FLAGS) --from=latex --latex-engine=xelatex --to=latex $< -o $@
+	@pandoc $(PANDOC_FLAGS) --from=latex --pdf-engine=xelatex --to=latex $< -o $@
 
 %.pdf: %.md $(DOT_TARGETS)
 	$(info [DOC] $< -> $@)
-	@pandoc $(PANDOC_FLAGS) --from=markdown --latex-engine=xelatex --to=latex $< -o $@
+	@pandoc $(PANDOC_FLAGS) --from=markdown --pdf-engine=xelatex --to=latex $< -o $@
 
 img/%.dot.png: img/%.dot
 	dot -Gdpi=300 -Tpng $< -o $@
